@@ -1,9 +1,6 @@
-build
+.classpath
 .gradle
+.project
+.settings
 bin
-*.xml
-*.yc
-*.smt2
-*.xls
-*.log
-*.csv
+build
