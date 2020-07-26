@@ -22,7 +22,7 @@ public final class UnknownProperty extends Property {
 
 	/**
 	 * Inductive counterexample for the property, only available if
-	 * JKindApi.setInductiveCounterexamples()
+	 * Kind2Api.setInductiveCounterexamples()
 	 */
 	public Counterexample getInductiveCounterexample() {
 		return cex;

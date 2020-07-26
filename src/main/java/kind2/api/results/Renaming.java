@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.VarDecl;
 import kind2.lustre.values.EnumValue;
 import kind2.lustre.values.Value;
@@ -99,7 +99,7 @@ public abstract class Renaming {
 		}
 
 		return new InvalidProperty(name, property.getSource(), rename(property.getCounterexample()),
-				rename(this::rename, property.getConflicts()), property.getRuntime(), property.getReport());
+				rename(this::rename, property.getConflicts()), property.getRuntime());
 	}
 
 	/**
@@ -209,7 +209,7 @@ public abstract class Renaming {
 			EnumValue ev = (EnumValue) value;
 			String renamedValue = rename(ev.value);
 			if (renamedValue == null) {
-				throw new JKindException("Failed when renaming enumeration value: " + ev.value);
+				throw new Kind2Exception("Failed when renaming enumeration value: " + ev.value);
 			}
 			return new EnumValue(renamedValue);
 		} else {

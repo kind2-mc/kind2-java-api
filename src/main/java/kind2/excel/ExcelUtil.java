@@ -1,6 +1,6 @@
 package kind2.excel;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import jxl.format.Border;
 import jxl.format.BorderLineStyle;
 import jxl.format.CellFormat;
@@ -18,7 +18,7 @@ public class ExcelUtil {
 		try {
 			font.setBoldStyle(WritableFont.BOLD);
 		} catch (WriteException e) {
-			throw new JKindException("Error creating bold font for Excel", e);
+			throw new Kind2Exception("Error creating bold font for Excel", e);
 		}
 		boldFormat.setFont(font);
 		return boldFormat;
@@ -30,7 +30,7 @@ public class ExcelUtil {
 		try {
 			font.setColour(Colour.GREY_25_PERCENT);
 		} catch (WriteException e) {
-			throw new JKindException("Error creating grey font for Excel", e);
+			throw new Kind2Exception("Error creating grey font for Excel", e);
 		}
 		fadedFormat.setFont(font);
 		return fadedFormat;
@@ -41,7 +41,7 @@ public class ExcelUtil {
 		try {
 			highlightFormat.setBackground(Colour.ROSE);
 		} catch (WriteException e) {
-			throw new JKindException("Error creating highlighting for Excel", e);
+			throw new Kind2Exception("Error creating highlighting for Excel", e);
 		}
 		return highlightFormat;
 	}
@@ -51,7 +51,7 @@ public class ExcelUtil {
 		try {
 			format.setBorder(Border.BOTTOM, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			throw new JKindException("Error creating border format for Excel", e);
+			throw new Kind2Exception("Error creating border format for Excel", e);
 		}
 		return format;
 	}
@@ -61,7 +61,7 @@ public class ExcelUtil {
 		try {
 			format.setBorder(Border.LEFT, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			throw new JKindException("Error creating border format for Excel", e);
+			throw new Kind2Exception("Error creating border format for Excel", e);
 		}
 		return format;
 	}

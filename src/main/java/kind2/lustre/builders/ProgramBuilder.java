@@ -6,10 +6,9 @@ import java.util.List;
 
 import kind2.lustre.Constant;
 import kind2.lustre.Contract;
-import kind2.lustre.Function;
 import kind2.lustre.ImportedFunction;
 import kind2.lustre.ImportedNode;
-import kind2.lustre.Kind2Function;
+import kind2.lustre.Function;
 import kind2.lustre.Location;
 import kind2.lustre.Node;
 import kind2.lustre.Program;
@@ -18,11 +17,10 @@ import kind2.lustre.TypeDef;
 public class ProgramBuilder {
 	private List<TypeDef> types = new ArrayList<>();
 	private List<Constant> constants = new ArrayList<>();
-	private List<Function> functions = new ArrayList<>();
 	private List<ImportedFunction> importedFunctions = new ArrayList<>();
 	private List<ImportedNode> importedNodes = new ArrayList<>();
 	private List<Contract> contracts = new ArrayList<>();
-	private List<Kind2Function> kind2Functions = new ArrayList<>();
+	private List<Function> functions = new ArrayList<>();
 	private List<Node> nodes = new ArrayList<>();
 	private String main;
 
@@ -32,11 +30,10 @@ public class ProgramBuilder {
 	public ProgramBuilder(Program program) {
 		this.types = new ArrayList<>(program.types);
 		this.constants = new ArrayList<>(program.constants);
-		this.functions = new ArrayList<>(program.functions);
 		this.importedFunctions = new ArrayList<>(program.importedFunctions);
 		this.importedNodes = new ArrayList<>(program.importedNodes);
 		this.contracts = new ArrayList<>(program.contracts);
-		this.kind2Functions = new ArrayList<>(program.kind2Functions);
+		this.functions = new ArrayList<>(program.functions);
 		this.nodes = new ArrayList<>(program.nodes);
 		this.main = program.main;
 	}
@@ -116,18 +113,18 @@ public class ProgramBuilder {
 		return this;
 	}
 
-	public ProgramBuilder addKind2Function(Kind2Function kind2Function) {
-		this.kind2Functions.add(kind2Function);
+	public ProgramBuilder addFunction(Function function) {
+		this.functions.add(function);
 		return this;
 	}
 
-	public ProgramBuilder addKind2Functions(Collection<Kind2Function> kind2Functions) {
-		this.kind2Functions.addAll(kind2Functions);
+	public ProgramBuilder addFunctions(Collection<Function> functions) {
+		this.functions.addAll(functions);
 		return this;
 	}
 
-	public ProgramBuilder clearKind2Function() {
-		this.kind2Functions.clear();
+	public ProgramBuilder clearFunctions() {
+		this.functions.clear();
 		return this;
 	}
 
@@ -146,28 +143,13 @@ public class ProgramBuilder {
 		return this;
 	}
 
-	public ProgramBuilder addFunction(Function function) {
-		this.functions.add(function);
-		return this;
-	}
-
-	public ProgramBuilder addFunctions(Collection<Function> functions) {
-		this.functions.addAll(functions);
-		return this;
-	}
-
-	public ProgramBuilder clearFunctions() {
-		this.functions.clear();
-		return this;
-	}
-
 	public ProgramBuilder setMain(String main) {
 		this.main = main;
 		return this;
 	}
 
 	public Program build() {
-		return new Program(Location.NULL, types, constants, functions, importedFunctions, importedNodes, contracts,
-				kind2Functions, nodes, main);
+		return new Program(Location.NULL, types, constants, importedFunctions, importedNodes, contracts,
+				functions, nodes, main);
 	}
 }

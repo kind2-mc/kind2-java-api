@@ -3,7 +3,7 @@ package kind2.lustre.builders;
 import java.util.ArrayList;
 import java.util.List;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.Equation;
 import kind2.lustre.Expr;
 import kind2.lustre.IdExpr;
@@ -49,10 +49,10 @@ public class EquationBuilder {
 
 	public Equation build() {
 		if (lhs.isEmpty()) {
-			throw new JKindException("left-hand side is empty");
+			throw new Kind2Exception("left-hand side is empty");
 		}
 		if (expr == null) {
-			throw new JKindException("right-hand side is empty");
+			throw new Kind2Exception("right-hand side is empty");
 		}
 		return new Equation(Location.NULL, lhs, expr);
 	}

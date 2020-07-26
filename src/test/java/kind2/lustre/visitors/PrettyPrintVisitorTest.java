@@ -7,7 +7,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.Assume;
 import kind2.lustre.Constant;
 import kind2.lustre.Contract;
@@ -16,14 +16,14 @@ import kind2.lustre.Guarantee;
 import kind2.lustre.IdExpr;
 import kind2.lustre.ImportedFunction;
 import kind2.lustre.ImportedNode;
-import kind2.lustre.Kind2Function;
+import kind2.lustre.Function;
 import kind2.lustre.LustreUtil;
 import kind2.lustre.Mode;
 import kind2.lustre.ModeRefExpr;
 import kind2.lustre.NamedType;
 import kind2.lustre.VarDef;
 import kind2.lustre.builders.ContractBodyBuilder;
-import kind2.lustre.builders.Kind2FunctionBuilder;
+import kind2.lustre.builders.FunctionBuilder;
 
 class PrettyPrintVisitorTest {
 	String removeWhiteSpace(String s) {
@@ -35,7 +35,7 @@ class PrettyPrintVisitorTest {
 	void assumeTest() {
 		String expected = "assume true;";
 
-		Assertions.assertThrows(JKindException.class, () -> new Assume(null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Assume(null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(new Assume(LustreUtil.TRUE));
@@ -47,7 +47,7 @@ class PrettyPrintVisitorTest {
 	void guaranteeTest() {
 		String expected = "guarantee true;";
 
-		Assertions.assertThrows(JKindException.class, () -> new Guarantee(null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(new Guarantee(LustreUtil.TRUE));
@@ -59,8 +59,8 @@ class PrettyPrintVisitorTest {
 	void modeRefExprTest() {
 		String expected = "::a::b::c";
 
-		Assertions.assertThrows(JKindException.class, ModeRefExpr::new);
-		Assertions.assertThrows(JKindException.class, () -> new ModeRefExpr((String) null));
+		Assertions.assertThrows(Kind2Exception.class, ModeRefExpr::new);
+		Assertions.assertThrows(Kind2Exception.class, () -> new ModeRefExpr((String) null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(LustreUtil.modeRef("a", "b", "c"));
@@ -72,8 +72,8 @@ class PrettyPrintVisitorTest {
 	void constantTest() {
 		String expected = "const c = true;";
 
-		Assertions.assertThrows(JKindException.class, () -> new Constant(null, null, LustreUtil.TRUE));
-		Assertions.assertThrows(JKindException.class, () -> new Constant("c", null, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Constant(null, null, LustreUtil.TRUE));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Constant("c", null, null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(new Constant("c", null, LustreUtil.TRUE));
@@ -85,9 +85,9 @@ class PrettyPrintVisitorTest {
 	void varDefTest() {
 		String expected = "var x : bool = true;";
 
-		Assertions.assertThrows(JKindException.class, () -> new VarDef(null, NamedType.BOOL, LustreUtil.TRUE));
-		Assertions.assertThrows(JKindException.class, () -> new VarDef("x", null, LustreUtil.TRUE));
-		Assertions.assertThrows(JKindException.class, () -> new VarDef("x", NamedType.BOOL, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new VarDef(null, NamedType.BOOL, LustreUtil.TRUE));
+		Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", null, LustreUtil.TRUE));
+		Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", NamedType.BOOL, null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(new VarDef("x", NamedType.BOOL, LustreUtil.TRUE));
@@ -97,7 +97,7 @@ class PrettyPrintVisitorTest {
 
 	@Test
 	void contractImportTest() {
-		Assertions.assertThrows(JKindException.class, () -> new ContractImport(null, null, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new ContractImport(null, null, null));
 
 		String expected = "import Spec() returns ();";
 
@@ -155,7 +155,7 @@ class PrettyPrintVisitorTest {
 
 		ContractBodyBuilder c = new ContractBodyBuilder();
 
-		Assertions.assertThrows(JKindException.class, c::build);
+		Assertions.assertThrows(Kind2Exception.class, c::build);
 
 		c.addGuarantee(LustreUtil.TRUE);
 		c.addAssumption(LustreUtil.TRUE);
@@ -178,9 +178,9 @@ class PrettyPrintVisitorTest {
 		ContractBodyBuilder c = new ContractBodyBuilder();
 		c.addGuarantee(LustreUtil.TRUE);
 
-		Assertions.assertThrows(JKindException.class, () -> new Contract(null, null, null, c.build()));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Contract(null, null, null, c.build()));
 
-		Assertions.assertThrows(JKindException.class, () -> new Contract("c", null, null, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new Contract("c", null, null, null));
 
 		PrettyPrintVisitor visitor = new PrettyPrintVisitor();
 		visitor.visit(new Contract("c", null, null, c.build()));
@@ -190,7 +190,7 @@ class PrettyPrintVisitorTest {
 
 	@Test
 	void importedFunctionTest() {
-		Assertions.assertThrows(JKindException.class, () -> new ImportedFunction(null, null, null, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new ImportedFunction(null, null, null, null));
 
 		String expected = "function imported f() returns ();";
 
@@ -213,7 +213,7 @@ class PrettyPrintVisitorTest {
 
 	@Test
 	void importedNodeTest() {
-		Assertions.assertThrows(JKindException.class, () -> new ImportedNode(null, null, null, null));
+		Assertions.assertThrows(Kind2Exception.class, () -> new ImportedNode(null, null, null, null));
 
 		String expected = "node imported n() returns ();";
 
@@ -236,10 +236,10 @@ class PrettyPrintVisitorTest {
 
 	@Test
 	void kind2FunctionTest() {
-		Assertions.assertThrows(JKindException.class,
-				() -> new Kind2Function(null, null, null, null, null, null, null, null));
+		Assertions.assertThrows(Kind2Exception.class,
+				() -> new Function(null, null, null, null, null, null, null, null));
 
-		Kind2FunctionBuilder f = new Kind2FunctionBuilder("even");
+		FunctionBuilder f = new FunctionBuilder("even");
 
 		IdExpr N = f.createInput("N", NamedType.INT);
 		IdExpr B = f.createOutput("B", NamedType.BOOL);

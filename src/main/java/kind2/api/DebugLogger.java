@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.util.Util;
 
 public class DebugLogger {
@@ -20,7 +20,7 @@ public class DebugLogger {
 			File debugFile = File.createTempFile(prefix, ".txt");
 			debug = new PrintWriter(new FileWriter(debugFile), true);
 		} catch (IOException e) {
-			throw new JKindException("Unable to create temporary debug file", e);
+			throw new Kind2Exception("Unable to create temporary debug file", e);
 		}
 	}
 
@@ -53,7 +53,7 @@ public class DebugLogger {
 				Util.writeToFile(contents, file);
 				return file;
 			} catch (IOException e) {
-				throw new JKindException("Unable to create temporary file", e);
+				throw new Kind2Exception("Unable to create temporary file", e);
 			}
 		} else {
 			return null;

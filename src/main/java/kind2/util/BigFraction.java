@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 
 /**
  * An arbitrary sized fractional value
@@ -127,7 +127,7 @@ public class BigFraction implements Comparable<BigFraction> {
 
 	public String toTruncatedDecimal(int scale, String suffix) {
 		if (scale <= 0) {
-			throw new JKindException("Scale must be positive");
+			throw new Kind2Exception("Scale must be positive");
 		}
 
 		BigDecimal dec = toBigDecimal(scale);

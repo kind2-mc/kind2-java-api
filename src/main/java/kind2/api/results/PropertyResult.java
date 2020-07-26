@@ -1,6 +1,6 @@
 package kind2.api.results;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.results.InconsistentProperty;
 import kind2.results.InvalidProperty;
 import kind2.results.Property;
@@ -60,7 +60,7 @@ public class PropertyResult extends AnalysisResult {
 		if (property instanceof ValidProperty) {
 			if (invalidInPast) {
 				if (invertStatus) {
-					throw new JKindException("Refinement not supported for inverted property");
+					throw new Kind2Exception("Refinement not supported for inverted property");
 				}
 				setStatus(Status.VALID_REFINED);
 			} else {

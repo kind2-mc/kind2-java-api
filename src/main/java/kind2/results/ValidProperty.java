@@ -54,14 +54,14 @@ public final class ValidProperty extends Property {
 
 	/**
 	 * Invariants used to prove property, only available if
-	 * JKindApi.setIvcReduction()
+	 * Kind2Api.setIvcReduction()
 	 */
 	public List<String> getInvariants() {
 		return invariants;
 	}
 
 	/**
-	 * Inductive validity core, only available if JKindApi.setIvcReduction()
+	 * Inductive validity core, only available if Kind2Api.setIvcReduction()
 	 */
 	public Set<String> getIvc() {
 		return ivc;
@@ -69,14 +69,14 @@ public final class ValidProperty extends Property {
 
 	/**
 	 * Invariants used to prove property, only available if
-	 * JKindApi.setIvcReduction()
+	 * Kind2Api.setIvcReduction()
 	 */
 	public Set<List<String>> getInvariantSets() {
 		return invarantSets;
 	}
 
 	/**
-	 * Inductive validity core, only available if JKindApi.setIvcReduction()
+	 * Inductive validity core, only available if Kind2Api.setIvcReduction()
 	 */
 
 	public Set<List<String>> getIvcSets() {

@@ -2,8 +2,8 @@ package kind2.api;
 
 import java.io.File;
 
-import kind2.JKindException;
-import kind2.api.results.JKindResult;
+import kind2.Kind2Exception;
+import kind2.api.results.Result;
 import kind2.lustre.Program;
 
 public abstract class KindApi {
@@ -18,7 +18,7 @@ public abstract class KindApi {
 	 */
 	public void setTimeout(int timeout) {
 		if (timeout <= 0) {
-			throw new JKindException("Timeout must be positive");
+			throw new Kind2Exception("Timeout must be positive");
 		}
 		this.timeout = timeout;
 	}
@@ -27,7 +27,7 @@ public abstract class KindApi {
 	 * Put the KindApi into debug mode where it saves all output
 	 */
 	public void setApiDebug() {
-		debug = new DebugLogger("jkind-api-debug-");
+		debug = new DebugLogger("-api-debug-");
 	}
 
 	/**
@@ -51,9 +51,9 @@ public abstract class KindApi {
 	 *            Place to store results as they come in
 	 * @param monitor
 	 *            Used to check for cancellation
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
-	public void execute(Program program, JKindResult result, IProgressMonitor monitor) {
+	public void execute(Program program, Result result, IProgressMonitor monitor) {
 		execute(program.toString(), result, monitor);
 	}
 
@@ -66,9 +66,9 @@ public abstract class KindApi {
 	 *            Place to store results as they come in
 	 * @param monitor
 	 *            Used to check for cancellation
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
-	public void execute(String program, JKindResult result, IProgressMonitor monitor) {
+	public void execute(String program, Result result, IProgressMonitor monitor) {
 		File lustreFile = null;
 		try {
 			lustreFile = ApiUtil.writeLustreFile(program);
@@ -87,9 +87,9 @@ public abstract class KindApi {
 	 *            Place to store results as they come in
 	 * @param monitor
 	 *            Used to check for cancellation
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
-	public abstract void execute(File lustreFile, JKindResult result, IProgressMonitor monitor);
+	public abstract void execute(File lustreFile, Result result, IProgressMonitor monitor);
 
 	/**
 	 * Check if the KindApi is available for running and throw exception if not

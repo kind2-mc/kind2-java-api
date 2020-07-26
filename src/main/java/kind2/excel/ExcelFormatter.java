@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.results.Counterexample;
 import kind2.results.InconsistentProperty;
 import kind2.results.InvalidProperty;
@@ -56,7 +56,7 @@ public class ExcelFormatter implements Closeable {
 			summarySheet.addCell(new Label(5, 0, "True For", boldFormat));
 			summaryRow = 1;
 		} catch (WriteException | IOException e) {
-			throw new JKindException("Error writing to Excel file", e);
+			throw new Kind2Exception("Error writing to Excel file", e);
 		}
 
 		cexFormatter = new ExcelCounterexampleFormatter(workbook, layout);
@@ -85,7 +85,7 @@ public class ExcelFormatter implements Closeable {
 
 		workbook = null;
 		if (error != null) {
-			throw new JKindException("Error closing Excel file", error);
+			throw new Kind2Exception("Error closing Excel file", error);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class ExcelFormatter implements Closeable {
 				write(property);
 			}
 		} catch (WriteException e) {
-			throw new JKindException("Error writing to Excel file", e);
+			throw new Kind2Exception("Error writing to Excel file", e);
 		}
 	}
 

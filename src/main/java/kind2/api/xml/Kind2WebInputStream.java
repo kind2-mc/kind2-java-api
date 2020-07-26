@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.api.Kind2Api;
 
 public class Kind2WebInputStream extends InputStream {
@@ -138,10 +138,10 @@ public class Kind2WebInputStream extends InputStream {
 			}
 			match = abortPattern.matcher(line);
 			if (match.matches()) {
-				throw new JKindException("Kind2 server aborted job: " + match.group(1));
+				throw new Kind2Exception("Kind2 server aborted job: " + match.group(1));
 			}
 		}
-		throw new JKindException("Failed to receive job id from " + baseUri);
+		throw new Kind2Exception("Failed to receive job id from " + baseUri);
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class Kind2WebInputStream extends InputStream {
 			URLConnection conn = url.openConnection();
 			conn.getInputStream().close();
 		} catch (IOException e) {
-			throw new JKindException("Error canceling kind2 job", e);
+			throw new Kind2Exception("Error canceling kind2 job", e);
 		}
 	}
 }

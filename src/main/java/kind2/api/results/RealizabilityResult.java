@@ -5,34 +5,31 @@ import java.util.Collections;
 import kind2.util.Util;
 
 /**
- * This class holds the results of a run of JRealizability.
-
+ * This class holds the results of a run of Realizability.
+ *
  * Note on renaming: This object can be configured with a {@link Renaming} which
  * changes the names of properties and signals as they arrive. In this case, all
  * properties are added and retrieved using their original names.
  * 
  * @see PropertyResult
  */
-public class JRealizabilityResult extends JKindResult {
+public class RealizabilityResult extends Result {
 	/**
-	 * Construct a JRealizabilityResult to hold the results of a run of JRealizability
-	 * 
-	 * @param name
-	 *            Name of the results
+	 * Construct a RealizabilityResult to hold the results of a run of Realizability
+	 *
+	 * @param name Name of the results
 	 */
-	public JRealizabilityResult(String name) {
+	public RealizabilityResult(String name) {
 		super(name, Collections.singletonList(Util.REALIZABLE));
 	}
 
 	/**
-	 * Construct a JRealizabilityResult to hold the results of a run of JRealizability
-	 * 
-	 * @param name
-	 *            Name of the results	 
-	 * @param renaming
-	 *            Renaming to apply to apply properties
+	 * Construct a RealizabilityResult to hold the results of a run of Realizability
+	 *
+	 * @param name     Name of the results
+	 * @param renaming Renaming to apply to apply properties
 	 */
-	public JRealizabilityResult(String name, Renaming renaming) {
+	public RealizabilityResult(String name, Renaming renaming) {
 		super(name, Collections.singletonList(Util.REALIZABLE), renaming);
 	}
 

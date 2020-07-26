@@ -1,10 +1,10 @@
 package kind2.api.results;
 
 public class Ticker extends Thread {
-	private JKindResult result;
+	private Result result;
 	private boolean done;
 
-	public Ticker(JKindResult result) {
+	public Ticker(Result result) {
 		super("Ticker");
 		this.result = result;
 		this.done = false;

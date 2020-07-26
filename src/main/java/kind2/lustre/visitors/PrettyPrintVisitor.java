@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.ArrayAccessExpr;
 import kind2.lustre.ArrayExpr;
 import kind2.lustre.ArrayType;
@@ -25,7 +25,6 @@ import kind2.lustre.ContractItem;
 import kind2.lustre.EnumType;
 import kind2.lustre.Equation;
 import kind2.lustre.Expr;
-import kind2.lustre.Function;
 import kind2.lustre.FunctionCallExpr;
 import kind2.lustre.Guarantee;
 import kind2.lustre.IdExpr;
@@ -33,7 +32,7 @@ import kind2.lustre.IfThenElseExpr;
 import kind2.lustre.ImportedFunction;
 import kind2.lustre.ImportedNode;
 import kind2.lustre.IntExpr;
-import kind2.lustre.Kind2Function;
+import kind2.lustre.Function;
 import kind2.lustre.Mode;
 import kind2.lustre.ModeRefExpr;
 import kind2.lustre.NamedType;
@@ -82,14 +81,12 @@ public class PrettyPrintVisitor {
 			visit((Equation) a);
 		} else if (a instanceof Expr) {
 			expr((Expr) a);
-		} else if (a instanceof Function) {
-			visit((Function) a);
 		} else if (a instanceof ImportedFunction) {
 			visit((ImportedFunction) a);
 		} else if (a instanceof ImportedNode) {
 			visit((ImportedNode) a);
-		} else if (a instanceof Kind2Function) {
-			visit((Kind2Function) a);
+		} else if (a instanceof Function) {
+			visit((Function) a);
 		} else if (a instanceof Node) {
 			visit((Node) a);
 		} else if (a instanceof Program) {
@@ -99,7 +96,7 @@ public class PrettyPrintVisitor {
 		} else if (a instanceof VarDecl) {
 			visit((VarDecl) a);
 		} else {
-			throw new JKindException("Unkown AST construct!");
+			throw new Kind2Exception("Unkown AST construct!");
 		}
 	}
 
@@ -117,14 +114,6 @@ public class PrettyPrintVisitor {
 		if (!program.constants.isEmpty()) {
 			for (Constant constant : program.constants) {
 				visit(constant);
-				newline();
-			}
-			newline();
-		}
-
-		if (!program.functions.isEmpty()) {
-			for (Function function : program.functions) {
-				visit(function);
 				newline();
 			}
 			newline();
@@ -152,8 +141,8 @@ public class PrettyPrintVisitor {
 			newline();
 		}
 
-		for (Kind2Function kind2Function : program.kind2Functions) {
-			visit(kind2Function);
+		for (Function function : program.functions) {
+			visit(function);
 			newline();
 			newline();
 		}
@@ -260,7 +249,7 @@ public class PrettyPrintVisitor {
 		} else if (i instanceof VarDef) {
 			visit((VarDef) i);
 		} else {
-			throw new JKindException("Unkown contract item!");
+			throw new Kind2Exception("Unkown contract item!");
 		}
 	}
 
@@ -289,22 +278,6 @@ public class PrettyPrintVisitor {
 		}
 
 		write(");");
-
-	}
-
-	public void visit(Function function) {
-		write("function ");
-		write(function.id);
-		write("(");
-		newline();
-		varDecls(function.inputs);
-		newline();
-		write(") returns (");
-		newline();
-		varDecls(function.outputs);
-		newline();
-		write(");");
-		newline();
 
 	}
 
@@ -491,7 +464,7 @@ public class PrettyPrintVisitor {
 		} else if (e instanceof UnaryExpr) {
 			visit((UnaryExpr) e);
 		} else {
-			throw new JKindException("Unkown expression kind!");
+			throw new Kind2Exception("Unkown expression kind!");
 		}
 	}
 
@@ -667,60 +640,60 @@ public class PrettyPrintVisitor {
 
 	}
 
-	public void visit(Kind2Function kind2Function) {
+	public void visit(Function function) {
 		write("function ");
-		write(kind2Function.id);
+		write(function.id);
 		write("(");
 		newline();
-		varDecls(kind2Function.inputs);
+		varDecls(function.inputs);
 		newline();
 		write(") returns (");
 		newline();
-		varDecls(kind2Function.outputs);
+		varDecls(function.outputs);
 		newline();
 		write(");");
 		newline();
 
-		if (kind2Function.contractBody != null) {
+		if (function.contractBody != null) {
 			write("(*@contract");
 			newline();
-			visit(kind2Function.contractBody);
+			visit(function.contractBody);
 			write("*)");
 			newline();
 		}
 
-		if (!kind2Function.locals.isEmpty()) {
+		if (!function.locals.isEmpty()) {
 			write("var");
 			newline();
-			varDecls(kind2Function.locals);
+			varDecls(function.locals);
 			write(";");
 			newline();
 		}
 		write("let");
 		newline();
 
-		if (kind2Function.id.equals(main)) {
+		if (function.id.equals(main)) {
 			write("  --%MAIN;");
 			newline();
 		}
 
-		for (Equation equation : kind2Function.equations) {
+		for (Equation equation : function.equations) {
 			write("  ");
 			visit(equation);
 			newline();
 		}
 
-		if (!kind2Function.assertions.isEmpty()) {
+		if (!function.assertions.isEmpty()) {
 			newline();
-			for (Expr assertion : kind2Function.assertions) {
+			for (Expr assertion : function.assertions) {
 				assertion(assertion);
 				newline();
 			}
 		}
 
-		if (!kind2Function.properties.isEmpty()) {
+		if (!function.properties.isEmpty()) {
 			newline();
-			for (String property : kind2Function.properties) {
+			for (String property : function.properties) {
 				property(property);
 				newline();
 			}

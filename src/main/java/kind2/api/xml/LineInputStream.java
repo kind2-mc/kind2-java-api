@@ -3,7 +3,7 @@ package kind2.api.xml;
 import java.io.IOException;
 import java.io.InputStream;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 
 public class LineInputStream implements AutoCloseable {
 	private final InputStream source;
@@ -36,7 +36,7 @@ public class LineInputStream implements AutoCloseable {
 		try {
 			source.close();
 		} catch (IOException e) {
-			throw new JKindException("Error closing input stream", e);
+			throw new Kind2Exception("Error closing input stream", e);
 		}
 	}
 }

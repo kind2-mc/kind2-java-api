@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import kind2.JKindException;
-import kind2.api.results.JKindResult;
+import kind2.Kind2Exception;
+import kind2.api.results.Result;
 import kind2.api.xml.XmlParseThread;
 import kind2.lustre.Program;
 import kind2.lustre.visitors.PrettyPrintVisitor;
@@ -28,10 +28,10 @@ public class Kind2Api extends KindApi {
 	 *            Place to store results as they come in
 	 * @param monitor
 	 *            Used to check for cancellation
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
 	@Override
-	public void execute(Program program, JKindResult result, IProgressMonitor monitor) {
+	public void execute(Program program, Result result, IProgressMonitor monitor) {
 		PrettyPrintVisitor kind2Printer = new PrettyPrintVisitor();
 		kind2Printer.visit(program);
 		execute(kind2Printer.toString(), result, monitor);
@@ -46,21 +46,21 @@ public class Kind2Api extends KindApi {
 	 *            Place to store results as they come in
 	 * @param monitor
 	 *            Used to check for cancellation
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
 	@Override
-	public void execute(File lustreFile, JKindResult result, IProgressMonitor monitor) {
+	public void execute(File lustreFile, Result result, IProgressMonitor monitor) {
 		debug.println("Lustre file", lustreFile);
 		try {
 			callKind2(lustreFile, result, monitor);
-		} catch (JKindException e) {
+		} catch (Kind2Exception e) {
 			throw e;
 		} catch (Throwable t) {
-			throw new JKindException(result.getText(), t);
+			throw new Kind2Exception(result.getText(), t);
 		}
 	}
 
-	private void callKind2(File lustreFile, JKindResult result, IProgressMonitor monitor)
+	private void callKind2(File lustreFile, Result result, IProgressMonitor monitor)
 			throws IOException, InterruptedException {
 		ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
 		debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
@@ -71,7 +71,7 @@ public class Kind2Api extends KindApi {
 		try {
 			result.start();
 			process = builder.start();
-			parseThread = new XmlParseThread(process.getInputStream(), result, Backend.KIND2);
+			parseThread = new XmlParseThread(process.getInputStream(), result);
 			parseThread.start();
 			while (!monitor.isCanceled() && parseThread.isAlive()) {
 				sleep(POLL_INTERVAL);
@@ -94,12 +94,12 @@ public class Kind2Api extends KindApi {
 			monitor.done();
 
 			if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
-				throw new JKindException("Abnormal termination, exit code " + code);
+				throw new Kind2Exception("Abnormal termination, exit code " + code);
 			}
 		}
 
 		if (parseThread.getThrowable() != null) {
-			throw new JKindException("Error parsing XML", parseThread.getThrowable());
+			throw new Kind2Exception("Error parsing XML", parseThread.getThrowable());
 		}
 	}
 
@@ -118,6 +118,8 @@ public class Kind2Api extends KindApi {
 		List<String> args = new ArrayList<>();
 		args.add("-xml");
 		args.add("-v");
+		//args.add("--compositional");
+		//args.add("true");
 		if (timeout != null) {
 			args.add("--timeout_wall");
 			args.add(timeout.toString());
@@ -140,7 +142,7 @@ public class Kind2Api extends KindApi {
 
 		String output = ApiUtil.readAll(process.getInputStream());
 		if (process.exitValue() != 0) {
-			throw new JKindException("Error running kind2: " + output);
+			throw new Kind2Exception("Error running kind2: " + output);
 		}
 		return output;
 	}

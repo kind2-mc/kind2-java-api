@@ -8,15 +8,15 @@ import kind2.lustre.ContractBody;
 import kind2.lustre.Equation;
 import kind2.lustre.Expr;
 import kind2.lustre.IdExpr;
-import kind2.lustre.Kind2Function;
+import kind2.lustre.Function;
 import kind2.lustre.Location;
 import kind2.lustre.Type;
 import kind2.lustre.VarDecl;
 
 /**
- * This class provides helper functions for constructing a kind2 function.
+ * This class provides helper functions for constructing a function.
  */
-public class Kind2FunctionBuilder {
+public class FunctionBuilder {
 	private String id;
 	private List<VarDecl> inputs = new ArrayList<>();
 	private List<VarDecl> outputs = new ArrayList<>();
@@ -31,24 +31,24 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @param id name of the function
 	 */
-	public Kind2FunctionBuilder(String id) {
+	public FunctionBuilder(String id) {
 		this.id = id;
 	}
 
 	/**
 	 * Constructor
 	 *
-	 * @param kind2Function function to clone
+	 * @param function function to clone
 	 */
-	public Kind2FunctionBuilder(Kind2Function Kind2Function) {
-		this.id = Kind2Function.id;
-		this.inputs = new ArrayList<>(Kind2Function.inputs);
-		this.outputs = new ArrayList<>(Kind2Function.outputs);
-		this.contractBody = Kind2Function.contractBody;
-		this.locals = new ArrayList<>(Kind2Function.locals);
-		this.equations = new ArrayList<>(Kind2Function.equations);
-		this.properties = new ArrayList<>(Kind2Function.properties);
-		this.assertions = new ArrayList<>(Kind2Function.assertions);
+	public FunctionBuilder(Function Function) {
+		this.id = Function.id;
+		this.inputs = new ArrayList<>(Function.inputs);
+		this.outputs = new ArrayList<>(Function.outputs);
+		this.contractBody = Function.contractBody;
+		this.locals = new ArrayList<>(Function.locals);
+		this.equations = new ArrayList<>(Function.equations);
+		this.properties = new ArrayList<>(Function.properties);
+		this.assertions = new ArrayList<>(Function.assertions);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class Kind2FunctionBuilder {
 	 * @param id name of the function
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder setId(String id) {
+	public FunctionBuilder setId(String id) {
 		this.id = id;
 		return this;
 	}
@@ -68,7 +68,7 @@ public class Kind2FunctionBuilder {
 	 * @param input the input to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addInput(VarDecl input) {
+	public FunctionBuilder addInput(VarDecl input) {
 		this.inputs.add(input);
 		return this;
 	}
@@ -79,7 +79,7 @@ public class Kind2FunctionBuilder {
 	 * @param inputs a collection of inputs to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addInputs(Collection<VarDecl> inputs) {
+	public FunctionBuilder addInputs(Collection<VarDecl> inputs) {
 		this.inputs.addAll(inputs);
 		return this;
 	}
@@ -101,7 +101,7 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearInputs() {
+	public FunctionBuilder clearInputs() {
 		this.inputs.clear();
 		return this;
 	}
@@ -112,7 +112,7 @@ public class Kind2FunctionBuilder {
 	 * @param output the output to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addOutput(VarDecl output) {
+	public FunctionBuilder addOutput(VarDecl output) {
 		this.outputs.add(output);
 		return this;
 	}
@@ -123,7 +123,7 @@ public class Kind2FunctionBuilder {
 	 * @param outputs a collection of outputs to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addOutputs(Collection<VarDecl> outputs) {
+	public FunctionBuilder addOutputs(Collection<VarDecl> outputs) {
 		this.outputs.addAll(outputs);
 		return this;
 	}
@@ -145,7 +145,7 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearOutputs() {
+	public FunctionBuilder clearOutputs() {
 		this.outputs.clear();
 		return this;
 	}
@@ -156,7 +156,7 @@ public class Kind2FunctionBuilder {
 	 * @param contractBody body of the inline contract
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder setContractBody(ContractBody contractBody) {
+	public FunctionBuilder setContractBody(ContractBody contractBody) {
 		this.contractBody = contractBody;
 		return this;
 	}
@@ -167,7 +167,7 @@ public class Kind2FunctionBuilder {
 	 * @param local the local var to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addLocal(VarDecl local) {
+	public FunctionBuilder addLocal(VarDecl local) {
 		this.locals.add(local);
 		return this;
 	}
@@ -178,7 +178,7 @@ public class Kind2FunctionBuilder {
 	 * @param locals a collection of local vars to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addLocals(Collection<VarDecl> locals) {
+	public FunctionBuilder addLocals(Collection<VarDecl> locals) {
 		this.locals.addAll(locals);
 		return this;
 	}
@@ -200,7 +200,7 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearLocals() {
+	public FunctionBuilder clearLocals() {
 		this.locals.clear();
 		return this;
 	}
@@ -211,7 +211,7 @@ public class Kind2FunctionBuilder {
 	 * @param equation the equation to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addEquation(Equation equation) {
+	public FunctionBuilder addEquation(Equation equation) {
 		this.equations.add(equation);
 		return this;
 	}
@@ -223,7 +223,7 @@ public class Kind2FunctionBuilder {
 	 * @param expr the right-hand side of the equation
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addEquation(IdExpr var, Expr expr) {
+	public FunctionBuilder addEquation(IdExpr var, Expr expr) {
 		this.equations.add(new Equation(var, expr));
 		return this;
 	}
@@ -234,7 +234,7 @@ public class Kind2FunctionBuilder {
 	 * @param equations a collection of equations to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addEquations(Collection<Equation> equations) {
+	public FunctionBuilder addEquations(Collection<Equation> equations) {
 		this.equations.addAll(equations);
 		return this;
 	}
@@ -244,7 +244,7 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearEquations() {
+	public FunctionBuilder clearEquations() {
 		this.equations.clear();
 		return this;
 	}
@@ -255,7 +255,7 @@ public class Kind2FunctionBuilder {
 	 * @param assertion a boolean expression representing a constraint
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addAssertion(Expr assertion) {
+	public FunctionBuilder addAssertion(Expr assertion) {
 		this.assertions.add(assertion);
 		return this;
 	}
@@ -266,7 +266,7 @@ public class Kind2FunctionBuilder {
 	 * @param assertions a collection of assertions to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addAssertions(Collection<Expr> assertions) {
+	public FunctionBuilder addAssertions(Collection<Expr> assertions) {
 		this.assertions.addAll(assertions);
 		return this;
 	}
@@ -276,7 +276,7 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearAssertions() {
+	public FunctionBuilder clearAssertions() {
 		this.assertions.clear();
 		return this;
 	}
@@ -287,7 +287,7 @@ public class Kind2FunctionBuilder {
 	 * @param property constraint expressing the behavior of a node
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addProperty(String property) {
+	public FunctionBuilder addProperty(String property) {
 		this.properties.add(property);
 		return this;
 	}
@@ -298,7 +298,7 @@ public class Kind2FunctionBuilder {
 	 * @param property a boolean var/constant
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addProperty(IdExpr property) {
+	public FunctionBuilder addProperty(IdExpr property) {
 		this.properties.add(property.id);
 		return this;
 	}
@@ -309,7 +309,7 @@ public class Kind2FunctionBuilder {
 	 * @param property a collection of properties to add
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder addProperties(Collection<String> properties) {
+	public FunctionBuilder addProperties(Collection<String> properties) {
 		this.properties.addAll(properties);
 		return this;
 	}
@@ -319,18 +319,18 @@ public class Kind2FunctionBuilder {
 	 *
 	 * @return this function builder
 	 */
-	public Kind2FunctionBuilder clearProperties() {
+	public FunctionBuilder clearProperties() {
 		this.properties.clear();
 		return this;
 	}
 
 	/**
-	 * construct a kind2 function
+	 * construct a function
 	 *
 	 * @return constructed function
 	 */
-	public Kind2Function build() {
-		return new Kind2Function(Location.NULL, id, inputs, outputs, contractBody, locals, equations, assertions,
+	public Function build() {
+		return new Function(Location.NULL, id, inputs, outputs, contractBody, locals, equations, assertions,
 				properties);
 	}
 }

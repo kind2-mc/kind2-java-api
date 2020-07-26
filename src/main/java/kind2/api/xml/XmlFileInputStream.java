@@ -7,13 +7,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JKindXmlFileInputStream extends InputStream {
+public class XmlFileInputStream extends InputStream {
 	private final File xmlFile;
 	private InputStream stream;
 	private volatile boolean done;
 	private static final int POLL_INTERVAL = 100;
 
-	public JKindXmlFileInputStream(File xmlFile) {
+	public XmlFileInputStream(File xmlFile) {
 		this.xmlFile = xmlFile;
 		this.stream = null;
 		this.done = false;

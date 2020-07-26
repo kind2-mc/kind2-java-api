@@ -15,7 +15,7 @@ import kind2.results.layout.Layout;
 import kind2.results.layout.SingletonLayout;
 
 /**
- * This class holds the results of a run of JKind.
+ * This class holds the results of a run of Kind2.
  * 
  * Each property is tracked using a {@link PropertyResult} class.
  * 
@@ -25,7 +25,7 @@ import kind2.results.layout.SingletonLayout;
  * 
  * @see PropertyResult
  */
-public class JKindResult extends AnalysisResult implements PropertyChangeListener {
+public class Result extends AnalysisResult implements PropertyChangeListener {
 	private String text;
 	private final List<PropertyResult> propertyResults = new ArrayList<>();
 	private final MultiStatus multiStatus = new MultiStatus();
@@ -33,43 +33,43 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	private Renaming renaming;
 
 	/**
-	 * Construct an empty JKindResult to hold the results of a run of JKind
+	 * Construct an empty Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
 	 */
-	public JKindResult(String name) {
+	public Result(String name) {
 		super(name);
 	}
 
 	/**
-	 * Construct a JKindResult to hold the results of a run of JKind
+	 * Construct a Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
 	 * @param properties
 	 *            Property names to track
 	 */
-	public JKindResult(String name, List<String> properties) {
+	public Result(String name, List<String> properties) {
 		super(name);
 		addProperties(properties);
 	}
 
 	/**
-	 * Construct a JKindResult to hold the results of a run of JKind
+	 * Construct a Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
 	 * @param renaming
 	 *            Renaming to apply to properties
 	 */
-	public JKindResult(String name, Renaming renaming) {
+	public Result(String name, Renaming renaming) {
 		super(name);
 		this.renaming = renaming;
 	}
 
 	/**
-	 * Construct a JKindResult to hold the results of a run of JKind
+	 * Construct a Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
@@ -78,14 +78,14 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	 * @param renaming
 	 *            Renaming to apply to properties
 	 */
-	public JKindResult(String name, List<String> properties, Renaming renaming) {
+	public Result(String name, List<String> properties, Renaming renaming) {
 		super(name);
 		this.renaming = renaming;
 		addProperties(properties);
 	}
 
 	/**
-	 * Construct a JKindResult to hold the results of a run of JKind
+	 * Construct a Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
@@ -95,13 +95,13 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	 *            True if the status of the property of the same index in
 	 *            properties should be inverted
 	 */
-	public JKindResult(String name, List<String> properties, List<Boolean> invertStatus) {
+	public Result(String name, List<String> properties, List<Boolean> invertStatus) {
 		super(name);
 		addProperties(properties, invertStatus);
 	}
 
 	/**
-	 * Construct a JKindResult to hold the results of a run of JKind
+	 * Construct a Result to hold the results of a run of Kind2
 	 * 
 	 * @param name
 	 *            Name of the results
@@ -113,7 +113,7 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	 * @param renaming
 	 *            Renaming to apply to properties
 	 */
-	public JKindResult(String name, List<String> properties, List<Boolean> invertStatus, Renaming renaming) {
+	public Result(String name, List<String> properties, List<Boolean> invertStatus, Renaming renaming) {
 		super(name);
 		this.renaming = renaming;
 		addProperties(properties, invertStatus);
@@ -210,7 +210,7 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	}
 
 	/**
-	 * Get all PropertyResult objects stored in the JKindResult
+	 * Get all PropertyResult objects stored in the Result
 	 */
 	public List<PropertyResult> getPropertyResults() {
 		return Collections.unmodifiableList(propertyResults);
@@ -300,7 +300,7 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	 *            Layout information for counterexamples, defined over renamed
 	 *            signals
 	 * @see Layout
-	 * @throws jkind.JKindException
+	 * @throws kind2.Kind2Exception
 	 */
 	public void toExcel(File file, Layout layout) {
 		try (ExcelFormatter formatter = new ExcelFormatter(file, layout)) {
@@ -325,7 +325,7 @@ public class JKindResult extends AnalysisResult implements PropertyChangeListene
 	 * 
 	 * @param file
 	 *            File to write Excel spreadsheet to
-	 * @throws jkind.JKindException
+	 * @throws kind2.Kind2Exception
 	 */
 	public void toExcel(File file) {
 		toExcel(file, new SingletonLayout("Signals"));

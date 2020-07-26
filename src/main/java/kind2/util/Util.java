@@ -22,7 +22,7 @@ import java.util.TreeSet;
 
 import org.w3c.dom.Element;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.EnumType;
 import kind2.lustre.NamedType;
 import kind2.lustre.SubrangeIntType;
@@ -149,7 +149,7 @@ public class Util {
                 }
         }
 
-        throw new JKindException("Unable to parse " + value + " as " + type);
+        throw new Kind2Exception("Unable to parse " + value + " as " + type);
     }
 
     public static Value parseArrayValue(String type, Element arrayElement) {
@@ -207,7 +207,7 @@ public class Util {
     public static final String REALIZABLE = "%REALIZABLE";
 
     /**
-     * ASCII "End of Text" character, used by JKindApi to ask JKind to terminate
+     * ASCII "End of Text" character, used by Kind2Api to ask Kind2 to terminate
      */
     public static final int END_OF_TEXT = 0x03;
 }

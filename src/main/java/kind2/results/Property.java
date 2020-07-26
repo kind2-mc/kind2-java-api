@@ -1,7 +1,7 @@
 package kind2.results;
 
 /**
- * Abstract class of property result from JKind
+ * Abstract class of property result from 
  */
 public abstract class Property {
 	private final String name;

@@ -21,7 +21,7 @@ import kind2.util.CounterexampleFormatter;
 import kind2.util.Util;
 
 /**
- * A JKind counterexample
+ * A  counterexample
  */
 public final class Counterexample {
 	private final int length;
@@ -177,7 +177,7 @@ public final class Counterexample {
 	 * @param layout
 	 *            Layout information for signals in counterexample
 	 * @see Layout
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
 	public void toExcel(File file, Layout layout) {
 		try (ExcelCounterexampleFormatter formatter = new ExcelCounterexampleFormatter(file, layout)) {
@@ -192,7 +192,7 @@ public final class Counterexample {
 	 * 
 	 * @param file
 	 *            File to write Excel spreadsheet to
-	 * @throws jkind.JKindException
+	 * @throws .Kind2Exception
 	 */
 	public void toExcel(File file) {
 		toExcel(file, new SingletonLayout("Signals"));

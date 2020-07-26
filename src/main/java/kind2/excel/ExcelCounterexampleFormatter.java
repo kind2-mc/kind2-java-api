@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.VarDecl;
 import kind2.lustre.values.BooleanValue;
 import kind2.lustre.values.EnumValue;
@@ -56,7 +56,7 @@ public class ExcelCounterexampleFormatter implements Closeable {
 		try {
 			workbook = Workbook.createWorkbook(file);
 		} catch (IOException e) {
-			throw new JKindException("Error writing to Excel file", e);
+			throw new Kind2Exception("Error writing to Excel file", e);
 		}
 	}
 
@@ -74,7 +74,7 @@ public class ExcelCounterexampleFormatter implements Closeable {
 				workbook = null;
 			}
 		} catch (Exception e) {
-			throw new JKindException("Error closing Excel file", e);
+			throw new Kind2Exception("Error closing Excel file", e);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class ExcelCounterexampleFormatter implements Closeable {
 
 			return sheet;
 		} catch (WriteException e) {
-			throw new JKindException("Error writing counterexample to Excel file", e);
+			throw new Kind2Exception("Error writing counterexample to Excel file", e);
 		}
 	}
 
@@ -155,7 +155,7 @@ public class ExcelCounterexampleFormatter implements Closeable {
 			EnumValue ev = (EnumValue) value;
 			sheet.addCell(new Label(col, row, ev.value));
 		} else {
-			throw new JKindException("Unknown value type in Excel writer: " + value.getClass().getSimpleName());
+			throw new Kind2Exception("Unknown value type in Excel writer: " + value.getClass().getSimpleName());
 		}
 	}
 

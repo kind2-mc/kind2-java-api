@@ -19,9 +19,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import kind2.JKindException;
-import kind2.api.Backend;
-import kind2.api.results.JKindResult;
+import kind2.Kind2Exception;
+import kind2.api.results.Result;
 import kind2.api.results.PropertyResult;
 import kind2.lustre.NamedType;
 import kind2.lustre.Type;
@@ -39,17 +38,15 @@ import kind2.util.Util;
 
 public class XmlParseThread extends Thread {
 	private final InputStream xmlStream;
-	private final JKindResult result;
-	private final Backend backend;
+	private final Result result;
 	private final DocumentBuilderFactory factory;
 	private volatile Throwable throwable;
 	private Map<String, List<PropertyResult>> analysisToProps = new HashMap<>();
 
-	public XmlParseThread(InputStream xmlStream, JKindResult result, Backend backend) {
+	public XmlParseThread(InputStream xmlStream, Result result) {
 		super("Xml Parse");
 		this.xmlStream = xmlStream;
 		this.result = result;
-		this.backend = backend;
 		this.factory = DocumentBuilderFactory.newInstance();
 	}
 
@@ -81,8 +78,8 @@ public class XmlParseThread extends Thread {
 
 				if (beginProgress && endProgress) {
 					// Kind 2 progress format uses a single line
-					parseKind2ProgressXml(line, analysis);
-				} else if (beginProgress || beginProperty) {
+					parseProgressXml(line, analysis);
+				} else if (beginProperty) {
 					buffer = new StringBuilder();
 					buffer.append(line);
 					if (endProperty) {
@@ -93,12 +90,8 @@ public class XmlParseThread extends Thread {
 					buffer.append(line);
 					parsePropertyXML(buffer.toString(), analysis);
 					buffer = null;
-				} else if (endProgress) {
-					buffer.append(line);
-					parseJKindProgressXml(buffer.toString());
-					buffer = null;
 				} else if (beginAnalysis) {
-					analysis = parseKind2AnalysisXml(line);
+					analysis = parseAnalysisXml(line);
 				} else if (endAnalysis) {
 					analysis = null;
 				} else if (buffer != null) {
@@ -110,7 +103,7 @@ public class XmlParseThread extends Thread {
 		}
 	}
 
-	private String parseKind2AnalysisXml(String line) {
+	private String parseAnalysisXml(String line) {
 		Element progressElement = parseXml(line);
 		String analysis = progressElement.getAttribute("top");
 		analysisToProps.putIfAbsent(analysis, new ArrayList<>());
@@ -123,32 +116,17 @@ public class XmlParseThread extends Thread {
 			Document doc = builder.parse(new InputSource(new StringReader(xml)));
 			return doc.getDocumentElement();
 		} catch (Exception e) {
-			throw new JKindException("Error parsing: " + xml, e);
+			throw new Kind2Exception("Error parsing: " + xml, e);
 		}
 	}
 
-	private void parseKind2ProgressXml(String progressXml, String analysis) {
+	private void parseProgressXml(String progressXml, String analysis) {
 		Element progressElement = parseXml(progressXml);
 		String source = progressElement.getAttribute("source");
 		if ("bmc".equals(source)) {
 			int k = Integer.parseInt(progressElement.getTextContent());
 			for (PropertyResult pr : analysisToProps.get(analysis)) {
 				pr.setBaseProgress(k);
-			}
-		}
-	}
-
-	private void parseJKindProgressXml(String progressXml) {
-		Element progressElement = parseXml(progressXml);
-		String source = progressElement.getAttribute("source");
-		if ("bmc".equals(source)) {
-			int trueFor = Integer.parseInt(progressElement.getAttribute("trueFor"));
-			for (Element propertyElement : getElements(progressElement, "PropertyProgress")) {
-				String prop = propertyElement.getAttribute("name");
-				PropertyResult pr = result.getPropertyResult(prop);
-				if (pr != null) {
-					pr.setBaseProgress(trueFor);
-				}
 			}
 		}
 	}
@@ -192,7 +170,6 @@ public class XmlParseThread extends Thread {
 		Set<List<String>> ivcSets = new HashSet<List<String>>();
 		List<String> conflicts = getConflicts(getElement(propertyElement, "Conflicts"));
 		Counterexample cex = getCounterexample(getElement(propertyElement, getCounterexampleTag()), k);
-		String reportFile = getReportFile(propertyElement);
 
 		if (numOfIVCs == 0) {
 			List<String> curInvariants = getStringList(getElements(propertyElement, "Invariant"));
@@ -214,7 +191,7 @@ public class XmlParseThread extends Thread {
 			return new ValidProperty(name, source, k, runtime, invariants, ivc, invarantSets, ivcSets, mivcTimedOut);
 
 		case "falsifiable":
-			return new InvalidProperty(name, source, cex, conflicts, runtime, reportFile);
+			return new InvalidProperty(name, source, cex, conflicts, runtime);
 
 		case "unknown":
 			return new UnknownProperty(name, trueFor, cex, runtime);
@@ -223,16 +200,7 @@ public class XmlParseThread extends Thread {
 			return new InconsistentProperty(name, source, k, runtime);
 
 		default:
-			throw new JKindException("Unknown property answer in XML file: " + answer);
-		}
-	}
-
-	private String getReportFile(Element propertyElement) {
-		switch(backend) {
-			case SALLY:
-				return propertyElement.getAttribute("report");
-			default:
-				return null;
+			throw new Kind2Exception("Unknown property answer in XML file: " + answer);
 		}
 	}
 
@@ -256,15 +224,7 @@ public class XmlParseThread extends Thread {
 		}
 		int k = Integer.parseInt(kNode.getTextContent());
 
-		switch (backend) {
-		case JKIND:
-		case SALLY:
-			return k;
-		case KIND2:
-			return k + 1;
-		default:
-			throw new IllegalArgumentException();
-		}
+		return k + 1;
 	}
 
 	private int getNumOfIVCs(Node numOfIVCNode) {
@@ -327,27 +287,11 @@ public class XmlParseThread extends Thread {
 	}
 
 	protected String getCounterexampleTag() {
-		switch (backend) {
-		case JKIND:
-			return "Counterexample";
-		case KIND2:
-		case SALLY:
-			return "CounterExample";
-		default:
-			throw new IllegalArgumentException();
-		}
+		return "CounterExample";
 	}
 
 	protected String getSignalTag() {
-		switch (backend) {
-		case JKIND:
-			return "Signal";
-		case KIND2:
-		case SALLY:
-			return "Stream";
-		default:
-			throw new IllegalArgumentException();
-		}
+		return "Stream";
 	}
 
 	private Signal<Value> getSignal(Element signalElement) {
@@ -366,15 +310,7 @@ public class XmlParseThread extends Thread {
 	}
 
 	protected String getTimeAttribute() {
-		switch (backend) {
-		case JKIND:
-			return "time";
-		case KIND2:
-		case SALLY:
-			return "instant";
-		default:
-			throw new IllegalArgumentException();
-		}
+		return "instant";
 	}
 
 	private Value getValue(Element valueElement, String type) {

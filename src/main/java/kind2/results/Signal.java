@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import kind2.JKindException;
+import kind2.Kind2Exception;
 import kind2.lustre.values.Value;
 
 /**
@@ -61,7 +61,7 @@ public final class Signal<T extends Value> implements Comparable<Signal<T>> {
 			if (klass.isInstance(value)) {
 				castSignal.putValue(step, klass.cast(value));
 			} else {
-				throw new JKindException(
+				throw new Kind2Exception(
 						"Cannot cast " + value.getClass().getSimpleName() + " to " + klass.getSimpleName());
 			}
 		}
