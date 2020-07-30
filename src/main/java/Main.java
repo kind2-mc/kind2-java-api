@@ -2,20 +2,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import kind2.api.IProgressMonitor;
-import kind2.api.Kind2Api;
-import kind2.api.results.Result;
-import kind2.lustre.Contract;
-import kind2.lustre.IdExpr;
-import kind2.lustre.ImportedFunction;
-import kind2.lustre.LustreUtil;
-import kind2.lustre.NamedType;
-import kind2.lustre.NodeCallExpr;
-import kind2.lustre.VarDecl;
-import kind2.lustre.builders.ContractBodyBuilder;
-import kind2.lustre.builders.FunctionBuilder;
-import kind2.lustre.builders.NodeBuilder;
-import kind2.lustre.builders.ProgramBuilder;
+import edu.uiowa.kind2.api.IProgressMonitor;
+import edu.uiowa.kind2.api.Kind2Api;
+import edu.uiowa.kind2.api.results.Result;
+import edu.uiowa.kind2.lustre.Contract;
+import edu.uiowa.kind2.lustre.IdExpr;
+import edu.uiowa.kind2.lustre.ImportedFunction;
+import edu.uiowa.kind2.lustre.LustreUtil;
+import edu.uiowa.kind2.lustre.NamedType;
+import edu.uiowa.kind2.lustre.NodeCallExpr;
+import edu.uiowa.kind2.lustre.VarDecl;
+import edu.uiowa.kind2.lustre.builders.ContractBodyBuilder;
+import edu.uiowa.kind2.lustre.builders.FunctionBuilder;
+import edu.uiowa.kind2.lustre.builders.NodeBuilder;
+import edu.uiowa.kind2.lustre.builders.ProgramBuilder;
 
 public class Main {
 	public static void main(String[] args) {
