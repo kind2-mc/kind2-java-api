@@ -2,26 +2,11 @@ package kind2.api;
 
 import java.io.File;
 
-import kind2.Kind2Exception;
 import kind2.api.results.Result;
 import kind2.lustre.Program;
 
 public abstract class KindApi {
-	protected Integer timeout = null;
 	protected DebugLogger debug = new DebugLogger();
-
-	/**
-	 * Set a maximum run time for entire execution
-	 * 
-	 * @param timeout
-	 *            A positive timeout in seconds
-	 */
-	public void setTimeout(int timeout) {
-		if (timeout <= 0) {
-			throw new Kind2Exception("Timeout must be positive");
-		}
-		this.timeout = timeout;
-	}
 
 	/**
 	 * Put the KindApi into debug mode where it saves all output

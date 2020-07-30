@@ -13,31 +13,24 @@ public class Node extends Ast {
 	public final List<Equation> equations;
 	public final List<String> properties;
 	public final List<Expr> assertions;
-	public final List<String> ivc;
-	public final List<String> realizabilityInputs; // Nullable
 	public final ContractBody contractBody; // Nullable
 
-	public Node(Location location, String id, List<VarDecl> inputs, List<VarDecl> outputs, List<VarDecl> locals,
-			List<Equation> equations, List<String> properties, List<Expr> assertions, List<String> realizabilityInputs,
-			ContractBody contractBody, List<String> ivc) {
+	public Node(Location location, String id, List<VarDecl> inputs, List<VarDecl> outputs, ContractBody contractBody,
+			List<VarDecl> locals, List<Equation> equations, List<Expr> assertions, List<String> properties) {
 		super(location);
 		Assert.isNotNull(id);
 		this.id = id;
 		this.inputs = Util.safeList(inputs);
 		this.outputs = Util.safeList(outputs);
+		this.contractBody = contractBody;
 		this.locals = Util.safeList(locals);
 		this.equations = Util.safeList(equations);
-		this.properties = Util.safeList(properties);
 		this.assertions = Util.safeList(assertions);
-		this.ivc = Util.safeList(ivc);
-		this.realizabilityInputs = Util.safeNullableList(realizabilityInputs);
-		this.contractBody = contractBody;
+		this.properties = Util.safeList(properties);
 	}
 
-	public Node(String id, List<VarDecl> inputs, List<VarDecl> outputs, List<VarDecl> locals, List<Equation> equations,
-			List<String> properties, List<Expr> assertions, List<String> realizabilityInputs, ContractBody contractBody,
-			List<String> ivc) {
-		this(Location.NULL, id, inputs, outputs, locals, equations, properties, assertions, realizabilityInputs,
-				contractBody, ivc);
+	public Node(String id, List<VarDecl> inputs, List<VarDecl> outputs, ContractBody contractBody, List<VarDecl> locals,
+			List<Equation> equations, List<Expr> assertions, List<String> properties) {
+		this(Location.NULL, id, inputs, outputs, contractBody, locals, equations, assertions, properties);
 	}
 }

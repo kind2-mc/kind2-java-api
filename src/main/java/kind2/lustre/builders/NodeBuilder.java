@@ -12,19 +12,16 @@ import kind2.lustre.Location;
 import kind2.lustre.Node;
 import kind2.lustre.Type;
 import kind2.lustre.VarDecl;
-import kind2.util.Util;
 
 public class NodeBuilder {
 	private String id;
 	private List<VarDecl> inputs = new ArrayList<>();
 	private List<VarDecl> outputs = new ArrayList<>();
+	private ContractBody contractBody = null;
 	private List<VarDecl> locals = new ArrayList<>();
 	private List<Equation> equations = new ArrayList<>();
-	private List<String> properties = new ArrayList<>();
 	private List<Expr> assertions = new ArrayList<>();
-	private List<String> ivc = new ArrayList<>();
-	private List<String> realizabilityInputs = null;
-	private ContractBody contractBody = null;
+	private List<String> properties = new ArrayList<>();
 
 	public NodeBuilder(String id) {
 		this.id = id;
@@ -34,13 +31,11 @@ public class NodeBuilder {
 		this.id = node.id;
 		this.inputs = new ArrayList<>(node.inputs);
 		this.outputs = new ArrayList<>(node.outputs);
+		this.contractBody = node.contractBody;
 		this.locals = new ArrayList<>(node.locals);
 		this.equations = new ArrayList<>(node.equations);
-		this.properties = new ArrayList<>(node.properties);
 		this.assertions = new ArrayList<>(node.assertions);
-		this.ivc = new ArrayList<>(node.ivc);
-		this.realizabilityInputs = Util.copyNullable(node.realizabilityInputs);
-		this.contractBody = node.contractBody;
+		this.properties = new ArrayList<>(node.properties);
 	}
 
 	public NodeBuilder setId(String id) {
@@ -163,33 +158,12 @@ public class NodeBuilder {
 		return this;
 	}
 
-	public NodeBuilder addIvc(String e) {
-		this.ivc.add(e);
-		return this;
-	}
-
-	public NodeBuilder addIvcs(List<String> ivc) {
-		this.ivc.addAll(ivc);
-		return this;
-	}
-
-	public NodeBuilder clearIvc() {
-		this.ivc.clear();
-		return this;
-	}
-
-	public NodeBuilder setRealizabilityInputs(List<String> realizabilityInputs) {
-		this.realizabilityInputs = Util.copyNullable(realizabilityInputs);
-		return this;
-	}
-
 	public NodeBuilder setContractBody(ContractBody contractBody) {
 		this.contractBody = contractBody;
 		return this;
 	}
 
 	public Node build() {
-		return new Node(Location.NULL, id, inputs, outputs, locals, equations, properties, assertions,
-				realizabilityInputs, contractBody, ivc);
+		return new Node(Location.NULL, id, inputs, outputs, contractBody, locals, equations, assertions, properties);
 	}
 }

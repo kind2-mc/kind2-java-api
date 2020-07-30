@@ -1,7 +1,7 @@
-package kind2;
+package kind2.api;
 
 public enum SolverOption {
-	SMTINTERPOL, Z3, YICES, YICES2, CVC4, MATHSAT;
+	BOOLECTOR, CVC4, YICES, YICES2, Z3;
 
 	@Override
 	public String toString() {

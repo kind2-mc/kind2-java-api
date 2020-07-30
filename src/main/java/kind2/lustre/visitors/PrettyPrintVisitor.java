@@ -1,7 +1,5 @@
 package kind2.lustre.visitors;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -10,7 +8,6 @@ import kind2.Kind2Exception;
 import kind2.lustre.ArrayAccessExpr;
 import kind2.lustre.ArrayExpr;
 import kind2.lustre.ArrayType;
-import kind2.lustre.ArrayUpdateExpr;
 import kind2.lustre.Assume;
 import kind2.lustre.Ast;
 import kind2.lustre.BinaryExpr;
@@ -25,6 +22,7 @@ import kind2.lustre.ContractItem;
 import kind2.lustre.EnumType;
 import kind2.lustre.Equation;
 import kind2.lustre.Expr;
+import kind2.lustre.Function;
 import kind2.lustre.FunctionCallExpr;
 import kind2.lustre.Guarantee;
 import kind2.lustre.IdExpr;
@@ -32,7 +30,6 @@ import kind2.lustre.IfThenElseExpr;
 import kind2.lustre.ImportedFunction;
 import kind2.lustre.ImportedNode;
 import kind2.lustre.IntExpr;
-import kind2.lustre.Function;
 import kind2.lustre.Mode;
 import kind2.lustre.ModeRefExpr;
 import kind2.lustre.NamedType;
@@ -43,7 +40,6 @@ import kind2.lustre.RealExpr;
 import kind2.lustre.RecordAccessExpr;
 import kind2.lustre.RecordExpr;
 import kind2.lustre.RecordType;
-import kind2.lustre.RecordUpdateExpr;
 import kind2.lustre.TupleExpr;
 import kind2.lustre.Type;
 import kind2.lustre.TypeDef;
@@ -96,7 +92,7 @@ public class PrettyPrintVisitor {
 		} else if (a instanceof VarDecl) {
 			visit((VarDecl) a);
 		} else {
-			throw new Kind2Exception("Unkown AST construct!");
+			throw new Kind2Exception("Unknown AST construct!");
 		}
 	}
 
@@ -155,7 +151,6 @@ public class PrettyPrintVisitor {
 				newline();
 			}
 		}
-
 	}
 
 	public void visit(TypeDef typeDef) {
@@ -164,7 +159,6 @@ public class PrettyPrintVisitor {
 		write(" = ");
 		writeType(typeDef.type);
 		write(";");
-
 	}
 
 	private void writeType(Type type) {
@@ -204,7 +198,6 @@ public class PrettyPrintVisitor {
 		write(" = ");
 		expr(constant.expr);
 		write(";");
-
 	}
 
 	public void visit(Contract contract) {
@@ -224,7 +217,6 @@ public class PrettyPrintVisitor {
 		newline();
 		visit(contract.contractBody);
 		write("tel;");
-
 	}
 
 	public void visit(ContractBody contractBody) {
@@ -249,7 +241,7 @@ public class PrettyPrintVisitor {
 		} else if (i instanceof VarDef) {
 			visit((VarDef) i);
 		} else {
-			throw new Kind2Exception("Unkown contract item!");
+			throw new Kind2Exception("Unknown contract item!");
 		}
 	}
 
@@ -278,7 +270,6 @@ public class PrettyPrintVisitor {
 		}
 
 		write(");");
-
 	}
 
 	public void visit(Node node) {
@@ -337,24 +328,7 @@ public class PrettyPrintVisitor {
 			}
 		}
 
-		if (node.realizabilityInputs != null) {
-			write("  --%REALIZABLE ");
-			write(node.realizabilityInputs.stream().collect(joining(", ")));
-			write(";");
-			newline();
-			newline();
-		}
-
-		if (!node.ivc.isEmpty()) {
-			write("  --%IVC ");
-			write(node.ivc.stream().collect(joining(", ")));
-			write(";");
-			newline();
-			newline();
-		}
-
 		write("tel;");
-
 	}
 
 	private void varDecls(List<VarDecl> varDecls) {
@@ -389,7 +363,6 @@ public class PrettyPrintVisitor {
 			write(" : ");
 			write(varDecl.type);
 		}
-
 	}
 
 	public void visit(Equation equation) {
@@ -408,7 +381,6 @@ public class PrettyPrintVisitor {
 		write(" = ");
 		expr(equation.expr);
 		write(";");
-
 	}
 
 	private void assertion(Expr assertion) {
@@ -429,8 +401,6 @@ public class PrettyPrintVisitor {
 			visit((ArrayAccessExpr) e);
 		} else if (e instanceof ArrayExpr) {
 			visit((ArrayExpr) e);
-		} else if (e instanceof ArrayUpdateExpr) {
-			visit((ArrayUpdateExpr) e);
 		} else if (e instanceof BinaryExpr) {
 			visit((BinaryExpr) e);
 		} else if (e instanceof BoolExpr) {
@@ -457,14 +427,12 @@ public class PrettyPrintVisitor {
 			visit((RecordAccessExpr) e);
 		} else if (e instanceof RecordExpr) {
 			visit((RecordExpr) e);
-		} else if (e instanceof RecordUpdateExpr) {
-			visit((RecordUpdateExpr) e);
 		} else if (e instanceof TupleExpr) {
 			visit((TupleExpr) e);
 		} else if (e instanceof UnaryExpr) {
 			visit((UnaryExpr) e);
 		} else {
-			throw new Kind2Exception("Unkown expression kind!");
+			throw new Kind2Exception("Unknown expression kind!");
 		}
 	}
 
@@ -473,7 +441,6 @@ public class PrettyPrintVisitor {
 		write("[");
 		expr(e.index);
 		write("]");
-
 	}
 
 	public void visit(ArrayExpr e) {
@@ -485,24 +452,12 @@ public class PrettyPrintVisitor {
 			expr(iterator.next());
 		}
 		write("]");
-
-	}
-
-	public void visit(ArrayUpdateExpr e) {
-		expr(e.array);
-		write("[");
-		expr(e.index);
-		write(" := ");
-		expr(e.value);
-		write("]");
-
 	}
 
 	public void visit(Assume assumption) {
 		write("assume ");
 		expr(assumption.expr);
 		write(";");
-
 	}
 
 	public void visit(BinaryExpr e) {
@@ -513,12 +468,10 @@ public class PrettyPrintVisitor {
 		write(" ");
 		expr(e.right);
 		write(")");
-
 	}
 
 	public void visit(BoolExpr e) {
 		write(Boolean.toString(e.value));
-
 	}
 
 	public void visit(CastExpr e) {
@@ -526,7 +479,6 @@ public class PrettyPrintVisitor {
 		write("(");
 		expr(e.expr);
 		write(")");
-
 	}
 
 	private String getCastFunction(Type type) {
@@ -549,7 +501,6 @@ public class PrettyPrintVisitor {
 			expr(arg);
 		}
 		write(")");
-
 	}
 
 	public void visit(FunctionCallExpr e) {
@@ -563,19 +514,16 @@ public class PrettyPrintVisitor {
 			}
 		}
 		write(")");
-
 	}
 
 	public void visit(Guarantee guarantee) {
 		write("guarantee ");
 		expr(guarantee.expr);
 		write(";");
-
 	}
 
 	public void visit(IdExpr e) {
 		write(e.id);
-
 	}
 
 	public void visit(IfThenElseExpr e) {
@@ -586,7 +534,6 @@ public class PrettyPrintVisitor {
 		write(" else ");
 		expr(e.elseExpr);
 		write(")");
-
 	}
 
 	public void visit(ImportedFunction importedFunction) {
@@ -609,7 +556,6 @@ public class PrettyPrintVisitor {
 			visit(importedFunction.contractBody);
 			write("*)");
 		}
-
 	}
 
 	public void visit(ImportedNode importedNode) {
@@ -632,12 +578,10 @@ public class PrettyPrintVisitor {
 			visit(importedNode.contractBody);
 			write("*)");
 		}
-
 	}
 
 	public void visit(IntExpr e) {
 		write(e.value);
-
 	}
 
 	public void visit(Function function) {
@@ -700,7 +644,6 @@ public class PrettyPrintVisitor {
 		}
 
 		write("tel;");
-
 	}
 
 	public void visit(Mode mode) {
@@ -721,7 +664,6 @@ public class PrettyPrintVisitor {
 			newline();
 		}
 		write("  );");
-
 	}
 
 	public void visit(ModeRefExpr e) {
@@ -729,7 +671,6 @@ public class PrettyPrintVisitor {
 			write("::");
 			write(s);
 		}
-
 	}
 
 	public void visit(NodeCallExpr e) {
@@ -743,7 +684,6 @@ public class PrettyPrintVisitor {
 			}
 		}
 		write(")");
-
 	}
 
 	public void visit(RealExpr e) {
@@ -752,14 +692,12 @@ public class PrettyPrintVisitor {
 		if (!str.contains(".")) {
 			write(".0");
 		}
-
 	}
 
 	public void visit(RecordAccessExpr e) {
 		expr(e.record);
 		write(".");
 		write(e.field);
-
 	}
 
 	public void visit(RecordExpr e) {
@@ -776,17 +714,6 @@ public class PrettyPrintVisitor {
 			}
 		}
 		write("}");
-
-	}
-
-	public void visit(RecordUpdateExpr e) {
-		expr(e.record);
-		write("{");
-		write(e.field);
-		write(" := ");
-		expr(e.value);
-		write("}");
-
 	}
 
 	public void visit(TupleExpr e) {
@@ -803,7 +730,6 @@ public class PrettyPrintVisitor {
 			expr(iterator.next());
 		}
 		write(")");
-
 	}
 
 	public void visit(UnaryExpr e) {
@@ -814,7 +740,6 @@ public class PrettyPrintVisitor {
 		}
 		expr(e.expr);
 		write(")");
-
 	}
 
 	public void visit(VarDef varDef) {
@@ -823,6 +748,5 @@ public class PrettyPrintVisitor {
 		write(" = ");
 		expr(varDef.expr);
 		write(";");
-
 	}
 }

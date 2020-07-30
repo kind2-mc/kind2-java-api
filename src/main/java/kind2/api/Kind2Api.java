@@ -19,15 +19,52 @@ public class Kind2Api extends KindApi {
 	public static final String KIND2 = "kind2";
 	private static final long POLL_INTERVAL = 100;
 
+	// module smt
+	private SolverOption smtSolver;
+	private String smtLogic;
+	private Boolean checkSatAssume;
+	private Boolean smtShortNames;
+	private String boolectorBin;
+	private String z3Bin;
+	private String cvc4Bin;
+	private String yicesBin;
+	private String yices2Bin;
+	private Boolean smtTrace;
+
+	// general
+	// private String lusMain;
+	private String outputDir;
+	private ArrayList<String> includeDirs;
+	private String realPrecision;
+	private Boolean logInvs;
+	// private Boolean printInvs;
+	private Float timeout;
+
+	public Kind2Api() {
+		smtSolver = null;
+		smtLogic = null;
+		checkSatAssume = null;
+		smtShortNames = null;
+		boolectorBin = null;
+		z3Bin = null;
+		cvc4Bin = null;
+		yicesBin = null;
+		yices2Bin = null;
+		smtTrace = null;
+		outputDir = null;
+		includeDirs = new ArrayList<>();
+		realPrecision = null;
+		logInvs = null;
+		// Boolean = null;
+		timeout = null;
+	}
+
 	/**
 	 * Run Kind on a Lustre program
 	 *
-	 * @param program
-	 *            Lustre program
-	 * @param result
-	 *            Place to store results as they come in
-	 * @param monitor
-	 *            Used to check for cancellation
+	 * @param program Lustre program
+	 * @param result  Place to store results as they come in
+	 * @param monitor Used to check for cancellation
 	 * @throws .Kind2Exception
 	 */
 	@Override
@@ -40,12 +77,9 @@ public class Kind2Api extends KindApi {
 	/**
 	 * Run Kind2 on a Lustre program
 	 *
-	 * @param lustreFile
-	 *            File containing Lustre program
-	 * @param result
-	 *            Place to store results as they come in
-	 * @param monitor
-	 *            Used to check for cancellation
+	 * @param lustreFile File containing Lustre program
+	 * @param result     Place to store results as they come in
+	 * @param monitor    Used to check for cancellation
 	 * @throws .Kind2Exception
 	 */
 	@Override
@@ -118,13 +152,143 @@ public class Kind2Api extends KindApi {
 		List<String> args = new ArrayList<>();
 		args.add("-xml");
 		args.add("-v");
-		//args.add("--compositional");
-		//args.add("true");
+		if (smtSolver != null) {
+			args.add("--smt_solver");
+			args.add(smtSolver.toString());
+		}
+		if (smtLogic != null) {
+			args.add("--smt_logic");
+			args.add(smtLogic);
+		}
+		if (checkSatAssume != null) {
+			args.add("--check_sat_assume");
+			args.add(checkSatAssume.toString());
+		}
+		if (smtShortNames != null) {
+			args.add("--smt_short_names");
+			args.add(smtShortNames.toString());
+		}
+		if (boolectorBin != null) {
+			args.add("--boolector_bin");
+			args.add(boolectorBin);
+		}
+		if (cvc4Bin != null) {
+			args.add("--cvc4_bin");
+			args.add(cvc4Bin);
+		}
+		if (yicesBin != null) {
+			args.add("--yices_bin");
+			args.add(yicesBin);
+		}
+		if (yices2Bin != null) {
+			args.add("--yices2_bin");
+			args.add(yices2Bin);
+		}
+		if (z3Bin != null) {
+			args.add("--z3_bin");
+			args.add(z3Bin);
+		}
+		if (smtTrace != null) {
+			args.add("--smt_trace");
+			args.add(smtTrace.toString());
+		}
+		if (outputDir != null) {
+			args.add("--output_dir");
+			args.add(outputDir);
+		}
+		if (!includeDirs.isEmpty()) {
+			for (String dir : includeDirs) {
+				args.add("--include_dir");
+				args.add(dir);
+			}
+		}
+		if (realPrecision != null) {
+			args.add("--real_precision");
+			args.add(realPrecision);
+		}
+		if (logInvs != null) {
+			args.add("--log_invs");
+			args.add(logInvs.toString());
+		}
 		if (timeout != null) {
-			args.add("--timeout_wall");
+			args.add("--timeout");
 			args.add(timeout.toString());
 		}
 		return args;
+	}
+
+	/**
+	 * Set the solver to use (Boolector, CVC4, Yices, Yices2, Z3)
+	 */
+	public void setSmtSolver(SolverOption smtSolver) {
+		this.smtSolver = smtSolver;
+	}
+
+	/**
+	 * Set the SMT logic to use (ALL, QF_UF, LIA, ...)
+	 */
+	public void setSmtLogic(String smtLogic) {
+		this.smtLogic = smtLogic;
+	}
+
+	public void setCheckSatAssume(boolean checkSatAssume) {
+		this.checkSatAssume = checkSatAssume;
+	}
+
+	public void setSmtShortNames(boolean smtShortNames) {
+		this.smtShortNames = smtShortNames;
+	}
+
+	public void setBoolectorBin(String boolectorBin) {
+		this.boolectorBin = boolectorBin;
+	}
+
+	public void setCvc4Bin(String cvc4Bin) {
+		this.cvc4Bin = cvc4Bin;
+	}
+
+	public void setYicesBin(String yicesBin) {
+		this.yicesBin = yicesBin;
+	}
+
+	public void setYices2Bin(String yices2Bin) {
+		this.yices2Bin = yices2Bin;
+	}
+
+	public void setZ3Bin(String z3Bin) {
+		this.z3Bin = z3Bin;
+	}
+
+	public void outputDir(String outputDir) {
+		this.outputDir = outputDir;
+	}
+
+	public void includeDir(String dir) {
+		this.includeDirs.add(dir);
+	}
+
+	public void includeDirs(ArrayList<String> dirs) {
+		this.includeDirs.addAll(dirs);
+	}
+
+	public void setRealPrecision(String realPrecision) {
+		this.realPrecision = realPrecision;
+	}
+
+	public void logInvs() {
+		this.logInvs = true;
+	}
+
+	/**
+	 * Set a maximum run time for entire execution
+	 * 
+	 * @param timeout A positive timeout in seconds
+	 */
+	public void setTimeout(float timeout) {
+		if (timeout <= 0) {
+			throw new Kind2Exception("Timeout must be positive");
+		}
+		this.timeout = timeout;
 	}
 
 	protected void sleep(long interval) {
