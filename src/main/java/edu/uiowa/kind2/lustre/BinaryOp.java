@@ -1,9 +1,16 @@
+/*
+ * Copyright (c) 2012-2013, Rockwell Collins
+ * All rights reserved.
+ *
+ * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
+ */
+
 package edu.uiowa.kind2.lustre;
 
 public enum BinaryOp {
-	PLUS("+"), MINUS("-"), MULTIPLY("*"), DIVIDE("/"), INT_DIVIDE("div"), MODULUS("mod"), EQUAL("="), NOTEQUAL(
-			"<>"), GREATER(">"), LESS("<"), GREATEREQUAL(
-					">="), LESSEQUAL("<="), OR("or"), AND("and"), XOR("xor"), IMPLIES("=>"), ARROW("->");
+	PLUS("+"), MINUS("-"), MULTIPLY("*"), DIVIDE("/"), INT_DIVIDE("div"), MODULUS("mod"), EQUAL("="), NOTEQUAL("<>"),
+	GREATER(">"), LESS("<"), GREATEREQUAL(">="), LESSEQUAL("<="), OR("or"), AND("and"), XOR("xor"), IMPLIES("=>"),
+	ARROW("->");
 
 	private String str;
 
