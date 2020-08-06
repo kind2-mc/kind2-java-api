@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2013, Rockwell Collins
+ * Copyright (c) 2020, Board of Trustees of the University of Iowa
  * All rights reserved.
  *
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
@@ -28,6 +29,7 @@ import org.xml.sax.InputSource;
 
 import edu.uiowa.kind2.Kind2Exception;
 import edu.uiowa.kind2.api.results.Result;
+import edu.uiowa.kind2.api.LogLevel;
 import edu.uiowa.kind2.api.results.PropertyResult;
 import edu.uiowa.kind2.lustre.NamedType;
 import edu.uiowa.kind2.lustre.Type;
@@ -45,6 +47,7 @@ import edu.uiowa.kind2.util.Util;
 
 public class XmlParseThread extends Thread {
 	private final InputStream xmlStream;
+	private final HashMap<LogLevel, List<String>> logs;
 	private final Result result;
 	private final DocumentBuilderFactory factory;
 	private volatile Throwable throwable;
@@ -53,6 +56,7 @@ public class XmlParseThread extends Thread {
 	public XmlParseThread(InputStream xmlStream, Result result) {
 		super("Xml Parse");
 		this.xmlStream = xmlStream;
+		this.logs = new HashMap<>();
 		this.result = result;
 		this.factory = DocumentBuilderFactory.newInstance();
 	}
@@ -60,15 +64,14 @@ public class XmlParseThread extends Thread {
 	@Override
 	public void run() {
 		/*
-		 * XML parsers buffer their input which conflicts with the way we are
-		 * streaming data from the XML file as it is written. This results in
-		 * data in the XML not being acted upon until more content is written to
-		 * the XML file which causes the buffer to fill. Instead, we read the
-		 * XML file ourselves and give relevant pieces of it to the parser as
-		 * they are ready.
+		 * XML parsers buffer their input which conflicts with the way we are streaming
+		 * data from the XML file as it is written. This results in data in the XML not
+		 * being acted upon until more content is written to the XML file which causes
+		 * the buffer to fill. Instead, we read the XML file ourselves and give relevant
+		 * pieces of it to the parser as they are ready.
 		 *
-		 * The downside is we assume the <Property ...> and </Property> tags are
-		 * on their own lines.
+		 * The downside is we assume the <Property ...> and </Property> tags are on
+		 * their own lines.
 		 */
 
 		try (LineInputStream lines = new LineInputStream(xmlStream)) {
@@ -82,6 +85,8 @@ public class XmlParseThread extends Thread {
 				boolean endProgress = line.contains("</Progress>");
 				boolean beginAnalysis = line.contains("<AnalysisStart");
 				boolean endAnalysis = line.contains("<AnalysisStop");
+				boolean beginLog = line.contains("<Log");
+				boolean endLog = line.contains("</Log>");
 
 				if (beginProgress && endProgress) {
 					// Kind 2 progress format uses a single line
@@ -101,6 +106,8 @@ public class XmlParseThread extends Thread {
 					analysis = parseAnalysisXml(line);
 				} else if (endAnalysis) {
 					analysis = null;
+				} else if (beginLog && endLog) {
+					parseLogXml(line);
 				} else if (buffer != null) {
 					buffer.append(line);
 				}
@@ -115,6 +122,14 @@ public class XmlParseThread extends Thread {
 		String analysis = progressElement.getAttribute("top");
 		analysisToProps.putIfAbsent(analysis, new ArrayList<>());
 		return analysis;
+	}
+
+	private void parseLogXml(String line) {
+		Element logElement = parseXml(line);
+		String logClass = logElement.getAttribute("class").toUpperCase();
+		String logText = logElement.getTextContent();
+		logs.putIfAbsent(LogLevel.valueOf(logClass), new ArrayList<>());
+		logs.get(LogLevel.valueOf(logClass)).add(logText);
 	}
 
 	private Element parseXml(String xml) {
@@ -194,20 +209,21 @@ public class XmlParseThread extends Thread {
 		}
 
 		switch (answer) {
-		case "valid":
-			return new ValidProperty(name, source, k, runtime, invariants, ivc, invarantSets, ivcSets, mivcTimedOut);
+			case "valid":
+				return new ValidProperty(name, source, k, runtime, invariants, ivc, invarantSets, ivcSets,
+						mivcTimedOut);
 
-		case "falsifiable":
-			return new InvalidProperty(name, source, cex, conflicts, runtime);
+			case "falsifiable":
+				return new InvalidProperty(name, source, cex, conflicts, runtime);
 
-		case "unknown":
-			return new UnknownProperty(name, trueFor, cex, runtime);
+			case "unknown":
+				return new UnknownProperty(name, trueFor, cex, runtime);
 
-		case "inconsistent":
-			return new InconsistentProperty(name, source, k, runtime);
+			case "inconsistent":
+				return new InconsistentProperty(name, source, k, runtime);
 
-		default:
-			throw new Kind2Exception("Unknown property answer in XML file: " + answer);
+			default:
+				throw new Kind2Exception("Unknown property answer in XML file: " + answer);
 		}
 	}
 
@@ -368,6 +384,10 @@ public class XmlParseThread extends Thread {
 			elements.add((Element) nodeList.item(i));
 		}
 		return elements;
+	}
+
+	public List<String> getLogs(LogLevel logLevel) {
+		return logs.get(logLevel);
 	}
 
 	public Throwable getThrowable() {

@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.uiowa.kind2.Kind2Exception;
 import edu.uiowa.kind2.api.results.Result;
@@ -26,6 +28,7 @@ import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 public class Kind2Api extends KindApi {
 	public static final String KIND2 = "kind2";
 	private static final long POLL_INTERVAL = 100;
+	private XmlParseThread parseThread;
 
 	// module smt
 	private SolverOption smtSolver;
@@ -39,16 +42,32 @@ public class Kind2Api extends KindApi {
 	private String yices2Bin;
 	private Boolean smtTrace;
 
+	// module ind
+	private Boolean indPrintCex;
+
+	// module contracts
+	private Boolean compositional;
+	private Boolean checkModes;
+	private Boolean checkImplem;
+	private Boolean refinement;
+
 	// general
 	// private String lusMain;
 	private String outputDir;
-	private ArrayList<String> includeDirs;
+	private List<String> includeDirs;
 	private String realPrecision;
 	private Boolean logInvs;
 	// private Boolean printInvs;
 	private Float timeout;
+	private Boolean onlyParse;
+	private Set<Module> enabledSet;
+	private Set<Module> disabledSet;
+	private Boolean modular;
+	private Boolean sliceNodes;
+	private Boolean checkSubproperties;
 
 	public Kind2Api() {
+		parseThread = null;
 		smtSolver = null;
 		smtLogic = null;
 		checkSatAssume = null;
@@ -59,12 +78,23 @@ public class Kind2Api extends KindApi {
 		yicesBin = null;
 		yices2Bin = null;
 		smtTrace = null;
+		indPrintCex = null;
+		compositional = null;
+		checkModes = null;
+		checkImplem = null;
+		refinement = null;
 		outputDir = null;
 		includeDirs = new ArrayList<>();
 		realPrecision = null;
 		logInvs = null;
-		// Boolean = null;
+		// printInvs = null;
 		timeout = null;
+		onlyParse = null;
+		enabledSet = new HashSet<>();
+		disabledSet = new HashSet<>();
+		modular = null;
+		sliceNodes = null;
+		checkSubproperties = null;
 	}
 
 	/**
@@ -107,7 +137,6 @@ public class Kind2Api extends KindApi {
 		ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
 		debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
 		Process process = null;
-		XmlParseThread parseThread = null;
 		int code = 0;
 
 		try {
@@ -136,7 +165,12 @@ public class Kind2Api extends KindApi {
 			monitor.done();
 
 			if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
-				throw new Kind2Exception("Abnormal termination, exit code " + code);
+				StringBuilder sb = new StringBuilder();
+				for (String log : getLogs(LogLevel.FATAL)) {
+					sb.append(log).append('\n');
+				}
+				sb.deleteCharAt(sb.length() - 1);
+				throw new Kind2Exception("Abnormal termination, exit code " + code + ", fatal: " + sb.toString());
 			}
 		}
 
@@ -200,6 +234,26 @@ public class Kind2Api extends KindApi {
 			args.add("--smt_trace");
 			args.add(smtTrace.toString());
 		}
+		if (indPrintCex != null) {
+			args.add("--ind_print_cex");
+			args.add(indPrintCex.toString());
+		}
+		if (compositional != null) {
+			args.add("--compositional");
+			args.add(checkSubproperties.toString());
+		}
+		if (checkModes != null) {
+			args.add("--check_modes");
+			args.add(checkModes.toString());
+		}
+		if (checkImplem != null) {
+			args.add("--check_implem");
+			args.add(checkImplem.toString());
+		}
+		if (refinement != null) {
+			args.add("--refinement");
+			args.add(refinement.toString());
+		}
 		if (outputDir != null) {
 			args.add("--output_dir");
 			args.add(outputDir);
@@ -221,6 +275,34 @@ public class Kind2Api extends KindApi {
 		if (timeout != null) {
 			args.add("--timeout");
 			args.add(timeout.toString());
+		}
+		if (onlyParse != null) {
+			args.add("--only_parse");
+			args.add(onlyParse.toString());
+		}
+		if (!enabledSet.isEmpty()) {
+			for (Module module : enabledSet) {
+				args.add("--enable");
+				args.add(module.toString());
+			}
+		}
+		if (!disabledSet.isEmpty()) {
+			for (Module module : disabledSet) {
+				args.add("--disable");
+				args.add(module.toString());
+			}
+		}
+		if (modular != null) {
+			args.add("--modular");
+			args.add(modular.toString());
+		}
+		if (sliceNodes != null) {
+			args.add("--slice_nodes");
+			args.add(sliceNodes.toString());
+		}
+		if (checkSubproperties != null) {
+			args.add("--check_subproperties");
+			args.add(checkSubproperties.toString());
 		}
 		return args;
 	}
@@ -267,6 +349,30 @@ public class Kind2Api extends KindApi {
 		this.z3Bin = z3Bin;
 	}
 
+	public void setSmtTrace(boolean smtTrace) {
+		this.smtTrace = smtTrace;
+	}
+
+	public void setIndPrintCex(boolean indPrintCex) {
+		this.indPrintCex = indPrintCex;
+	}
+
+	public void setCompositional(boolean compositional) {
+		this.compositional = compositional;
+	}
+
+	public void setCheckModes(boolean checkModes) {
+		this.checkModes = checkModes;
+	}
+
+	public void setCheckImplem(boolean checkImplem) {
+		this.checkImplem = checkImplem;
+	}
+
+	public void setRefinement(boolean refinement) {
+		this.refinement = refinement;
+	}
+
 	public void outputDir(String outputDir) {
 		this.outputDir = outputDir;
 	}
@@ -299,11 +405,40 @@ public class Kind2Api extends KindApi {
 		this.timeout = timeout;
 	}
 
+	public void setOnlyParse(boolean onlyParse) {
+		this.onlyParse = onlyParse;
+	}
+
+	public void enable(Module module) {
+		this.enabledSet.add(module);
+	}
+
+	public void disable(Module module) {
+		this.disabledSet.add(module);
+	}
+
+	public void setModular(boolean modular) {
+		this.modular = modular;
+	}
+
+	public void setSliceNodes(boolean sliceNodes) {
+		this.sliceNodes = sliceNodes;
+	}
+
+	public void setCheckSubproperties(boolean checkSubproperties) {
+		this.checkSubproperties = checkSubproperties;
+	}
+
 	protected void sleep(long interval) {
 		try {
 			Thread.sleep(interval);
 		} catch (InterruptedException e) {
 		}
+	}
+
+	public List<String> getLogs(LogLevel logLevel)
+	{
+		return parseThread.getLogs(logLevel);
 	}
 
 	@Override
