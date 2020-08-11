@@ -308,94 +308,230 @@ public class Kind2Api extends KindApi {
 	}
 
 	/**
-	 * Set the solver to use (Boolector, CVC4, Yices, Yices2, Z3)
+	 * Choose an SMT solver
+	 * <p>
+	 * Default: detect
+	 *
+	 * @param smtSolver the SMT solver to use
 	 */
 	public void setSmtSolver(SolverOption smtSolver) {
 		this.smtSolver = smtSolver;
 	}
 
 	/**
-	 * Set the SMT logic to use (ALL, QF_UF, LIA, ...)
+	 * Select logic for SMT solvers (none, detect, ALL, QF_UF, LIA, ...)
+	 * <p>
+	 * Default: detect
+	 *
+	 * @param smtLogic the logic to use
 	 */
 	public void setSmtLogic(String smtLogic) {
 		this.smtLogic = smtLogic;
 	}
 
+	/**
+	 * Use check-sat-assuming, or simulate with push/pop when false
+	 * <p>
+	 * Default: true
+	 *
+	 * @param checkSatAssume whether or not to use check-sat-assuming
+	 */
 	public void setCheckSatAssume(boolean checkSatAssume) {
 		this.checkSatAssume = checkSatAssume;
 	}
 
+	/**
+	 * Send short variable names to SMT solver, send full names if false
+	 * <p>
+	 * Default: true
+	 *
+	 * @param smtShortNames whether or not to send short variable names
+	 */
 	public void setSmtShortNames(boolean smtShortNames) {
 		this.smtShortNames = smtShortNames;
 	}
 
+	/**
+	 * Executable of Boolector solver
+	 * <p>
+	 * Default: "boolector"
+	 *
+	 * @param boolectorBin path to Boolector executable
+	 */
 	public void setBoolectorBin(String boolectorBin) {
 		this.boolectorBin = boolectorBin;
 	}
 
+	/**
+	 * Executable of CVC4 solver
+	 * <p>
+	 * Default: "cvc4"
+	 *
+	 * @param cvc4Bin path to CVC4 executable
+	 */
 	public void setCvc4Bin(String cvc4Bin) {
 		this.cvc4Bin = cvc4Bin;
 	}
 
+	/**
+	 * Executable of Yices solver
+	 * <p>
+	 * Default: "yices"
+	 *
+	 * @param yicesBin path to Yices executable
+	 */
 	public void setYicesBin(String yicesBin) {
 		this.yicesBin = yicesBin;
 	}
 
+	/**
+	 * Executable of Yices2 solver
+	 * <p>
+	 * Default: "yices-smt2"
+	 *
+	 * @param yices2Bin path to Yices2 executable
+	 */
 	public void setYices2Bin(String yices2Bin) {
 		this.yices2Bin = yices2Bin;
 	}
 
+	/**
+	 * Executable of Z3 solver
+	 * <p>
+	 * Default: "z3"
+	 *
+	 * @param z3Bin path to Z3 executable
+	 */
 	public void setZ3Bin(String z3Bin) {
 		this.z3Bin = z3Bin;
 	}
 
+	/**
+	 * Write all SMT commands to files
+	 * <p>
+	 * Default: false
+	 *
+	 * @param smtTrace whether or not to write all SMT commands to files
+	 */
 	public void setSmtTrace(boolean smtTrace) {
 		this.smtTrace = smtTrace;
 	}
 
+	/**
+	 * Print counterexamples to induction
+	 * <p>
+	 * Default: false
+	 *
+	 * @param indPrintCex whether or not to print counterexamples to induction
+	 */
 	public void setIndPrintCex(boolean indPrintCex) {
 		this.indPrintCex = indPrintCex;
 	}
 
+	/**
+	 * Abstract subnodes with a contract
+	 * <p>
+	 * Default: false
+	 *
+	 * @param compositional whether or not to abstract subnodes with a contract
+	 */
 	public void setCompositional(boolean compositional) {
 		this.compositional = compositional;
 	}
 
+	/**
+	 * Checks the modes of contracts for exhaustiveness
+	 * <p>
+	 * Default: true
+	 *
+	 * @param checkModes whether or not to check if the modes are exhaustive
+	 */
 	public void setCheckModes(boolean checkModes) {
 		this.checkModes = checkModes;
 	}
 
+	/**
+	 * Checks the implementation of nodes
+	 * <p>
+	 * Default: true
+	 *
+	 * @param checkImplem whether or not to check the implementation of nodes
+	 */
 	public void setCheckImplem(boolean checkImplem) {
 		this.checkImplem = checkImplem;
 	}
 
+	/**
+	 * (De)activates refinement in compositional reasoning
+	 * <p>
+	 * Default: true
+	 *
+	 * @param refinement whether or not to activate refinement in compositional
+	 *                   reasoning
+	 */
 	public void setRefinement(boolean refinement) {
 		this.refinement = refinement;
 	}
 
+	/**
+	 * Output directory for the files generated: SMT traces, compilation, testgen,
+	 * certification...
+	 * <p>
+	 * Default: {@code tmp/<filename>.out}
+	 *
+	 * @param outputDir path to output directory for the files generated
+	 */
 	public void outputDir(String outputDir) {
 		this.outputDir = outputDir;
 	}
 
+	/**
+	 * Include a directory in the search path. The directory will be searched after
+	 * the current include directory, and any other directory added before it when
+	 * an include directive is found
+	 *
+	 * @param dir the directory to include
+	 */
 	public void includeDir(String dir) {
 		this.includeDirs.add(dir);
 	}
 
-	public void includeDirs(ArrayList<String> dirs) {
+	/**
+	 * Include directories in the search path. The directories will be searched
+	 * following their order in the list
+	 *
+	 * @param dirs the directories to include
+	 */
+	public void includeDirs(List<String> dirs) {
 		this.includeDirs.addAll(dirs);
 	}
 
+	/**
+	 * Adjust precision of real values in model output In floating-point format
+	 * {@code f<nn>} means a relative error less than {@code 2^-nn}
+	 * <p>
+	 * Default: rational
+	 *
+	 * @param realPrecision can be "rational" or "float"
+	 */
 	public void setRealPrecision(String realPrecision) {
 		this.realPrecision = realPrecision;
 	}
 
-	public void logInvs() {
-		this.logInvs = true;
+	/**
+	 * Logs strengthening invariants as contracts after minimization.
+	 * <p>
+	 * Default: false
+	 *
+	 * @param logInvs whether or not to log strengthening invariants
+	 */
+	public void setLogInvs(boolean logInvs) {
+		this.logInvs = logInvs;
 	}
 
 	/**
 	 * Set a maximum run time for entire execution
-	 * 
+	 *
 	 * @param timeout A positive timeout in seconds
 	 */
 	public void setTimeout(float timeout) {
@@ -405,26 +541,68 @@ public class Kind2Api extends KindApi {
 		this.timeout = timeout;
 	}
 
+	/**
+	 * Only parse the Lustre program. No analysis is performed
+	 * <p>
+	 * Default: false
+	 *
+	 * @param onlyParse whether or not to only parse the Lustre program
+	 */
 	public void setOnlyParse(boolean onlyParse) {
 		this.onlyParse = onlyParse;
 	}
 
+	/**
+	 * Enable Kind module, repeat option to enable several modules
+	 * <p>
+	 * Default: [BMC, IND, IND2, IC3, INVGEN, INVGENOS, INVGENINTOS, INVGENREALOS]
+	 *
+	 * @param module the module to enable
+	 */
 	public void enable(Module module) {
 		this.enabledSet.add(module);
 	}
 
+	/**
+	 * Disable Kind module, repeat option to disable several modules
+	 *
+	 * @param module the module to disable
+	 */
 	public void disable(Module module) {
 		this.disabledSet.add(module);
 	}
 
+	/**
+	 * Bottom-up analysis of each node
+	 * <p>
+	 * Default: false
+	 *
+	 * @param modular whether or not enable modular analysis
+	 */
 	public void setModular(boolean modular) {
 		this.modular = modular;
 	}
 
+	/**
+	 * Only equations that are relevant for checking the contract and properties of
+	 * a node are considered during the analysis
+	 * <p>
+	 * Default: true
+	 *
+	 * @param sliceNodes whether or not to consider only relative equations
+	 */
 	public void setSliceNodes(boolean sliceNodes) {
 		this.sliceNodes = sliceNodes;
 	}
 
+	/**
+	 * Check properties of subnodes that are relevant for the analysis of the top
+	 * node. Only available with monolithic analysis
+	 * <p>
+	 * Default: false
+	 *
+	 * @param checkSubproperties whether or not to check subproperties
+	 */
 	public void setCheckSubproperties(boolean checkSubproperties) {
 		this.checkSubproperties = checkSubproperties;
 	}
@@ -436,8 +614,7 @@ public class Kind2Api extends KindApi {
 		}
 	}
 
-	public List<String> getLogs(LogLevel logLevel)
-	{
+	public List<String> getLogs(LogLevel logLevel) {
 		return parseThread.getLogs(logLevel);
 	}
 
