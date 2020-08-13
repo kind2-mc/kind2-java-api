@@ -51,6 +51,21 @@ public class Kind2Api extends KindApi {
   private Boolean checkImplem;
   private Boolean refinement;
 
+  // module ivc
+  private Boolean ivc;
+  private HashSet<IVCCategory> ivcCategories;
+  private Boolean ivcAll;
+  private Boolean ivcApproximate;
+  private Boolean ivcSmallestFirst;
+  private Boolean ivcOnlyMainNode;
+  private Boolean ivcMustSet;
+  private Boolean printIVC;
+  private Boolean printIVCComplement;
+  private String minimizeProgram;
+  private String ivcOutputDir;
+  private Integer ivcPrecomputedMCS;
+  private Integer ivcUCTimeout;
+
   // general
   // private String lusMain;
   private String outputDir;
@@ -83,6 +98,19 @@ public class Kind2Api extends KindApi {
     checkModes = null;
     checkImplem = null;
     refinement = null;
+    ivc = null;
+    ivcCategories = new HashSet<>();
+    ivcAll = null;
+    ivcApproximate = null;
+    ivcSmallestFirst = null;
+    ivcOnlyMainNode = null;
+    ivcMustSet = null;
+    printIVC = null;
+    printIVCComplement = null;
+    minimizeProgram = null;
+    ivcOutputDir = null;
+    ivcPrecomputedMCS = null;
+    ivcUCTimeout = null;
     outputDir = null;
     includeDirs = new ArrayList<>();
     realPrecision = null;
@@ -254,6 +282,60 @@ public class Kind2Api extends KindApi {
     if (refinement != null) {
       args.add("--refinement");
       args.add(refinement.toString());
+    }
+    if (ivc != null) {
+      args.add("--ivc");
+      args.add(ivc.toString());
+    }
+    if (!ivcCategories.isEmpty()) {
+      for (IVCCategory category : ivcCategories) {
+        args.add("--ivc_category");
+        args.add(category.toString());
+      }
+    }
+    if (ivcAll != null) {
+      args.add("--ivc_all");
+      args.add(ivcAll.toString());
+    }
+    if (ivcApproximate != null) {
+      args.add("--ivc_approximate");
+      args.add(ivcApproximate.toString());
+    }
+    if (ivcSmallestFirst != null) {
+      args.add("--ivc_smallest_first");
+      args.add(ivcSmallestFirst.toString());
+    }
+    if (ivcOnlyMainNode != null) {
+      args.add("--ivc_only_main_node");
+      args.add(ivcOnlyMainNode.toString());
+    }
+    if (ivcMustSet != null) {
+      args.add("--ivc_must_set");
+      args.add(ivcMustSet.toString());
+    }
+    if (printIVC != null) {
+      args.add("--print_ivc");
+      args.add(printIVC.toString());
+    }
+    if (printIVCComplement != null) {
+      args.add("--print_ivc_complement");
+      args.add(printIVCComplement.toString());
+    }
+    if (minimizeProgram != null) {
+      args.add("--minimize_program");
+      args.add(minimizeProgram.toString());
+    }
+    if (ivcOutputDir != null) {
+      args.add("--ivc_output_dir");
+      args.add(ivcOutputDir.toString());
+    }
+    if (ivcPrecomputedMCS != null) {
+      args.add("--ivc_precomputed_mcs");
+      args.add(ivcPrecomputedMCS.toString());
+    }
+    if (ivcUCTimeout != null) {
+      args.add("--ivc_uc_timeout");
+      args.add(ivcUCTimeout.toString());
     }
     if (outputDir != null) {
       args.add("--output_dir");
@@ -471,6 +553,157 @@ public class Kind2Api extends KindApi {
    */
   public void setRefinement(boolean refinement) {
     this.refinement = refinement;
+  }
+
+  /**
+   * Enable inductive validity core generation
+   * <p>
+   * Default: false
+   *
+   * @param ivc whether or not to enable IVC generation
+   */
+  public void setIVC(boolean ivc) {
+    this.ivc = ivc;
+  }
+
+  /**
+   * Minimize only a specific category of elements, repeat option to minimize multiple categories
+   * <p>
+   * Default: minimize all categories of elements
+   *
+   * @param ivcCategory IVC category to minimize
+   */
+  public void setIVCCategory(IVCCategory ivcCategory) {
+    this.ivcCategories.add(ivcCategory);
+  }
+
+  /**
+   * Compute all the Minimal Inductive Validity Cores.
+   * <p>
+   * Default: false
+   *
+   * @param ivcAll whether or not to compute all the MIVC
+   */
+  public void setIVCAll(boolean ivcAll) {
+    this.ivcAll = ivcAll;
+  }
+
+  /**
+   * Compute an approximation (superset) of a MIVC. Ignored if --ivc_all is true.
+   * <p>
+   * Default: true
+   *
+   * @param ivcApproximate whether or not to compute an approximation of a MIVC
+   */
+  public void setIVCApproximate(boolean ivcApproximate) {
+    this.ivcApproximate = ivcApproximate;
+  }
+
+  /**
+   * Compute a smallest IVC first. If --ivc_all is false, the computed IVC will be a smallest one.
+   * <p>
+   * Default: false
+   *
+   * @param ivcSmallestFirst whether or not to compute a smallest IVC first
+   */
+  public void setIVCSmallestFirst(boolean ivcSmallestFirst) {
+    this.ivcSmallestFirst = ivcSmallestFirst;
+  }
+
+  /**
+   * Only elements of the main node are considered in the computation
+   * <p>
+   * Default: false
+   *
+   * @param ivcOnlyMainNode whether or not to consider only elements of the main node
+   */
+  public void setIVCOnlyMainNode(boolean ivcOnlyMainNode) {
+    this.ivcOnlyMainNode = ivcOnlyMainNode;
+  }
+
+  /**
+   * Compute the MUST set in addition to the IVCs
+   * <p>
+   * Default: false
+   *
+   * @param ivcMustSet whether or not to compute the MUST set
+   */
+  public void setIVCMustSet(boolean ivcMustSet) {
+    this.ivcMustSet = ivcMustSet;
+  }
+
+  /**
+   * Print the inductive validity core computed
+   * <p>
+   * Default: true
+   *
+   * @param printIVC whether or not to print the inductive validity core
+   */
+  public void setPrintIVC(boolean printIVC) {
+    this.printIVC = printIVC;
+  }
+
+  /**
+   * Print the complement of the inductive validity core computed (= the elements that were not
+   * necessary to prove the properties)
+   * <p>
+   * Default: false
+   *
+   * @param printIVCComplement whether or not to print the complement of the IVC computed
+   */
+  public void setPrintIVCComplement(boolean printIVCComplement) {
+    this.printIVCComplement = printIVCComplement;
+  }
+
+  /**
+   * Minimize the source Lustre program according to the inductive validity core(s) computed
+   * <ul>
+   * <li>"no" to disable this feature</li>
+   * <li>"valid_lustre" to replace useless expressions by a valid node call</li>
+   * <li>"concise" to replace useless expressions by a '_'</li>
+   * </ul>
+   * <p>
+   * Default: "no"
+   *
+   * @param minimizeProgram whether or not to minimize program according to IVC computed
+   */
+  public void setMinimizeProgram(String minimizeProgram) {
+    this.minimizeProgram = minimizeProgram;
+  }
+
+  /**
+   * Output directory for the minimized programs
+   * <p>
+   * Default: <INPUT_FILENAME>
+   *
+   * @param ivcOutputDir output directory for the minimized programs
+   */
+  public void setIVCOutputDir(String ivcOutputDir) {
+    this.ivcOutputDir = ivcOutputDir;
+  }
+
+  /**
+   * When computing all MIVCs, set a cardinality upper bound for the precomputed MCSs (helps prune
+   * space of candidates).
+   * <p>
+   * Default: 0
+   *
+   * @param ivcPrecomputedMCS cardinality upper bound for the computed MCSs
+   */
+  public void setIVCPrecomputedMCS(int ivcPrecomputedMCS) {
+    this.ivcPrecomputedMCS = ivcPrecomputedMCS;
+  }
+
+  /**
+   * Set a timeout for each unsat core check sent to the solver. This setting is ignored if a solver
+   * different than Z3 is used. Set to 0 to disable timeout.
+   * <p>
+   * Default: 0
+   *
+   * @param ivcUCTimeout timeout for each unsat core check sent to the solver
+   */
+  public void setIVCUCTimeout(int ivcUCTimeout) {
+    this.ivcUCTimeout = ivcUCTimeout;
   }
 
   /**
