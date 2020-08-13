@@ -1,37 +1,17 @@
-/*
-allprojects {
-    apply plugin: 'java'
-}
-
-task dist(type: Zip) {
-    dependsOn 'jkind-common:jar'
-    from ('jkind-common/build/libs') {
-         include 'jkind-common.jar'
-         into 'jkind'
-    }
-    baseName = 'jkind'
-    version = 0.1
-}
-
-artifacts {
-    archives dist
-}
-*/
-
 plugins {
-    id 'java-library'
+  id 'java-library'
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+  implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }

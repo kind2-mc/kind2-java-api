@@ -8,7 +8,7 @@
 package edu.uiowa.kind2.api;
 
 public interface IProgressMonitor {
-	public boolean isCanceled();
+  public boolean isCanceled();
 
-	public void done();
+  public void done();
 }

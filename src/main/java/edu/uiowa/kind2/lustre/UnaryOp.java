@@ -8,25 +8,25 @@
 package edu.uiowa.kind2.lustre;
 
 public enum UnaryOp {
-	NEGATIVE("-"), NOT("not"), PRE("pre");
+  NEGATIVE("-"), NOT("not"), PRE("pre");
 
-	private String str;
+  private String str;
 
-	private UnaryOp(String str) {
-		this.str = str;
-	}
+  private UnaryOp(String str) {
+    this.str = str;
+  }
 
-	@Override
-	public String toString() {
-		return str;
-	}
+  @Override
+  public String toString() {
+    return str;
+  }
 
-	public static UnaryOp fromString(String string) {
-		for (UnaryOp op : UnaryOp.values()) {
-			if (op.toString().equals(string)) {
-				return op;
-			}
-		}
-		return null;
-	}
+  public static UnaryOp fromString(String string) {
+    for (UnaryOp op : UnaryOp.values()) {
+      if (op.toString().equals(string)) {
+        return op;
+      }
+    }
+    return null;
+  }
 }
