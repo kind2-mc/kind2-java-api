@@ -30,7 +30,6 @@ import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 public class Kind2Api2 {
   public static final String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  public Kind2Result gresult;
 
   // module smt
   private SolverOption smtSolver;
@@ -179,7 +178,7 @@ public class Kind2Api2 {
     try {
       process = builder.start();
       String json = new String(process.getInputStream().readAllBytes());
-      gresult = Kind2Result.analyzeJsonResult(json);
+      result.initialize(json);
     } finally {
       if (process != null) {
         process.destroy();

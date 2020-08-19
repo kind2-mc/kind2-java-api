@@ -66,27 +66,21 @@ public class Kind2Result
   /**
    * The options used by kind2 process.
    */
-  private final Kind2Options options;
+  private Kind2Options options;
   /**
    * Kind2 json output.
    */
-  private final String json;
+  private String json;
   /**
    * a list of kind2 logs.
    */
   private final List<Kind2Log> kind2Logs;
 
   /**
-   * A private constructor that is used internally by {@link Kind2Result#analyzeJsonResult(String)}.
-   * Use the static method {@link Kind2Result#analyzeJsonResult(String) to get a an instance of this class}.
-   *
-   * @param options   an object of {@link Kind2Options} which describes the options used by kind2 process.
-   * @param jsonArray an array that captures all kind2 json output
+   * a default constructor
    */
-  private Kind2Result(Kind2Options options, JsonArray jsonArray)
+  public Kind2Result()
   {
-    this.options = options;
-    json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonArray);
     kind2Logs = new ArrayList<>();
   }
 
@@ -178,13 +172,22 @@ public class Kind2Result
    */
   public static Kind2Result analyzeJsonResult(String json)
   {
-    Kind2Result kind2Result = null;
-    JsonArray resultArray = JsonParser.parseString(json).getAsJsonArray();
+    Kind2Result kind2Result = new Kind2Result();
+
+    kind2Result.initialize(json);
+
+    return kind2Result;
+  }
+
+  public void initialize(String json)
+  {
+    JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
+    this.json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonArray);
     Kind2Analysis kind2Analysis = null;
     // for post analysis
     Kind2Analysis previousAnalysis = null;
 
-    for (JsonElement jsonElement : resultArray)
+    for (JsonElement jsonElement : jsonArray)
     {
       String objectType = jsonElement.getAsJsonObject().get(Kind2Labels.objectType).getAsString();
       Kind2Object kind2Object = Kind2Object.getKind2Object(objectType);
@@ -192,13 +195,14 @@ public class Kind2Result
       if (kind2Object == Kind2Object.kind2Options)
       {
         Kind2Options options = new Kind2Options(jsonElement);
-        kind2Result = new Kind2Result(options, resultArray);
+
+        this.options = options;
       }
 
-      if (kind2Object == Kind2Object.log && kind2Result != null)
+      if (kind2Object == Kind2Object.log)
       {
-        Kind2Log log = new Kind2Log(kind2Result, jsonElement);
-        kind2Result.kind2Logs.add(log);
+        Kind2Log log = new Kind2Log(this, jsonElement);
+        this.kind2Logs.add(log);
       }
 
       if (kind2Object == Kind2Object.analysisStart)
@@ -212,7 +216,7 @@ public class Kind2Result
         if (kind2Analysis != null)
         {
           // 	finish the analysis
-          kind2Result.put(kind2Analysis.getNodeName(), kind2Analysis);
+          this.put(kind2Analysis.getNodeName(), kind2Analysis);
           previousAnalysis = kind2Analysis;
           kind2Analysis = null;
         }
@@ -277,11 +281,9 @@ public class Kind2Result
     }
 
     // build the node tree
-    kind2Result.buildTree();
+    this.buildTree();
     // analyze the result
-    kind2Result.analyze();
-
-    return kind2Result;
+    this.analyze();
   }
 
   /**

@@ -44,11 +44,8 @@ public class Main {
 
     System.out.println(program.build().toString());
 
-    Kind2Api api = new Kind2Api();
-    Result result = new Result("test");
-
-    // Kind2Api2 api = new Kind2Api2();
-    // Kind2Result result = null;
+    Kind2Api2 api = new Kind2Api2();
+    Kind2Result result = new Kind2Result();
 
     api.execute(program.build(), result, new IProgressMonitor() {
       @Override
@@ -61,8 +58,7 @@ public class Main {
       }
     });
 
-    System.out.println(result.getPropertyResults());
-    //System.out.println(api.gresult.getResultMap());
+    System.out.println(result);
 
   }
 
