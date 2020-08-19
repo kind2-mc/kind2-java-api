@@ -8,6 +8,7 @@
 
 package edu.uiowa.kind2.api;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,16 +20,17 @@ import java.util.Set;
 import edu.uiowa.kind2.Kind2Exception;
 import edu.uiowa.kind2.api.results.Result;
 import edu.uiowa.kind2.api.xml.XmlParseThread;
+import edu.uiowa.kind2.kind2results.Kind2Result;
 import edu.uiowa.kind2.lustre.Program;
 import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 
 /**
  * The primary interface to Kind2.
  */
-public class Kind2Api extends KindApi {
+public class Kind2Api2 {
   public static final String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private XmlParseThread parseThread;
+  public Kind2Result gresult;
 
   // module smt
   private SolverOption smtSolver;
@@ -51,21 +53,6 @@ public class Kind2Api extends KindApi {
   private Boolean checkImplem;
   private Boolean refinement;
 
-  // module ivc
-  private Boolean ivc;
-  private HashSet<IVCCategory> ivcCategories;
-  private Boolean ivcAll;
-  private Boolean ivcApproximate;
-  private Boolean ivcSmallestFirst;
-  private Boolean ivcOnlyMainNode;
-  private Boolean ivcMustSet;
-  private Boolean printIVC;
-  private Boolean printIVCComplement;
-  private String minimizeProgram;
-  private String ivcOutputDir;
-  private Integer ivcPrecomputedMCS;
-  private Integer ivcUCTimeout;
-
   // general
   // private String lusMain;
   private String outputDir;
@@ -81,8 +68,7 @@ public class Kind2Api extends KindApi {
   private Boolean sliceNodes;
   private Boolean checkSubproperties;
 
-  public Kind2Api() {
-    parseThread = null;
+  public Kind2Api2() {
     smtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
@@ -98,19 +84,6 @@ public class Kind2Api extends KindApi {
     checkModes = null;
     checkImplem = null;
     refinement = null;
-    ivc = null;
-    ivcCategories = new HashSet<>();
-    ivcAll = null;
-    ivcApproximate = null;
-    ivcSmallestFirst = null;
-    ivcOnlyMainNode = null;
-    ivcMustSet = null;
-    printIVC = null;
-    printIVCComplement = null;
-    minimizeProgram = null;
-    ivcOutputDir = null;
-    ivcPrecomputedMCS = null;
-    ivcUCTimeout = null;
     outputDir = null;
     includeDirs = new ArrayList<>();
     realPrecision = null;
@@ -125,6 +98,26 @@ public class Kind2Api extends KindApi {
     checkSubproperties = null;
   }
 
+  protected DebugLogger debug = new DebugLogger();
+
+  /**
+   * Put the KindApi into debug mode where it saves all output
+   */
+  public void setApiDebug() {
+    debug = new DebugLogger("-api-debug-");
+  }
+
+  /**
+   * Print string to debug log (assuming setApiDebug() has been called)
+   *
+   * @param text text to print to debug log
+   */
+  public void apiDebug(String text) {
+    if (debug != null) {
+      debug.println(text);
+    }
+  }
+
   /**
    * Run Kind on a Lustre program
    *
@@ -133,11 +126,28 @@ public class Kind2Api extends KindApi {
    * @param monitor Used to check for cancellation
    * @throws .Kind2Exception
    */
-  @Override
-  public void execute(Program program, Result result, IProgressMonitor monitor) {
+  public void execute(Program program, Kind2Result result, IProgressMonitor monitor) {
     PrettyPrintVisitor kind2Printer = new PrettyPrintVisitor();
     kind2Printer.visit(program);
     execute(kind2Printer.toString(), result, monitor);
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @param result  Place to store results as they come in
+   * @param monitor Used to check for cancellation
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Kind2Result result, IProgressMonitor monitor) {
+    File lustreFile = null;
+    try {
+      lustreFile = ApiUtil.writeLustreFile(program);
+      execute(lustreFile, result, monitor);
+    } finally {
+      debug.deleteIfUnneeded(lustreFile);
+    }
   }
 
   /**
@@ -146,21 +156,20 @@ public class Kind2Api extends KindApi {
    * @param lustreFile File containing Lustre program
    * @param result     Place to store results as they come in
    * @param monitor    Used to check for cancellation
-   * @throws .Kind2Exception
+   * @throws Kind2Exception
    */
-  @Override
-  public void execute(File lustreFile, Result result, IProgressMonitor monitor) {
+  public void execute(File lustreFile, Kind2Result result, IProgressMonitor monitor) {
     debug.println("Lustre file", lustreFile);
     try {
       callKind2(lustreFile, result, monitor);
     } catch (Kind2Exception e) {
       throw e;
     } catch (Throwable t) {
-      throw new Kind2Exception(result.getText(), t);
+      throw new Kind2Exception(result.getJson(), t);
     }
   }
 
-  private void callKind2(File lustreFile, Result result, IProgressMonitor monitor)
+  private void callKind2(File lustreFile, Kind2Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
@@ -168,43 +177,26 @@ public class Kind2Api extends KindApi {
     int code = 0;
 
     try {
-      result.start();
       process = builder.start();
-      parseThread = new XmlParseThread(process.getInputStream(), result);
-      parseThread.start();
-      while (!monitor.isCanceled() && parseThread.isAlive()) {
-        sleep(POLL_INTERVAL);
-      }
+      String json = new String(process.getInputStream().readAllBytes());
+      gresult = Kind2Result.analyzeJsonResult(json);
     } finally {
       if (process != null) {
         process.destroy();
         code = process.waitFor();
       }
 
-      if (parseThread != null) {
-        parseThread.join();
-      }
-
-      if (monitor.isCanceled()) {
-        result.cancel();
-      } else {
-        result.done();
-      }
       monitor.done();
 
       if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
         StringBuilder sb = new StringBuilder();
-        for (String log : getLogs(LogLevel.FATAL)) {
-          sb.append(log).append('\n');
-        }
+        //for (String log : getLogs(LogLevel.FATAL)) {
+        //  sb.append(log).append('\n');
+        //}
         sb.deleteCharAt(sb.length() - 1);
         throw new Kind2Exception(
             "Abnormal termination, exit code " + code + ", fatal: " + sb.toString());
       }
-    }
-
-    if (parseThread.getThrowable() != null) {
-      throw new Kind2Exception("Error parsing XML", parseThread.getThrowable());
     }
   }
 
@@ -221,7 +213,7 @@ public class Kind2Api extends KindApi {
 
   protected List<String> getArgs() {
     List<String> args = new ArrayList<>();
-    args.add("-xml");
+    args.add("-json");
     args.add("-v");
     if (smtSolver != null) {
       args.add("--smt_solver");
@@ -282,60 +274,6 @@ public class Kind2Api extends KindApi {
     if (refinement != null) {
       args.add("--refinement");
       args.add(refinement.toString());
-    }
-    if (ivc != null) {
-      args.add("--ivc");
-      args.add(ivc.toString());
-    }
-    if (!ivcCategories.isEmpty()) {
-      for (IVCCategory category : ivcCategories) {
-        args.add("--ivc_category");
-        args.add(category.toString());
-      }
-    }
-    if (ivcAll != null) {
-      args.add("--ivc_all");
-      args.add(ivcAll.toString());
-    }
-    if (ivcApproximate != null) {
-      args.add("--ivc_approximate");
-      args.add(ivcApproximate.toString());
-    }
-    if (ivcSmallestFirst != null) {
-      args.add("--ivc_smallest_first");
-      args.add(ivcSmallestFirst.toString());
-    }
-    if (ivcOnlyMainNode != null) {
-      args.add("--ivc_only_main_node");
-      args.add(ivcOnlyMainNode.toString());
-    }
-    if (ivcMustSet != null) {
-      args.add("--ivc_must_set");
-      args.add(ivcMustSet.toString());
-    }
-    if (printIVC != null) {
-      args.add("--print_ivc");
-      args.add(printIVC.toString());
-    }
-    if (printIVCComplement != null) {
-      args.add("--print_ivc_complement");
-      args.add(printIVCComplement.toString());
-    }
-    if (minimizeProgram != null) {
-      args.add("--minimize_program");
-      args.add(minimizeProgram.toString());
-    }
-    if (ivcOutputDir != null) {
-      args.add("--ivc_output_dir");
-      args.add(ivcOutputDir.toString());
-    }
-    if (ivcPrecomputedMCS != null) {
-      args.add("--ivc_precomputed_mcs");
-      args.add(ivcPrecomputedMCS.toString());
-    }
-    if (ivcUCTimeout != null) {
-      args.add("--ivc_uc_timeout");
-      args.add(ivcUCTimeout.toString());
     }
     if (outputDir != null) {
       args.add("--output_dir");
@@ -556,157 +494,6 @@ public class Kind2Api extends KindApi {
   }
 
   /**
-   * Enable inductive validity core generation
-   * <p>
-   * Default: false
-   *
-   * @param ivc whether or not to enable IVC generation
-   */
-  public void setIVC(boolean ivc) {
-    this.ivc = ivc;
-  }
-
-  /**
-   * Minimize only a specific category of elements, repeat option to minimize multiple categories
-   * <p>
-   * Default: minimize all categories of elements
-   *
-   * @param ivcCategory IVC category to minimize
-   */
-  public void setIVCCategory(IVCCategory ivcCategory) {
-    this.ivcCategories.add(ivcCategory);
-  }
-
-  /**
-   * Compute all the Minimal Inductive Validity Cores.
-   * <p>
-   * Default: false
-   *
-   * @param ivcAll whether or not to compute all the MIVC
-   */
-  public void setIVCAll(boolean ivcAll) {
-    this.ivcAll = ivcAll;
-  }
-
-  /**
-   * Compute an approximation (superset) of a MIVC. Ignored if --ivc_all is true.
-   * <p>
-   * Default: true
-   *
-   * @param ivcApproximate whether or not to compute an approximation of a MIVC
-   */
-  public void setIVCApproximate(boolean ivcApproximate) {
-    this.ivcApproximate = ivcApproximate;
-  }
-
-  /**
-   * Compute a smallest IVC first. If --ivc_all is false, the computed IVC will be a smallest one.
-   * <p>
-   * Default: false
-   *
-   * @param ivcSmallestFirst whether or not to compute a smallest IVC first
-   */
-  public void setIVCSmallestFirst(boolean ivcSmallestFirst) {
-    this.ivcSmallestFirst = ivcSmallestFirst;
-  }
-
-  /**
-   * Only elements of the main node are considered in the computation
-   * <p>
-   * Default: false
-   *
-   * @param ivcOnlyMainNode whether or not to consider only elements of the main node
-   */
-  public void setIVCOnlyMainNode(boolean ivcOnlyMainNode) {
-    this.ivcOnlyMainNode = ivcOnlyMainNode;
-  }
-
-  /**
-   * Compute the MUST set in addition to the IVCs
-   * <p>
-   * Default: false
-   *
-   * @param ivcMustSet whether or not to compute the MUST set
-   */
-  public void setIVCMustSet(boolean ivcMustSet) {
-    this.ivcMustSet = ivcMustSet;
-  }
-
-  /**
-   * Print the inductive validity core computed
-   * <p>
-   * Default: true
-   *
-   * @param printIVC whether or not to print the inductive validity core
-   */
-  public void setPrintIVC(boolean printIVC) {
-    this.printIVC = printIVC;
-  }
-
-  /**
-   * Print the complement of the inductive validity core computed (= the elements that were not
-   * necessary to prove the properties)
-   * <p>
-   * Default: false
-   *
-   * @param printIVCComplement whether or not to print the complement of the IVC computed
-   */
-  public void setPrintIVCComplement(boolean printIVCComplement) {
-    this.printIVCComplement = printIVCComplement;
-  }
-
-  /**
-   * Minimize the source Lustre program according to the inductive validity core(s) computed
-   * <ul>
-   * <li>"no" to disable this feature</li>
-   * <li>"valid_lustre" to replace useless expressions by a valid node call</li>
-   * <li>"concise" to replace useless expressions by a '_'</li>
-   * </ul>
-   * <p>
-   * Default: "no"
-   *
-   * @param minimizeProgram whether or not to minimize program according to IVC computed
-   */
-  public void setMinimizeProgram(String minimizeProgram) {
-    this.minimizeProgram = minimizeProgram;
-  }
-
-  /**
-   * Output directory for the minimized programs
-   * <p>
-   * Default: {@code <INPUT_FILENAME>}
-   *
-   * @param ivcOutputDir output directory for the minimized programs
-   */
-  public void setIVCOutputDir(String ivcOutputDir) {
-    this.ivcOutputDir = ivcOutputDir;
-  }
-
-  /**
-   * When computing all MIVCs, set a cardinality upper bound for the precomputed MCSs (helps prune
-   * space of candidates).
-   * <p>
-   * Default: 0
-   *
-   * @param ivcPrecomputedMCS cardinality upper bound for the computed MCSs
-   */
-  public void setIVCPrecomputedMCS(int ivcPrecomputedMCS) {
-    this.ivcPrecomputedMCS = ivcPrecomputedMCS;
-  }
-
-  /**
-   * Set a timeout for each unsat core check sent to the solver. This setting is ignored if a solver
-   * different than Z3 is used. Set to 0 to disable timeout.
-   * <p>
-   * Default: 0
-   *
-   * @param ivcUCTimeout timeout for each unsat core check sent to the solver
-   */
-  public void setIVCUCTimeout(int ivcUCTimeout) {
-    this.ivcUCTimeout = ivcUCTimeout;
-  }
-
-  /**
    * Output directory for the files generated: SMT traces, compilation, testgen, certification...
    * <p>
    * Default: {@code tmp/<filename>.out}
@@ -845,11 +632,16 @@ public class Kind2Api extends KindApi {
     }
   }
 
-  public List<String> getLogs(LogLevel logLevel) {
-    return parseThread.getLogs(logLevel);
-  }
+  // public List<String> getLogs(LogLevel logLevel) {
+  //   return parseThread.getLogs(logLevel);
+  // }
 
-  @Override
+  /**
+   * Check if the KindApi is available for running and throw exception if not
+   *
+   * @return Availability information when Kind is available
+   * @throws java.lang.Exception When Kind is not available
+   */
   public String checkAvailable() throws Exception {
     ProcessBuilder builder = new ProcessBuilder(KIND2, "--version");
     builder.redirectErrorStream(true);

@@ -1,0 +1,1924 @@
+[
+  {
+    "objectType": "kind2Options",
+    "enabled": [
+      "bmc",
+      "ind",
+      "ind2",
+      "ic3",
+      "invgents",
+      "invgenos",
+      "invgenintos",
+      "invgenintos"
+    ],
+    "timeout": 5.0,
+    "bmcMax": 0,
+    "compositional": true,
+    "modular": true
+  },
+  {
+    "objectType": "log",
+    "level": "info",
+    "source": "parse",
+    "value": "kind2 v1.1.0-486-g3e68273a"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Control",
+    "concrete": [],
+    "abstract": [],
+    "assumptions": []
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l101c12].guarantee[l94c2][1]",
+    "scope": "Control",
+    "line": 94,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.023
+    },
+    "answer": {
+      "source": "ic3",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Keypad",
+    "concrete": [],
+    "abstract": [],
+    "assumptions": [
+      [
+        "Control",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R3: Code is always non-negative[3]",
+    "scope": "Keypad",
+    "line": 44,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R4: Whenever there is a request a digit is pressed[4]",
+    "scope": "Keypad",
+    "line": 47,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R1: The component will not send an unlock requests before its third cycle[1]",
+    "scope": "Keypad",
+    "line": 38,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R2: Any two distinct unlock requests are separated by at least 2 clock cycles[2]",
+    "scope": "Keypad",
+    "line": 41,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.053
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "log",
+    "level": "note",
+    "source": "parse",
+    "value": "System Since has no property, skipping verification step."
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Lock",
+    "concrete": [
+      "Since"
+    ],
+    "abstract": [
+      "Keypad",
+      "Control"
+    ],
+    "assumptions": [
+      [
+        "Since",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "Keypad[l146c20].A1: Digit is always non-negative[1]",
+    "scope": "Keypad",
+    "line": 29,
+    "column": 2,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.043
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "LockSpec[l142c12].R2: Door locks remains locked as long as no one uses the keypad[2]",
+    "scope": "Lock",
+    "line": 134,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.043
+    },
+    "k": 6,
+    "answer": {
+      "source": "bmc",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "Lock",
+        "streams": [
+          {
+            "name": "Digit",
+            "type": "int",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Press",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                true
+              ],
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                true
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "MasterKey",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                false
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Unlocking",
+            "type": "bool",
+            "class": "output",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                4,
+                true
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Timer",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          },
+          {
+            "name": "Granted",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                true
+              ],
+              [
+                5,
+                true
+              ],
+              [
+                6,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Request",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                false
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Code",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          }
+        ],
+        "subnodes": [
+          {
+            "blockType": "node",
+            "name": "Since",
+            "streams": [
+              {
+                "name": "X",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Y",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    true
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "SinceXY",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Keypad",
+            "streams": [
+              {
+                "name": "Digit",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    2,
+                    0
+                  ],
+                  [
+                    3,
+                    0
+                  ],
+                  [
+                    4,
+                    0
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Press",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ],
+                  [
+                    1,
+                    true
+                  ],
+                  [
+                    2,
+                    true
+                  ],
+                  [
+                    3,
+                    true
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    2,
+                    0
+                  ],
+                  [
+                    3,
+                    0
+                  ],
+                  [
+                    4,
+                    0
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Control",
+            "streams": [
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    2,
+                    0
+                  ],
+                  [
+                    3,
+                    0
+                  ],
+                  [
+                    4,
+                    0
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "MasterKey",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "CurrentCode",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    2,
+                    0
+                  ],
+                  [
+                    3,
+                    0
+                  ],
+                  [
+                    4,
+                    0
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Granted",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    true
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    true
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "Control[l148c27].A1: Code is always non-negative[1]",
+    "scope": "Control",
+    "line": 91,
+    "column": 2,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.105
+    },
+    "answer": {
+      "source": "invgenos",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "LockSpec[l142c12].R1: The door will never be held open for more than 4 clock cycles at a time[1]",
+    "scope": "Lock",
+    "line": 129,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.137
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Lock",
+    "concrete": [
+      "Since",
+      "Keypad"
+    ],
+    "abstract": [
+      "Control"
+    ],
+    "assumptions": [
+      [
+        "Control",
+        1
+      ],
+      [
+        "Keypad",
+        1
+      ],
+      [
+        "Lock",
+        1
+      ],
+      [
+        "Since",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "LockSpec[l142c12].R2: Door locks remains locked as long as no one uses the keypad[2]",
+    "scope": "Lock",
+    "line": 134,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.053
+    },
+    "k": 6,
+    "answer": {
+      "source": "bmc",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "Lock",
+        "streams": [
+          {
+            "name": "Digit",
+            "type": "int",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                282
+              ],
+              [
+                1,
+                283
+              ],
+              [
+                2,
+                818
+              ],
+              [
+                3,
+                7721
+              ],
+              [
+                4,
+                281
+              ],
+              [
+                5,
+                8945
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Press",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                true
+              ],
+              [
+                1,
+                false
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                true
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "MasterKey",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                false
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Unlocking",
+            "type": "bool",
+            "class": "output",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                4,
+                true
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Timer",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          },
+          {
+            "name": "Granted",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                true
+              ],
+              [
+                6,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Request",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ],
+              [
+                1,
+                false
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                false
+              ],
+              [
+                4,
+                false
+              ],
+              [
+                5,
+                false
+              ],
+              [
+                6,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Code",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                282
+              ],
+              [
+                1,
+                282
+              ],
+              [
+                2,
+                282
+              ],
+              [
+                3,
+                282
+              ],
+              [
+                4,
+                282
+              ],
+              [
+                5,
+                11765
+              ],
+              [
+                6,
+                11765
+              ]
+            ]
+          }
+        ],
+        "subnodes": [
+          {
+            "blockType": "node",
+            "name": "Since",
+            "streams": [
+              {
+                "name": "X",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Y",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    true
+                  ],
+                  [
+                    2,
+                    true
+                  ],
+                  [
+                    3,
+                    true
+                  ],
+                  [
+                    4,
+                    true
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "SinceXY",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Keypad",
+            "streams": [
+              {
+                "name": "Digit",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    282
+                  ],
+                  [
+                    1,
+                    283
+                  ],
+                  [
+                    2,
+                    818
+                  ],
+                  [
+                    3,
+                    7721
+                  ],
+                  [
+                    4,
+                    281
+                  ],
+                  [
+                    5,
+                    8945
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Press",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    282
+                  ],
+                  [
+                    1,
+                    282
+                  ],
+                  [
+                    2,
+                    282
+                  ],
+                  [
+                    3,
+                    282
+                  ],
+                  [
+                    4,
+                    282
+                  ],
+                  [
+                    5,
+                    11765
+                  ],
+                  [
+                    6,
+                    11765
+                  ]
+                ]
+              },
+              {
+                "name": "PressedDigits",
+                "type": "int",
+                "class": "local",
+                "instantValues": [
+                  [
+                    0,
+                    1
+                  ],
+                  [
+                    1,
+                    1
+                  ],
+                  [
+                    2,
+                    1
+                  ],
+                  [
+                    3,
+                    1
+                  ],
+                  [
+                    4,
+                    1
+                  ],
+                  [
+                    5,
+                    2
+                  ],
+                  [
+                    6,
+                    2
+                  ]
+                ]
+              },
+              {
+                "name": "ElapsedTime",
+                "type": "int",
+                "class": "local",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    1
+                  ],
+                  [
+                    2,
+                    2
+                  ],
+                  [
+                    3,
+                    3
+                  ],
+                  [
+                    4,
+                    4
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    1
+                  ]
+                ]
+              },
+              {
+                "name": "ExpirationTime",
+                "type": "subrange [9, 9] of int",
+                "class": "local",
+                "instantValues": [
+                  [
+                    0,
+                    9
+                  ],
+                  [
+                    1,
+                    9
+                  ],
+                  [
+                    2,
+                    9
+                  ],
+                  [
+                    3,
+                    9
+                  ],
+                  [
+                    4,
+                    9
+                  ],
+                  [
+                    5,
+                    9
+                  ],
+                  [
+                    6,
+                    9
+                  ]
+                ]
+              },
+              {
+                "name": "IncompleteCode",
+                "type": "bool",
+                "class": "local",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    true
+                  ],
+                  [
+                    2,
+                    true
+                  ],
+                  [
+                    3,
+                    true
+                  ],
+                  [
+                    4,
+                    true
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Control",
+            "streams": [
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    282
+                  ],
+                  [
+                    1,
+                    282
+                  ],
+                  [
+                    2,
+                    282
+                  ],
+                  [
+                    3,
+                    282
+                  ],
+                  [
+                    4,
+                    282
+                  ],
+                  [
+                    5,
+                    11765
+                  ],
+                  [
+                    6,
+                    11765
+                  ]
+                ]
+              },
+              {
+                "name": "MasterKey",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    false
+                  ],
+                  [
+                    2,
+                    false
+                  ],
+                  [
+                    3,
+                    false
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    false
+                  ],
+                  [
+                    6,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "CurrentCode",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    2,
+                    0
+                  ],
+                  [
+                    3,
+                    0
+                  ],
+                  [
+                    4,
+                    0
+                  ],
+                  [
+                    5,
+                    0
+                  ],
+                  [
+                    6,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Granted",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ],
+                  [
+                    1,
+                    true
+                  ],
+                  [
+                    2,
+                    true
+                  ],
+                  [
+                    3,
+                    true
+                  ],
+                  [
+                    4,
+                    false
+                  ],
+                  [
+                    5,
+                    true
+                  ],
+                  [
+                    6,
+                    true
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Lock",
+    "concrete": [
+      "Since",
+      "Keypad",
+      "Control"
+    ],
+    "abstract": [],
+    "assumptions": [
+      [
+        "Control",
+        1
+      ],
+      [
+        "Keypad",
+        1
+      ],
+      [
+        "Lock",
+        1
+      ],
+      [
+        "Since",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "LockSpec[l142c12].R2: Door locks remains locked as long as no one uses the keypad[2]",
+    "scope": "Lock",
+    "line": 134,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.033
+    },
+    "answer": {
+      "source": "ind2",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  }
+]

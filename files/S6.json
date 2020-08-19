@@ -1,0 +1,100 @@
+[
+  {
+    "objectType": "kind2Options",
+    "enabled": [
+      "bmc",
+      "ind",
+      "ind2",
+      "ic3",
+      "invgents",
+      "invgenos",
+      "invgenintos",
+      "invgenintos"
+    ],
+    "timeout": 0.0,
+    "bmcMax": 0,
+    "compositional": true,
+    "modular": true
+  },
+  {
+    "objectType": "log",
+    "level": "info",
+    "source": "parse",
+    "value": "kind2 v1.1.0-482-gd69f383a"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "b",
+    "concrete": [],
+    "abstract": [],
+    "assumptions": []
+  },
+  {
+    "objectType": "property",
+    "name": "bSpec[l8c12].guarantee[l4c3][1]",
+    "scope": "b",
+    "line": 4,
+    "column": 3,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.052
+    },
+    "k": 0,
+    "answer": {
+      "source": "bmc",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "b"
+      }
+    ]
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "a",
+    "concrete": [
+      "b"
+    ],
+    "abstract": [],
+    "assumptions": [
+      [
+        "b",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "aSpec[l20c12].guarantee[l16c3][1]",
+    "scope": "a",
+    "line": 16,
+    "column": 3,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.022
+    },
+    "k": 0,
+    "answer": {
+      "source": "ic3",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "a"
+      }
+    ]
+  },
+  {
+    "objectType": "analysisStop"
+  }
+]

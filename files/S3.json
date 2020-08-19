@@ -1,0 +1,717 @@
+[
+  {
+    "objectType": "kind2Options",
+    "enabled": [
+      "bmc",
+      "ind",
+      "ind2",
+      "ic3",
+      "invgents",
+      "invgenos",
+      "invgenintos",
+      "invgenintos"
+    ],
+    "timeout": 5.0,
+    "bmcMax": 0,
+    "compositional": true,
+    "modular": true
+  },
+  {
+    "objectType": "log",
+    "level": "info",
+    "source": "parse",
+    "value": "kind2 v1.1.0-486-g3e68273a"
+  },
+  {
+    "objectType": "log",
+    "level": "note",
+    "source": "parse",
+    "value": "System HasHappened has no property, skipping verification step."
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Control",
+    "concrete": [
+      "HasHappened"
+    ],
+    "abstract": [],
+    "assumptions": [
+      [
+        "HasHappened",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l117c12].R2: unlock request is granted whenever the provided code equals the current one[2]",
+    "scope": "Control",
+    "line": 99,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l117c12].R1: Until the access code is first set, the door cannot be unlocked[1]",
+    "scope": "Control",
+    "line": 94,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ic3",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l117c12].R3: An unlock request is granted only if the provided code equals the current access code[3]",
+    "scope": "Control",
+    "line": 102,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l117c12].R4: Once it has been set, the current code can change only when the master key is inserted[4]",
+    "scope": "Control",
+    "line": 106,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "ControlSpec[l117c12].R5: Unlocking granted only if there is a request and the master key is not inserted[5]",
+    "scope": "Control",
+    "line": 109,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.042
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Keypad",
+    "concrete": [],
+    "abstract": [],
+    "assumptions": [
+      [
+        "Control",
+        1
+      ],
+      [
+        "HasHappened",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "log",
+    "level": "warn",
+    "source": "parse",
+    "value": "BMC Initial state is unsat, the system has no reachable states."
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R4: Whenever there is a request a digit is pressed[4]",
+    "scope": "Keypad",
+    "line": 47,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.023
+    },
+    "answer": {
+      "source": "bmc",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R3: Code is always non-negative[3]",
+    "scope": "Keypad",
+    "line": 44,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.023
+    },
+    "answer": {
+      "source": "bmc",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R2: Any two distinct unlock requests are separated by at least 2 clock cycles[2]",
+    "scope": "Keypad",
+    "line": 41,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.023
+    },
+    "answer": {
+      "source": "bmc",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "KeypadSpec[l54c12].R1: The component will not send an unlock requests before its third cycle[1]",
+    "scope": "Keypad",
+    "line": 38,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.023
+    },
+    "answer": {
+      "source": "bmc",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "Lock",
+    "concrete": [
+      "HasHappened"
+    ],
+    "abstract": [
+      "Keypad",
+      "Control"
+    ],
+    "assumptions": [
+      [
+        "Keypad",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "Control[l161c27].A1: Code is always non-negative[1]",
+    "scope": "Control",
+    "line": 91,
+    "column": 2,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.024
+    },
+    "k": 0,
+    "answer": {
+      "source": "ic3",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "Lock",
+        "streams": [
+          {
+            "name": "Digit",
+            "type": "int",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Press",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "MasterKey",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Unlocking",
+            "type": "bool",
+            "class": "output",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Timer",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Granted",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Request",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Code",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                -1
+              ]
+            ]
+          }
+        ],
+        "subnodes": [
+          {
+            "blockType": "node",
+            "name": "Keypad",
+            "streams": [
+              {
+                "name": "Digit",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Press",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Control",
+            "streams": [
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    -1
+                  ]
+                ]
+              },
+              {
+                "name": "MasterKey",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "CurrentCode",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    -2
+                  ]
+                ]
+              },
+              {
+                "name": "Granted",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "Keypad[l159c20].A1: Digit is always non-negative[1]",
+    "scope": "Keypad",
+    "line": 29,
+    "column": 2,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.024
+    },
+    "k": 0,
+    "answer": {
+      "source": "ic3",
+      "value": "falsifiable"
+    },
+    "counterExample": [
+      {
+        "blockType": "node",
+        "name": "Lock",
+        "streams": [
+          {
+            "name": "Digit",
+            "type": "int",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Press",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "MasterKey",
+            "type": "bool",
+            "class": "input",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Unlocking",
+            "type": "bool",
+            "class": "output",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Timer",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "name": "Granted",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                false
+              ]
+            ]
+          },
+          {
+            "name": "Request",
+            "type": "bool",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                true
+              ]
+            ]
+          },
+          {
+            "name": "Code",
+            "type": "int",
+            "class": "local",
+            "instantValues": [
+              [
+                0,
+                -1
+              ]
+            ]
+          }
+        ],
+        "subnodes": [
+          {
+            "blockType": "node",
+            "name": "Keypad",
+            "streams": [
+              {
+                "name": "Digit",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    0
+                  ]
+                ]
+              },
+              {
+                "name": "Press",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "blockType": "node",
+            "name": "Control",
+            "streams": [
+              {
+                "name": "Request",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    true
+                  ]
+                ]
+              },
+              {
+                "name": "Code",
+                "type": "int",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    -1
+                  ]
+                ]
+              },
+              {
+                "name": "MasterKey",
+                "type": "bool",
+                "class": "input",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              },
+              {
+                "name": "CurrentCode",
+                "type": "int",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    -2
+                  ]
+                ]
+              },
+              {
+                "name": "Granted",
+                "type": "bool",
+                "class": "output",
+                "instantValues": [
+                  [
+                    0,
+                    false
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "LockSpec[l155c12].R1: The door will never be held open for more than 4 clock cycles at a time[1]",
+    "scope": "Lock",
+    "line": 145,
+    "column": 2,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.178
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  }
+]

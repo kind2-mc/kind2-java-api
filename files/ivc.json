@@ -1,0 +1,630 @@
+[
+  {
+    "objectType": "log",
+    "level": "info",
+    "source": "parse",
+    "value": "kind2 v1.1.0-966-g16aac0ed"
+  },
+  {
+    "objectType": "kind2Options",
+    "enabled": [
+      "bmc",
+      "ind",
+      "ind2",
+      "ic3",
+      "invgents",
+      "invgenos",
+      "invgenintos",
+      "invgenintos"
+    ],
+    "timeout": 0.000000,
+    "bmcMax": 0,
+    "compositional": true,
+    "modular": true,
+    "ivc": {
+      "ivcCategory": [
+        "nodeCalls",
+        "contracts",
+        "equations",
+        "assertions"
+      ],
+      "ivcAll": true,
+      "ivcApproximate": true,
+      "ivcSmallestFirst": false,
+      "ivcOnlyMainNode": false,
+      "ivcMustSet": true
+    }
+  },
+  {
+    "objectType": "log",
+    "level": "warn",
+    "source": "parse",
+    "value": "IVC post-analysis enabled: disabling ind_compress"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "f",
+    "concrete": [],
+    "abstract": [],
+    "assumptions": []
+  },
+  {
+    "objectType": "property",
+    "name": "fSpec[l22c12].guarantee[l17c4][5]",
+    "scope": "f",
+    "line": 17,
+    "column": 4,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.125
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "fSpec[l22c12].guarantee[l16c4][4]",
+    "scope": "f",
+    "line": 16,
+    "column": 4,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.125
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "fSpec[l22c12].TheGoodOne[3]",
+    "scope": "f",
+    "line": 15,
+    "column": 4,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.125
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "fSpec[l22c12].guarantee[l13c4][2]",
+    "scope": "f",
+    "line": 13,
+    "column": 4,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.125
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "fSpec[l22c12].guarantee[l12c4][1]",
+    "scope": "f",
+    "line": 12,
+    "column": 4,
+    "source": "Guarantee",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.136
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "postAnalysisStart",
+    "name": "ivc"
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "must",
+    "size": 6,
+    "runtime": {
+      "unit": "sec",
+      "value": 3.447842836380005
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Equation",
+            "name": "r",
+            "line": 33,
+            "column": 8
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l12c4][1]",
+            "line": 12,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l13c4][2]",
+            "line": 13,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].TheGoodOne[3]",
+            "line": 15,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l16c4][4]",
+            "line": 16,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l17c4][5]",
+            "line": 17,
+            "column": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "must complement",
+    "size": 0,
+    "runtime": {
+      "unit": "sec",
+      "value": 3.447842836380005
+    },
+    "nodes": []
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc",
+    "size": 6,
+    "runtime": {
+      "unit": "sec",
+      "value": 0.37660717964172363
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Equation",
+            "name": "r",
+            "line": 33,
+            "column": 8
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l12c4][1]",
+            "line": 12,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l13c4][2]",
+            "line": 13,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].TheGoodOne[3]",
+            "line": 15,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l16c4][4]",
+            "line": 16,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l17c4][5]",
+            "line": 17,
+            "column": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc complement",
+    "size": 0,
+    "runtime": {
+      "unit": "sec",
+      "value": 0.37660717964172363
+    },
+    "nodes": []
+  },
+  {
+    "objectType": "postAnalysisEnd"
+  },
+  {
+    "objectType": "analysisStart",
+    "top": "main",
+    "concrete": [],
+    "abstract": [
+      "f"
+    ],
+    "assumptions": [
+      [
+        "f",
+        1
+      ]
+    ]
+  },
+  {
+    "objectType": "property",
+    "name": "f[l41c8].assume[l11c4][1]",
+    "scope": "f",
+    "line": 11,
+    "column": 4,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.080
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "f[l42c8].assume[l11c4][1]",
+    "scope": "f",
+    "line": 11,
+    "column": 4,
+    "source": "Assumption",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.080
+    },
+    "answer": {
+      "source": "ind",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "property",
+    "name": "P",
+    "line": 50,
+    "column": 4,
+    "source": "PropAnnot",
+    "runtime": {
+      "unit": "sec",
+      "timeout": false,
+      "value": 0.111
+    },
+    "answer": {
+      "source": "invgenos",
+      "value": "valid"
+    }
+  },
+  {
+    "objectType": "analysisStop"
+  },
+  {
+    "objectType": "postAnalysisStart",
+    "name": "ivc"
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "must",
+    "size": 5,
+    "runtime": {
+      "unit": "sec",
+      "value": 4.079503774642944
+    },
+    "nodes": [
+      {
+        "name": "main",
+        "elements": [
+          {
+            "category": "Equation",
+            "name": "z",
+            "line": 43,
+            "column": 8
+          },
+          {
+            "category": "Equation",
+            "name": "P",
+            "line": 48,
+            "column": 8
+          },
+          {
+            "category": "Assertion",
+            "name": "assertion[l40c4]",
+            "line": 40,
+            "column": 4
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 41,
+            "column": 8
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 42,
+            "column": 8
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "must complement",
+    "size": 5,
+    "runtime": {
+      "unit": "sec",
+      "value": 4.079503774642944
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l12c4][1]",
+            "line": 12,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l13c4][2]",
+            "line": 13,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].TheGoodOne[3]",
+            "line": 15,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l16c4][4]",
+            "line": 16,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l17c4][5]",
+            "line": 17,
+            "column": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc",
+    "size": 7,
+    "runtime": {
+      "unit": "sec",
+      "value": 2.201712131500244
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l16c4][4]",
+            "line": 16,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l17c4][5]",
+            "line": 17,
+            "column": 4
+          }
+        ]
+      },
+      {
+        "name": "main",
+        "elements": [
+          {
+            "category": "Equation",
+            "name": "z",
+            "line": 43,
+            "column": 8
+          },
+          {
+            "category": "Equation",
+            "name": "P",
+            "line": 48,
+            "column": 8
+          },
+          {
+            "category": "Assertion",
+            "name": "assertion[l40c4]",
+            "line": 40,
+            "column": 4
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 41,
+            "column": 8
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 42,
+            "column": 8
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc complement",
+    "size": 3,
+    "runtime": {
+      "unit": "sec",
+      "value": 2.201712131500244
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l12c4][1]",
+            "line": 12,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l13c4][2]",
+            "line": 13,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].TheGoodOne[3]",
+            "line": 15,
+            "column": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc",
+    "size": 6,
+    "runtime": {
+      "unit": "sec",
+      "value": 1.17085599899292
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].TheGoodOne[3]",
+            "line": 15,
+            "column": 4
+          }
+        ]
+      },
+      {
+        "name": "main",
+        "elements": [
+          {
+            "category": "Equation",
+            "name": "z",
+            "line": 43,
+            "column": 8
+          },
+          {
+            "category": "Equation",
+            "name": "P",
+            "line": 48,
+            "column": 8
+          },
+          {
+            "category": "Assertion",
+            "name": "assertion[l40c4]",
+            "line": 40,
+            "column": 4
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 41,
+            "column": 8
+          },
+          {
+            "category": "NodeCall",
+            "name": "f",
+            "line": 42,
+            "column": 8
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "modelElementSet",
+    "class": "ivc complement",
+    "size": 4,
+    "runtime": {
+      "unit": "sec",
+      "value": 1.17085599899292
+    },
+    "nodes": [
+      {
+        "name": "f",
+        "elements": [
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l12c4][1]",
+            "line": 12,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l13c4][2]",
+            "line": 13,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l16c4][4]",
+            "line": 16,
+            "column": 4
+          },
+          {
+            "category": "Guarantee",
+            "name": "fSpec[l22c12].guarantee[l17c4][5]",
+            "line": 17,
+            "column": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "objectType": "postAnalysisEnd"
+  }
+]

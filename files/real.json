@@ -1,0 +1,423 @@
+[
+{
+  "objectType" : "log",
+  "level" : "info",
+  "source" : "parse",
+  "value" : "kind2 nightly"
+}
+,
+{
+  "objectType" : "kind2Options",
+  "enabled" :
+  [
+    "bmc",
+    "ind",
+    "ind2",
+    "ic3",
+    "invgents",
+    "invgenos",
+    "invgenintos",
+    "invgenintos"
+  ],
+  "timeout" : 50.000000,
+  "bmcMax" : 0,
+  "compositional" : false,
+  "modular" : false
+}
+,
+{
+  "objectType" : "analysisStart",
+  "top" : "system",
+  "concrete" :
+  [
+    "integrate",
+    "heating",
+    "controller"
+  ],
+  "abstract" : [],
+  "assumptions" : []
+}
+,
+{
+  "objectType" : "property",
+  "name" : "The temperature of each room is between 15 and 20 degrees celsius",
+  "line" : 199,
+  "column" : 2,
+  "source" : "PropAnnot",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.123},
+  "k" : 5,
+  "answer" : {"source" : "bmc", "value" : "falsifiable"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "system",
+      "streams" :
+      [
+        {
+          "name" : "T",
+          "type" : "real",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, {"num": 14, "den": 1}],
+            [1, {"num": 18, "den": 1}],
+            [2, {"num": 18, "den": 1}],
+            [3, {"num": 18, "den": 1}],
+            [4, {"num": 18, "den": 1}],
+            [5, {"num": 18, "den": 1}]
+          ]
+        },
+        {
+          "name" : "h1",
+          "type" : "real",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, {"num": 0, "den": 1}],
+            [1, {"num": 0, "den": 1}],
+            [2, {"num": 0, "den": 1}],
+            [3, {"num": 0, "den": 1}],
+            [4, {"num": 0, "den": 1}],
+            [5, {"num": 0, "den": 1}]
+          ]
+        },
+        {
+          "name" : "h2",
+          "type" : "real",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, {"num": 0, "den": 1}],
+            [1, {"num": 1, "den": 1}],
+            [2, {"num": 1, "den": 1}],
+            [3, {"num": 1, "den": 1}],
+            [4, {"num": 1, "den": 1}],
+            [5, {"num": 1, "den": 1}]
+          ]
+        },
+        {
+          "name" : "T1",
+          "type" : "real",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, {"num": 33, "den": 2}],
+            [1, {"num": 669, "den": 40}],
+            [2, {"num": 1377, "den": 80}],
+            [3, {"num": 284481, "den": 16000}],
+            [4, {"num": 5872419, "den": 320000}],
+            [5, {"num": 480957, "den": 25600}]
+          ]
+        },
+        {
+          "name" : "T2",
+          "type" : "real",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, {"num": 33, "den": 2}],
+            [1, {"num": 86, "den": 5}],
+            [2, {"num": 14767, "den": 800}],
+            [3, {"num": 61871, "den": 3200}],
+            [4, {"num": 1586817, "den": 80000}],
+            [5, {"num": 129039637, "den": 6400000}]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "controller",
+          "streams" :
+          [
+            {
+              "name" : "T1",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, {"num": 33, "den": 2}],
+                [1, {"num": 33, "den": 2}],
+                [2, {"num": 669, "den": 40}],
+                [3, {"num": 1377, "den": 80}],
+                [4, {"num": 284481, "den": 16000}],
+                [5, {"num": 5872419, "den": 320000}]
+              ]
+            },
+            {
+              "name" : "T2",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, {"num": 33, "den": 2}],
+                [1, {"num": 33, "den": 2}],
+                [2, {"num": 86, "den": 5}],
+                [3, {"num": 14767, "den": 800}],
+                [4, {"num": 61871, "den": 3200}],
+                [5, {"num": 1586817, "den": 80000}]
+              ]
+            },
+            {
+              "name" : "h1",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 0, "den": 1}],
+                [2, {"num": 0, "den": 1}],
+                [3, {"num": 0, "den": 1}],
+                [4, {"num": 0, "den": 1}],
+                [5, {"num": 0, "den": 1}]
+              ]
+            },
+            {
+              "name" : "h2",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 1, "den": 1}],
+                [2, {"num": 1, "den": 1}],
+                [3, {"num": 1, "den": 1}],
+                [4, {"num": 1, "den": 1}],
+                [5, {"num": 1, "den": 1}]
+              ]
+            },
+            {
+              "name" : "activeHeater",
+              "type" : "enum",
+              "typeInfo" :
+              {
+                "values" : ["One", "Two"]
+              },
+              "class" : "local",
+              "instantValues" :
+              [
+                [0, "Two"],
+                [1, "Two"],
+                [2, "Two"],
+                [3, "Two"],
+                [4, "Two"],
+                [5, "Two"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "heating",
+          "streams" :
+          [
+            {
+              "name" : "h1",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 0, "den": 1}],
+                [2, {"num": 0, "den": 1}],
+                [3, {"num": 0, "den": 1}],
+                [4, {"num": 0, "den": 1}],
+                [5, {"num": 0, "den": 1}]
+              ]
+            },
+            {
+              "name" : "h2",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 1, "den": 1}],
+                [2, {"num": 1, "den": 1}],
+                [3, {"num": 1, "den": 1}],
+                [4, {"num": 1, "den": 1}],
+                [5, {"num": 1, "den": 1}]
+              ]
+            },
+            {
+              "name" : "T",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, {"num": 14, "den": 1}],
+                [1, {"num": 18, "den": 1}],
+                [2, {"num": 18, "den": 1}],
+                [3, {"num": 18, "den": 1}],
+                [4, {"num": 18, "den": 1}],
+                [5, {"num": 18, "den": 1}]
+              ]
+            },
+            {
+              "name" : "T1",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, {"num": 33, "den": 2}],
+                [1, {"num": 669, "den": 40}],
+                [2, {"num": 1377, "den": 80}],
+                [3, {"num": 284481, "den": 16000}],
+                [4, {"num": 5872419, "den": 320000}],
+                [5, {"num": 480957, "den": 25600}]
+              ]
+            },
+            {
+              "name" : "T2",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, {"num": 33, "den": 2}],
+                [1, {"num": 86, "den": 5}],
+                [2, {"num": 14767, "den": 800}],
+                [3, {"num": 61871, "den": 3200}],
+                [4, {"num": 1586817, "den": 80000}],
+                [5, {"num": 129039637, "den": 6400000}]
+              ]
+            },
+            {
+              "name" : "d_T1",
+              "type" : "real",
+              "class" : "local",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 9, "den": 20}],
+                [2, {"num": 21, "den": 40}],
+                [3, {"num": 4881, "den": 8000}],
+                [4, {"num": 85179, "den": 160000}],
+                [5, {"num": 108729, "den": 320000}]
+              ]
+            },
+            {
+              "name" : "d_T2",
+              "type" : "real",
+              "class" : "local",
+              "instantValues" :
+              [
+                [0, {"num": 0, "den": 1}],
+                [1, {"num": 7, "den": 5}],
+                [2, {"num": 447, "den": 400}],
+                [3, {"num": 203, "den": 320}],
+                [4, {"num": 14667, "den": 40000}],
+                [5, {"num": 920917, "den": 3200000}]
+              ]
+            }
+          ],
+          "subnodes" :
+          [
+            {
+              "blockType" : "node",
+              "name" : "integrate",
+              "streams" :
+              [
+                {
+                  "name" : "F",
+                  "type" : "real",
+                  "class" : "input",
+                  "instantValues" :
+                  [
+                    [0, {"num": 0, "den": 1}],
+                    [1, {"num": 7, "den": 5}],
+                    [2, {"num": 447, "den": 400}],
+                    [3, {"num": 203, "den": 320}],
+                    [4, {"num": 14667, "den": 40000}],
+                    [5, {"num": 920917, "den": 3200000}]
+                  ]
+                },
+                {
+                  "name" : "init",
+                  "type" : "real",
+                  "class" : "input",
+                  "instantValues" :
+                  [
+                    [0, {"num": 33, "den": 2}],
+                    [1, {"num": 33, "den": 2}],
+                    [2, {"num": 33, "den": 2}],
+                    [3, {"num": 33, "den": 2}],
+                    [4, {"num": 33, "den": 2}],
+                    [5, {"num": 33, "den": 2}]
+                  ]
+                },
+                {
+                  "name" : "Y",
+                  "type" : "real",
+                  "class" : "output",
+                  "instantValues" :
+                  [
+                    [0, {"num": 33, "den": 2}],
+                    [1, {"num": 86, "den": 5}],
+                    [2, {"num": 14767, "den": 800}],
+                    [3, {"num": 61871, "den": 3200}],
+                    [4, {"num": 1586817, "den": 80000}],
+                    [5, {"num": 129039637, "den": 6400000}]
+                  ]
+                }
+              ]
+            },
+            {
+              "blockType" : "node",
+              "name" : "integrate",
+              "streams" :
+              [
+                {
+                  "name" : "F",
+                  "type" : "real",
+                  "class" : "input",
+                  "instantValues" :
+                  [
+                    [0, {"num": 0, "den": 1}],
+                    [1, {"num": 9, "den": 20}],
+                    [2, {"num": 21, "den": 40}],
+                    [3, {"num": 4881, "den": 8000}],
+                    [4, {"num": 85179, "den": 160000}],
+                    [5, {"num": 108729, "den": 320000}]
+                  ]
+                },
+                {
+                  "name" : "init",
+                  "type" : "real",
+                  "class" : "input",
+                  "instantValues" :
+                  [
+                    [0, {"num": 33, "den": 2}],
+                    [1, {"num": 33, "den": 2}],
+                    [2, {"num": 33, "den": 2}],
+                    [3, {"num": 33, "den": 2}],
+                    [4, {"num": 33, "den": 2}],
+                    [5, {"num": 33, "den": 2}]
+                  ]
+                },
+                {
+                  "name" : "Y",
+                  "type" : "real",
+                  "class" : "output",
+                  "instantValues" :
+                  [
+                    [0, {"num": 33, "den": 2}],
+                    [1, {"num": 669, "den": 40}],
+                    [2, {"num": 1377, "den": 80}],
+                    [3, {"num": 284481, "den": 16000}],
+                    [4, {"num": 5872419, "den": 320000}],
+                    [5, {"num": 480957, "den": 25600}]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{"objectType" : "analysisStop"}
+]

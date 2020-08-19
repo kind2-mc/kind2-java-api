@@ -5,13 +5,15 @@
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
 
-package edu.uiowa.kind2.api;
+package edu.uiowa.kind2.kind2results;
 
-public enum LogLevel {
-  OFF, FATAL, ERROR, WARN, NOTE, INFO, DEBUG, TRACE;
-
-  @Override
-  public String toString() {
-    return name().toLowerCase();
+/**
+ * The bool type for kind2
+ */
+public class Kind2Bool extends Kind2Type
+{
+  public Kind2Bool()
+  {
+    super("bool");
   }
 }

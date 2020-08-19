@@ -1,0 +1,294 @@
+[
+{
+  "objectType" : "kind2Options",
+  "enabled" :
+  [
+    "bmc",
+    "ind",
+    "ind2",
+    "ic3",
+    "invgents",
+    "invgenos",
+    "invgenintos",
+    "invgenintos"
+  ],
+  "timeout" : 0.000000,
+  "bmcMax" : 0,
+  "compositional" : true,
+  "modular" : true
+}
+,
+{
+  "objectType" : "log",
+  "level" : "info",
+  "source" : "parse",
+  "value" : "kind2 v1.1.0-498-gd5049ee2"
+}
+,
+{
+  "objectType" : "analysisStart",
+  "top" : "Model_dot_C",
+  "concrete" : [],
+  "abstract" :
+  [
+    "Model_dot_B",
+    "Model_dot_A"
+  ],
+  "assumptions" : []
+}
+,
+{
+  "objectType" : "property",
+  "name" : "G2REQ[1]",
+  "scope" : "Model_dot_C",
+  "line" : 35,
+  "column" : 4,
+  "source" : "Guarantee",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.032},
+  "k" : 0,
+  "answer" : {"source" : "ic3", "value" : "falsifiable"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "Model_dot_C",
+      "streams" :
+      [
+        {
+          "name" : "y3.data",
+          "type" : "real",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, -3]
+          ]
+        },
+        {
+          "name" : "y3.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "x3.data",
+          "type" : "real",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, 0]
+          ]
+        },
+        {
+          "name" : "x3.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "z3.data",
+          "type" : "real",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, 0]
+          ]
+        },
+        {
+          "name" : "my_a2_y1.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "my_a2_y1.data",
+          "type" : "real",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, -2]
+          ]
+        },
+        {
+          "name" : "my_a1_y1.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "my_a1_y1.data",
+          "type" : "real",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, 1]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "Model_dot_A",
+          "streams" :
+          [
+            {
+              "name" : "x1.data",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0]
+              ]
+            },
+            {
+              "name" : "x1.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "y1.data",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, 1]
+              ]
+            },
+            {
+              "name" : "y1.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "Model_dot_A",
+          "streams" :
+          [
+            {
+              "name" : "x1.data",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, -3]
+              ]
+            },
+            {
+              "name" : "x1.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "y1.data",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -2]
+              ]
+            },
+            {
+              "name" : "y1.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "Model_dot_B",
+          "streams" :
+          [
+            {
+              "name" : "y2.data",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, -2]
+              ]
+            },
+            {
+              "name" : "y2.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "x2.data",
+              "type" : "real",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 1]
+              ]
+            },
+            {
+              "name" : "x2.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "z2.data",
+              "type" : "real",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, 0]
+              ]
+            },
+            {
+              "name" : "z2.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{"objectType" : "analysisStop"}
+]

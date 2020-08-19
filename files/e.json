@@ -1,0 +1,34 @@
+[
+{
+  "objectType" : "kind2Options",
+  "enabled" :
+  [
+    "bmc",
+    "ind",
+    "ind2",
+    "ic3",
+    "invgents",
+    "invgenos",
+    "invgenintos",
+    "invgenintos"
+  ],
+  "timeout" : 1.000000,
+  "bmcMax" : 0,
+  "compositional" : true,
+  "modular" : true
+}
+,
+{
+  "objectType" : "log",
+  "level" : "info",
+  "source" : "parse",
+  "value" : "kind2 v1.1.0-498-gd5049ee2"
+}
+,
+{
+  "objectType" : "log",
+  "level" : "note",
+  "source" : "parse",
+  "value" : "System HasHappened has no property, skipping verification step."
+}
+]

@@ -1,0 +1,1740 @@
+[
+{
+  "objectType" : "kind2Options",
+  "enabled" :
+  [
+    "bmc",
+    "ind",
+    "ind2",
+    "ic3",
+    "invgents",
+    "invgenos",
+    "invgenintos",
+    "invgenintos"
+  ],
+  "timeout" : 1.000000,
+  "bmcMax" : 0,
+  "compositional" : true,
+  "modular" : true
+}
+,
+{
+  "objectType" : "log",
+  "level" : "info",
+  "source" : "parse",
+  "value" : "kind2 v1.1.0-498-gd5049ee2"
+}
+,
+{
+  "objectType" : "log",
+  "level" : "note",
+  "source" : "parse",
+  "value" : "System HasHappened has no property, skipping verification step."
+}
+,
+{
+  "objectType" : "log",
+  "level" : "note",
+  "source" : "parse",
+  "value" : "System Since has no property, skipping verification step."
+}
+,
+{
+  "objectType" : "analysisStart",
+  "top" : "agree_dot_InputC_dot_Lock_dot_Impl",
+  "concrete" :
+  [
+    "Since",
+    "HasHappened"
+  ],
+  "abstract" :
+  [
+    "agree_dot_InputC_dot_Timer_dot_Impl",
+    "agree_dot_InputC_dot_Keypad_dot_Impl",
+    "agree_dot_InputC_dot_Control_dot_Impl"
+  ],
+  "assumptions" :
+  [
+    ["Since",1]
+  ]
+}
+,
+{
+  "objectType" : "property",
+  "name" : "guarantee[l93c2][1]",
+  "scope" : "agree_dot_InputC_dot_Lock_dot_Impl",
+  "line" : 93,
+  "column" : 2,
+  "source" : "Guarantee",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.042},
+  "k" : 0,
+  "answer" : {"source" : "ind", "value" : "unknown"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "agree_dot_InputC_dot_Lock_dot_Impl",
+      "streams" :
+      [
+        {
+          "name" : "Digit.data",
+          "type" : "int",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, 0]
+          ]
+        },
+        {
+          "name" : "Digit.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "MasterKey.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "MasterKey.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Press.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "Press.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Unlocking.data",
+          "type" : "bool",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "CurrentCode.data",
+          "type" : "int",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, -102]
+          ]
+        },
+        {
+          "name" : "control_Granted.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "control_Granted.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "keypad_Request.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Request.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "keypad_Code.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Code.data",
+          "type" : "int",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, -101]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "Since",
+          "streams" :
+          [
+            {
+              "name" : "X",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Y",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "SinceXY",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Keypad_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Digit.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0]
+              ]
+            },
+            {
+              "name" : "Digit.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Press.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Press.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -101]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Control_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "MasterKey.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "MasterKey.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, -101]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "CurrentCode.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -102]
+              ]
+            },
+            {
+              "name" : "CurrentCode.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Timer_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Running.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Running.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{
+  "objectType" : "property",
+  "name" : "agree_dot_InputC_dot_Control_dot_Impl[l101c36].assume[l52c2][1]",
+  "scope" : "agree_dot_InputC_dot_Control_dot_Impl",
+  "line" : 52,
+  "column" : 2,
+  "source" : "Assumption",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.042},
+  "k" : 0,
+  "answer" : {"source" : "ind", "value" : "unknown"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "agree_dot_InputC_dot_Lock_dot_Impl",
+      "streams" :
+      [
+        {
+          "name" : "Digit.data",
+          "type" : "int",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, 0]
+          ]
+        },
+        {
+          "name" : "Digit.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "MasterKey.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "MasterKey.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Press.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "Press.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Unlocking.data",
+          "type" : "bool",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "CurrentCode.data",
+          "type" : "int",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, -102]
+          ]
+        },
+        {
+          "name" : "control_Granted.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "control_Granted.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "keypad_Request.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Request.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "keypad_Code.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Code.data",
+          "type" : "int",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, -101]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "Since",
+          "streams" :
+          [
+            {
+              "name" : "X",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Y",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "SinceXY",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Keypad_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Digit.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0]
+              ]
+            },
+            {
+              "name" : "Digit.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Press.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Press.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -101]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Control_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "MasterKey.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "MasterKey.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, -101]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "CurrentCode.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -102]
+              ]
+            },
+            {
+              "name" : "CurrentCode.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Timer_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Running.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Running.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{
+  "objectType" : "property",
+  "name" : "guarantee[l93c2][1]",
+  "scope" : "agree_dot_InputC_dot_Lock_dot_Impl",
+  "line" : 93,
+  "column" : 2,
+  "source" : "Guarantee",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.106},
+  "k" : 0,
+  "answer" : {"source" : "bmc", "value" : "falsifiable"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "agree_dot_InputC_dot_Lock_dot_Impl",
+      "streams" :
+      [
+        {
+          "name" : "Digit.data",
+          "type" : "int",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, 0]
+          ]
+        },
+        {
+          "name" : "Digit.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "MasterKey.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "MasterKey.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Press.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "Press.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Unlocking.data",
+          "type" : "bool",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, true]
+          ]
+        },
+        {
+          "name" : "CurrentCode.data",
+          "type" : "int",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, 1000]
+          ]
+        },
+        {
+          "name" : "control_Granted.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "control_Granted.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "keypad_Request.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Request.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, false]
+          ]
+        },
+        {
+          "name" : "keypad_Code.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Code.data",
+          "type" : "int",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, 999]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "Since",
+          "streams" :
+          [
+            {
+              "name" : "X",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Y",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "SinceXY",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Keypad_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Digit.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0]
+              ]
+            },
+            {
+              "name" : "Digit.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Press.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Press.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, 999]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Control_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "MasterKey.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "MasterKey.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 999]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "CurrentCode.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, 1000]
+              ]
+            },
+            {
+              "name" : "CurrentCode.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Timer_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Running.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true]
+              ]
+            },
+            {
+              "name" : "Running.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{
+  "objectType" : "property",
+  "name" : "agree_dot_InputC_dot_Control_dot_Impl[l101c36].assume[l52c2][1]",
+  "scope" : "agree_dot_InputC_dot_Control_dot_Impl",
+  "line" : 52,
+  "column" : 2,
+  "source" : "Assumption",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.138},
+  "k" : 1,
+  "answer" : {"source" : "ind", "value" : "unknown"},
+  "counterExample" :
+  [
+    {
+      "blockType" : "node",
+      "name" : "agree_dot_InputC_dot_Lock_dot_Impl",
+      "streams" :
+      [
+        {
+          "name" : "Digit.data",
+          "type" : "int",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, 0],
+            [1, 0]
+          ]
+        },
+        {
+          "name" : "Digit.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "MasterKey.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, false],
+            [1, false]
+          ]
+        },
+        {
+          "name" : "MasterKey.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Press.data",
+          "type" : "bool",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, true],
+            [1, true]
+          ]
+        },
+        {
+          "name" : "Press.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "input",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "Unlocking.data",
+          "type" : "bool",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, true],
+            [1, false]
+          ]
+        },
+        {
+          "name" : "CurrentCode.data",
+          "type" : "int",
+          "class" : "output",
+          "instantValues" :
+          [
+            [0, -278],
+            [1, -277]
+          ]
+        },
+        {
+          "name" : "control_Granted.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "control_Granted.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, false],
+            [1, true]
+          ]
+        },
+        {
+          "name" : "keypad_Request.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Request.data",
+          "type" : "bool",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, false],
+            [1, false]
+          ]
+        },
+        {
+          "name" : "keypad_Code.direction",
+          "type" : "iml_dot_systems_dot_Direction",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, "iml_dot_systems_dot_Direction_dot_IN"],
+            [1, "iml_dot_systems_dot_Direction_dot_IN"]
+          ]
+        },
+        {
+          "name" : "keypad_Code.data",
+          "type" : "int",
+          "class" : "local",
+          "instantValues" :
+          [
+            [0, 0],
+            [1, -1]
+          ]
+        }
+      ],
+      "subnodes" :
+      [
+        {
+          "blockType" : "node",
+          "name" : "Since",
+          "streams" :
+          [
+            {
+              "name" : "X",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false],
+                [1, true]
+              ]
+            },
+            {
+              "name" : "Y",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false],
+                [1, false]
+              ]
+            },
+            {
+              "name" : "SinceXY",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false],
+                [1, true]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Keypad_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Digit.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0],
+                [1, 0]
+              ]
+            },
+            {
+              "name" : "Digit.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Press.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, true],
+                [1, true]
+              ]
+            },
+            {
+              "name" : "Press.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false],
+                [1, false]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, 0],
+                [1, -1]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Control_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "MasterKey.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false],
+                [1, false]
+              ]
+            },
+            {
+              "name" : "MasterKey.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Request.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false],
+                [1, false]
+              ]
+            },
+            {
+              "name" : "Request.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Code.data",
+              "type" : "int",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, 0],
+                [1, -1]
+              ]
+            },
+            {
+              "name" : "Code.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, false],
+                [1, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "CurrentCode.data",
+              "type" : "int",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, -278],
+                [1, -277]
+              ]
+            },
+            {
+              "name" : "CurrentCode.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        },
+        {
+          "blockType" : "node",
+          "name" : "agree_dot_InputC_dot_Timer_dot_Impl",
+          "streams" :
+          [
+            {
+              "name" : "Granted.data",
+              "type" : "bool",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, false],
+                [1, true]
+              ]
+            },
+            {
+              "name" : "Granted.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "input",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            },
+            {
+              "name" : "Running.data",
+              "type" : "bool",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, true],
+                [1, false]
+              ]
+            },
+            {
+              "name" : "Running.direction",
+              "type" : "iml_dot_systems_dot_Direction",
+              "class" : "output",
+              "instantValues" :
+              [
+                [0, "iml_dot_systems_dot_Direction_dot_IN"],
+                [1, "iml_dot_systems_dot_Direction_dot_IN"]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+,
+{
+  "objectType" : "property",
+  "name" : "agree_dot_InputC_dot_Control_dot_Impl[l101c36].assume[l52c2][1]",
+  "scope" : "agree_dot_InputC_dot_Control_dot_Impl",
+  "line" : 52,
+  "column" : 2,
+  "source" : "Assumption",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.201},
+  "answer" : {"source" : "ic3", "value" : "valid"}
+}
+,
+{
+  "objectType" : "property",
+  "name" : "agree_dot_InputC_dot_Keypad_dot_Impl[l100c35].assume[l72c2][1]",
+  "scope" : "agree_dot_InputC_dot_Keypad_dot_Impl",
+  "line" : 72,
+  "column" : 2,
+  "source" : "Assumption",
+  "runtime" : {"unit" : "sec", "timeout" : false, "value" : 0.201},
+  "answer" : {"source" : "ic3", "value" : "valid"}
+}
+,
+{"objectType" : "analysisStop"}
+]

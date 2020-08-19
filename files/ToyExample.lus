@@ -1,0 +1,45 @@
+type iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__ = struct { 
+    data : real;
+    direction : iml_dot_systems_dot_Direction
+};
+
+type iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__ = struct { 
+    data : real;
+    direction : iml_dot_systems_dot_Direction
+};
+
+type iml_dot_systems_dot_Direction = enum {
+    iml_dot_systems_dot_Direction_dot_IN,
+    iml_dot_systems_dot_Direction_dot_OUT,
+    iml_dot_systems_dot_Direction_dot_INOUT
+};
+
+
+node imported Model_dot_B (y2 : iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__; x2 : iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__)
+returns (z2 : iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__)
+(*@contract
+    guarantee "A1REQ" z2.data = x2.data + y2.data + 1.0;
+
+*) 
+
+node imported Model_dot_A (x1 : iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__)
+returns (y1 : iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__)
+(*@contract
+    guarantee "G1REQ" y1.data  > x1.data;
+
+*) 
+
+node Model_dot_C (y3 : iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__; x3 : iml_dot_systems_dot_InDataPort__iml_dot_lang_dot_Real__)
+returns (z3 : iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__)
+(*@contract
+    guarantee "G2REQ" z3.data  > x3.data;
+
+*) 
+var my_a1_y1 : iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__; 
+var my_a2_y1 : iml_dot_systems_dot_OutDataPort__iml_dot_lang_dot_Real__; 
+let
+    (my_a1_y1) = Model_dot_A ( x3);
+    (my_a2_y1) = Model_dot_A ( y3);
+    (z3) = Model_dot_B ( my_a2_y1, my_a1_y1);
+    --%MAIN; 
+tel
