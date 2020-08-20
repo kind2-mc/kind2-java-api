@@ -75,6 +75,10 @@ public class Kind2Result
    * a list of kind2 logs.
    */
   private final List<Kind2Log> kind2Logs;
+  /**
+   * Is this object properly initialized?
+   */
+  private boolean isInitialized;
 
   /**
    * a default constructor
@@ -82,6 +86,7 @@ public class Kind2Result
   public Kind2Result()
   {
     kind2Logs = new ArrayList<>();
+    isInitialized = false;
   }
 
   /**
@@ -284,6 +289,7 @@ public class Kind2Result
     this.buildTree();
     // analyze the result
     this.analyze();
+    isInitialized = true;
   }
 
   /**
@@ -516,5 +522,13 @@ public class Kind2Result
   public List<Kind2Log> getAllKind2Logs()
   {
     return kind2Logs;
+  }
+
+  /**
+   * @return whether or not this object is properly initialized.
+   */
+  public boolean isInitialized()
+  {
+    return isInitialized;
   }
 }

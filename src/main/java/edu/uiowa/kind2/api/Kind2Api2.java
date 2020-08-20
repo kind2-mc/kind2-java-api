@@ -8,7 +8,6 @@
 
 package edu.uiowa.kind2.api;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,8 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.uiowa.kind2.Kind2Exception;
-import edu.uiowa.kind2.api.results.Result;
-import edu.uiowa.kind2.api.xml.XmlParseThread;
 import edu.uiowa.kind2.kind2results.Kind2Result;
 import edu.uiowa.kind2.lustre.Program;
 import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
@@ -164,7 +161,7 @@ public class Kind2Api2 {
     } catch (Kind2Exception e) {
       throw e;
     } catch (Throwable t) {
-      throw new Kind2Exception(result.getJson(), t);
+      throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
@@ -177,9 +174,17 @@ public class Kind2Api2 {
 
     try {
       process = builder.start();
-      String json = new String(process.getInputStream().readAllBytes());
-      result.initialize(json);
+      while (!monitor.isCanceled() && process.isAlive()) {
+        sleep(POLL_INTERVAL);
+      }
     } finally {
+      if (!monitor.isCanceled()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        result.initialize(new String(bytes));
+      }
+
       if (process != null) {
         process.destroy();
         code = process.waitFor();
@@ -188,13 +193,7 @@ public class Kind2Api2 {
       monitor.done();
 
       if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
-        StringBuilder sb = new StringBuilder();
-        //for (String log : getLogs(LogLevel.FATAL)) {
-        //  sb.append(log).append('\n');
-        //}
-        sb.deleteCharAt(sb.length() - 1);
-        throw new Kind2Exception(
-            "Abnormal termination, exit code " + code + ", fatal: " + sb.toString());
+        throw new Kind2Exception("Abnormal termination, exit code " + code);
       }
     }
   }
@@ -630,10 +629,6 @@ public class Kind2Api2 {
     } catch (InterruptedException e) {
     }
   }
-
-  // public List<String> getLogs(LogLevel logLevel) {
-  //   return parseThread.getLogs(logLevel);
-  // }
 
   /**
    * Check if the KindApi is available for running and throw exception if not
