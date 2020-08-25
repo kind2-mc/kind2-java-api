@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.uiowa.kind2.api.IProgressMonitor;
-import edu.uiowa.kind2.api.Kind2Api2;
+import edu.uiowa.kind2.api.Kind2Api;
 import edu.uiowa.kind2.kind2results.Kind2Result;
 import edu.uiowa.kind2.lustre.Contract;
 import edu.uiowa.kind2.lustre.IdExpr;
@@ -42,7 +42,7 @@ public class Main {
 
     System.out.println(program.build().toString());
 
-    Kind2Api2 api = new Kind2Api2();
+    Kind2Api api = new Kind2Api();
     Kind2Result result = new Kind2Result();
 
     api.execute(program.build(), result, new IProgressMonitor() {

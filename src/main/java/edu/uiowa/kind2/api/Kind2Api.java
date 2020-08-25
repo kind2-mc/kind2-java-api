@@ -17,18 +17,16 @@ import java.util.List;
 import java.util.Set;
 
 import edu.uiowa.kind2.Kind2Exception;
-import edu.uiowa.kind2.api.results.Result;
-import edu.uiowa.kind2.api.xml.XmlParseThread;
+import edu.uiowa.kind2.kind2results.Kind2Result;
 import edu.uiowa.kind2.lustre.Program;
 import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 
 /**
  * The primary interface to Kind2.
  */
-public class Kind2Api extends KindApi {
+public class Kind2Api {
   public static final String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private XmlParseThread parseThread;
 
   // module smt
   private SolverOption smtSolver;
@@ -92,7 +90,6 @@ public class Kind2Api extends KindApi {
   private Boolean checkSubproperties;
 
   public Kind2Api() {
-    parseThread = null;
     smtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
@@ -121,6 +118,16 @@ public class Kind2Api extends KindApi {
     ivcOutputDir = null;
     ivcPrecomputedMCS = null;
     ivcUCTimeout = null;
+
+
+    mcsCategories = new HashSet<>();
+    mcsOnlyMainNode = null;
+    mcsAll = null;
+    mcsMaxCardinality = null;
+    printMCS = null;
+    printMCSComplement = null;
+    printMCSCounterexample = null;
+    mcsPerProperty = null;
     outputDir = null;
     includeDirs = new ArrayList<>();
     realPrecision = null;
@@ -135,6 +142,26 @@ public class Kind2Api extends KindApi {
     checkSubproperties = null;
   }
 
+  protected DebugLogger debug = new DebugLogger();
+
+  /**
+   * Put the KindApi into debug mode where it saves all output
+   */
+  public void setApiDebug() {
+    debug = new DebugLogger("-api-debug-");
+  }
+
+  /**
+   * Print string to debug log (assuming setApiDebug() has been called)
+   *
+   * @param text text to print to debug log
+   */
+  public void apiDebug(String text) {
+    if (debug != null) {
+      debug.println(text);
+    }
+  }
+
   /**
    * Run Kind on a Lustre program
    *
@@ -143,11 +170,28 @@ public class Kind2Api extends KindApi {
    * @param monitor Used to check for cancellation
    * @throws .Kind2Exception
    */
-  @Override
-  public void execute(Program program, Result result, IProgressMonitor monitor) {
+  public void execute(Program program, Kind2Result result, IProgressMonitor monitor) {
     PrettyPrintVisitor kind2Printer = new PrettyPrintVisitor();
     kind2Printer.visit(program);
     execute(kind2Printer.toString(), result, monitor);
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @param result  Place to store results as they come in
+   * @param monitor Used to check for cancellation
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Kind2Result result, IProgressMonitor monitor) {
+    File lustreFile = null;
+    try {
+      lustreFile = ApiUtil.writeLustreFile(program);
+      execute(lustreFile, result, monitor);
+    } finally {
+      debug.deleteIfUnneeded(lustreFile);
+    }
   }
 
   /**
@@ -156,21 +200,20 @@ public class Kind2Api extends KindApi {
    * @param lustreFile File containing Lustre program
    * @param result     Place to store results as they come in
    * @param monitor    Used to check for cancellation
-   * @throws .Kind2Exception
+   * @throws Kind2Exception
    */
-  @Override
-  public void execute(File lustreFile, Result result, IProgressMonitor monitor) {
+  public void execute(File lustreFile, Kind2Result result, IProgressMonitor monitor) {
     debug.println("Lustre file", lustreFile);
     try {
       callKind2(lustreFile, result, monitor);
     } catch (Kind2Exception e) {
       throw e;
     } catch (Throwable t) {
-      throw new Kind2Exception(result.getText(), t);
+      throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
-  private void callKind2(File lustreFile, Result result, IProgressMonitor monitor)
+  private void callKind2(File lustreFile, Kind2Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
@@ -178,43 +221,28 @@ public class Kind2Api extends KindApi {
     int code = 0;
 
     try {
-      result.start();
       process = builder.start();
-      parseThread = new XmlParseThread(process.getInputStream(), result);
-      parseThread.start();
-      while (!monitor.isCanceled() && parseThread.isAlive()) {
+      while (!monitor.isCanceled() && process.isAlive()) {
         sleep(POLL_INTERVAL);
       }
     } finally {
+      if (!monitor.isCanceled()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        result.initialize(new String(bytes));
+      }
+
       if (process != null) {
         process.destroy();
         code = process.waitFor();
       }
 
-      if (parseThread != null) {
-        parseThread.join();
-      }
-
-      if (monitor.isCanceled()) {
-        result.cancel();
-      } else {
-        result.done();
-      }
       monitor.done();
 
       if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
-        StringBuilder sb = new StringBuilder();
-        for (String log : getLogs(LogLevel.FATAL)) {
-          sb.append(log).append('\n');
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        throw new Kind2Exception(
-            "Abnormal termination, exit code " + code + ", fatal: " + sb.toString());
+        throw new Kind2Exception("Abnormal termination, exit code " + code);
       }
-    }
-
-    if (parseThread.getThrowable() != null) {
-      throw new Kind2Exception("Error parsing XML", parseThread.getThrowable());
     }
   }
 
@@ -231,7 +259,7 @@ public class Kind2Api extends KindApi {
 
   protected List<String> getArgs() {
     List<String> args = new ArrayList<>();
-    args.add("-xml");
+    args.add("-json");
     args.add("-v");
     if (smtSolver != null) {
       args.add("--smt_solver");
@@ -979,11 +1007,12 @@ public class Kind2Api extends KindApi {
     }
   }
 
-  public List<String> getLogs(LogLevel logLevel) {
-    return parseThread.getLogs(logLevel);
-  }
-
-  @Override
+  /**
+   * Check if the KindApi is available for running and throw exception if not
+   *
+   * @return Availability information when Kind is available
+   * @throws java.lang.Exception When Kind is not available
+   */
   public String checkAvailable() throws Exception {
     ProcessBuilder builder = new ProcessBuilder(KIND2, "--version");
     builder.redirectErrorStream(true);

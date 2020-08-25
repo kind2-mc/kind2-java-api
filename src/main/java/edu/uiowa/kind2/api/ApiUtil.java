@@ -36,39 +36,6 @@ public class ApiUtil {
     }
   }
 
-  public static String readOutput(Process process, IProgressMonitor monitor) throws IOException {
-    InputStream stream = new BufferedInputStream(process.getInputStream());
-    StringBuilder text = new StringBuilder();
-
-    while (true) {
-      if (!process.isAlive()) {
-        return text.toString();
-      }
-
-      checkMonitor(monitor, process);
-      while (stream.available() > 0) {
-        int c = stream.read();
-        if (c == -1) {
-          return text.toString();
-        }
-        text.append((char) c);
-        checkMonitor(monitor, process);
-      }
-
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-      }
-    }
-  }
-
-  private static void checkMonitor(IProgressMonitor monitor, Process process) throws IOException {
-    if (monitor.isCanceled()) {
-      process.getOutputStream().write(Util.END_OF_TEXT);
-      process.getOutputStream().flush();
-    }
-  }
-
   public static String readAll(InputStream inputStream) throws IOException {
     StringBuilder result = new StringBuilder();
     BufferedInputStream buffered = new BufferedInputStream(inputStream);
