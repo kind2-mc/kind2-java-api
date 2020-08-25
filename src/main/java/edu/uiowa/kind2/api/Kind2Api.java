@@ -66,6 +66,16 @@ public class Kind2Api extends KindApi {
   private Integer ivcPrecomputedMCS;
   private Integer ivcUCTimeout;
 
+  // module mcs
+  private Set<MCSCategory> mcsCategories;
+  private Boolean mcsOnlyMainNode;
+  private Boolean mcsAll;
+  private Integer mcsMaxCardinality;
+  private Boolean printMCS;
+  private Boolean printMCSComplement;
+  private Boolean printMCSCounterexample;
+  private Boolean mcsPerProperty;
+
   // general
   // private String lusMain;
   private String outputDir;
@@ -336,6 +346,40 @@ public class Kind2Api extends KindApi {
     if (ivcUCTimeout != null) {
       args.add("--ivc_uc_timeout");
       args.add(ivcUCTimeout.toString());
+    }
+    if (!mcsCategories.isEmpty()) {
+      for (MCSCategory category : mcsCategories) {
+        args.add("--mcs_category");
+        args.add(category.toString());
+      }
+    }
+    if (mcsOnlyMainNode != null) {
+      args.add("--mcs_only_main_node");
+      args.add(mcsOnlyMainNode.toString());
+    }
+    if (mcsAll != null) {
+      args.add("--mcs_all");
+      args.add(mcsAll.toString());
+    }
+    if (mcsMaxCardinality != null) {
+      args.add("--mcs_max_cardinality");
+      args.add(mcsMaxCardinality.toString());
+    }
+    if (printMCS != null) {
+      args.add("--print_mcs");
+      args.add(printMCS.toString());
+    }
+    if (printMCSComplement != null) {
+      args.add("--print_mcs_complement");
+      args.add(printMCSComplement.toString());
+    }
+    if (printMCSCounterexample != null) {
+      args.add("--print_mcs_counterexample");
+      args.add(printMCSCounterexample.toString());
+    }
+    if (mcsPerProperty != null) {
+      args.add("--mcs_per_property");
+      args.add(mcsPerProperty.toString());
     }
     if (outputDir != null) {
       args.add("--output_dir");
@@ -704,6 +748,96 @@ public class Kind2Api extends KindApi {
    */
   public void setIVCUCTimeout(int ivcUCTimeout) {
     this.ivcUCTimeout = ivcUCTimeout;
+  }
+
+  /**
+   * Consider only a specific category of elements, repeat option to consider multiple categories
+   * <p>
+   * Default: annotations
+   *
+   * @param category MCS category to consider
+   */
+  public void setMCSCategory(MCSCategory category) {
+    this.mcsCategories.add(category);
+  }
+
+  /**
+   * Only elements of the main node are considered in the computation
+   * <p>
+   * Default: false
+   *
+   * @param mcsOnlyMainNode whether or not to consider only elements of the main node
+   */
+  public void setMCSOnlyMainNode(boolean mcsOnlyMainNode) {
+    this.mcsOnlyMainNode = mcsOnlyMainNode;
+  }
+
+  /**
+   * Specify whether all the Minimal Cut Sets must be computed or just one
+   * <p>
+   * Default: false
+   *
+   * @param mcsAll whether all the Minimal Cut Sets must be computed or just one
+   */
+  public void setMCSAll(boolean mcsAll) {
+    this.mcsAll = mcsAll;
+  }
+
+  /**
+   * Only search for MCSs of cardinality lower or equal to this parameter. If -1, all MCSs will be
+   * considered.
+   * <p>
+   * Default: -1
+   *
+   * @param mcsMaxCardinality max cardinality of MCSs to search for
+   */
+  public void setMCSMaxCardinality(int mcsMaxCardinality) {
+    this.mcsMaxCardinality = mcsMaxCardinality;
+  }
+
+  /**
+   * Print the minimal cut set computed
+   * <p>
+   * Default: true
+   *
+   * @param printMCS whether or not to print the MCS
+   */
+  public void setPrintMCS(boolean printMCS) {
+    this.printMCS = printMCS;
+  }
+
+  /**
+   * Print the complement of the minimal cut set computed (this is equivalent to computing a Maximal
+   * Unsafe Abstraction)
+   * <p>
+   * Default: false
+   *
+   * @param printMCSComplement whether or not to print the MCS complement
+   */
+  public void setPrintMCSComplement(boolean printMCSComplement) {
+    this.printMCSComplement = printMCSComplement;
+  }
+
+  /**
+   * Print a counterexample for each MCS found
+   * <p>
+   * Default: false
+   *
+   * @param printMCSCounterexample whether or not to print a counterexample for each MCS
+   */
+  public void setPrintMCSCounterexample(boolean printMCSCounterexample) {
+    this.printMCSCounterexample = printMCSCounterexample;
+  }
+
+  /**
+   * If true, MCSs will be computed for each property separately
+   * <p>
+   * Default: true
+   *
+   * @param mcsPerProperty whether or not to compute MCSs for each property separately
+   */
+  public void setMCSPerProperty(boolean mcsPerProperty) {
+    this.mcsPerProperty = mcsPerProperty;
   }
 
   /**
