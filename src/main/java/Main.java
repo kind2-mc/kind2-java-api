@@ -11,7 +11,7 @@ import java.util.List;
 
 import edu.uiowa.kind2.api.IProgressMonitor;
 import edu.uiowa.kind2.api.Kind2Api;
-import edu.uiowa.kind2.kind2results.Kind2Result;
+import edu.uiowa.kind2.results.Kind2Result;
 import edu.uiowa.kind2.lustre.Contract;
 import edu.uiowa.kind2.lustre.IdExpr;
 import edu.uiowa.kind2.lustre.ImportedFunction;

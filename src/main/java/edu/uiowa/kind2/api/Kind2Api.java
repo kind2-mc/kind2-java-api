@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.uiowa.kind2.Kind2Exception;
-import edu.uiowa.kind2.kind2results.Kind2Result;
+import edu.uiowa.kind2.results.Kind2Result;
 import edu.uiowa.kind2.lustre.Program;
 import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 
