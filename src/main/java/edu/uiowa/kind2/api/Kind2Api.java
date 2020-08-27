@@ -43,6 +43,18 @@ public class Kind2Api {
   // module ind
   private Boolean indPrintCex;
 
+  // module ic3
+  private IC3Abstraction ic3Abstr;
+
+  // module test
+  private Boolean testgen;
+  private Boolean testgenGraphOnly;
+  private Integer testgenLen;
+
+  // module interpreter
+  private String interpreterInputFile;
+  private Integer interpreterSteps;
+
   // module contracts
   private Boolean compositional;
   private Boolean checkModes;
@@ -101,6 +113,12 @@ public class Kind2Api {
     yices2Bin = null;
     smtTrace = null;
     indPrintCex = null;
+    ic3Abstr = null;
+    testgen = null;
+    testgenGraphOnly = null;
+    testgenLen = null;
+    interpreterInputFile = null;
+    interpreterSteps = null;
     compositional = null;
     checkModes = null;
     checkImplem = null;
@@ -118,8 +136,6 @@ public class Kind2Api {
     ivcOutputDir = null;
     ivcPrecomputedMCS = null;
     ivcUCTimeout = null;
-
-
     mcsCategories = new HashSet<>();
     mcsOnlyMainNode = null;
     mcsAll = null;
@@ -304,6 +320,30 @@ public class Kind2Api {
     if (indPrintCex != null) {
       args.add("--ind_print_cex");
       args.add(indPrintCex.toString());
+    }
+    if (ic3Abstr != null) {
+      args.add("--ic3_abstr");
+      args.add(ic3Abstr.toString());
+    }
+    if (testgen != null) {
+      args.add("--testgen");
+      args.add(testgen.toString());
+    }
+    if (testgenGraphOnly != null) {
+      args.add("--testgen_graph_only");
+      args.add(testgenGraphOnly.toString());
+    }
+    if (testgenLen != null) {
+      args.add("--testgen_len");
+      args.add(testgenLen.toString());
+    }
+    if (interpreterInputFile != null) {
+      args.add("--interpreter_input_file");
+      args.add(interpreterInputFile.toString());
+    }
+    if (interpreterSteps != null) {
+      args.add("--interpreter_steps");
+      args.add(interpreterSteps.toString());
     }
     if (compositional != null) {
       args.add("--compositional");
@@ -581,6 +621,70 @@ public class Kind2Api {
    */
   public void setIndPrintCex(boolean indPrintCex) {
     this.indPrintCex = indPrintCex;
+  }
+
+  /**
+   * Choose method of abstraction in IC3
+   * <p>
+   * Default: None
+   *
+   * @param ic3Abstr abstraction method
+   */
+  public void setIC3Abstr(IC3Abstraction ic3Abstr) {
+    this.ic3Abstr = ic3Abstr;
+  }
+
+  /**
+   * Activates test generation for systems proved correct
+   * <p>
+   * Default: false
+   *
+   * @param testgen whether or not to activate test generation
+   */
+  public void setTestgen(boolean testgen) {
+    this.testgen = testgen;
+  }
+
+  /**
+   * Only draw the graph of reachable modes, do not log test cases.
+   * <p>
+   * Default: false
+   *
+   * @param testgenGraphOnly whether or not to only draw the graph of reachable modes
+   */
+  public void setTestgenGraphOnly(boolean testgenGraphOnly) {
+    this.testgenGraphOnly = testgenGraphOnly;
+  }
+
+  /**
+   * Maximum length for test generation
+   * <p>
+   * Default: 5
+   *
+   * @param testgenLen maximum length for test generation
+   */
+  public void setTestgenLen(int testgenLen) {
+    this.testgenLen = testgenLen;
+  }
+
+  /**
+   * Read input from file
+   *
+   * @param interpreterInputFile path to file
+   */
+  public void setInterpreterInputFile(String interpreterInputFile) {
+    this.interpreterInputFile = interpreterInputFile;
+  }
+
+  /**
+   * Run number of steps, override the number of steps given in the input file
+   * <p>
+   * Default: 0
+   *
+   * @param interpreterSteps number of steps to run
+   */
+  public void setInterpreterSteps(int interpreterSteps) {
+    this.interpreterSteps = interpreterSteps;
   }
 
   /**
