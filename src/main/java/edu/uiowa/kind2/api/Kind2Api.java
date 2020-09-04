@@ -87,12 +87,10 @@ public class Kind2Api {
   private Boolean mcsPerProperty;
 
   // general
-  // private String lusMain;
   private String outputDir;
   private List<String> includeDirs;
   private String realPrecision;
   private Boolean logInvs;
-  // private Boolean printInvs;
   private Float timeout;
   private Boolean onlyParse;
   private Set<Module> enabledSet;
@@ -148,7 +146,6 @@ public class Kind2Api {
     includeDirs = new ArrayList<>();
     realPrecision = null;
     logInvs = null;
-    // printInvs = null;
     timeout = null;
     onlyParse = null;
     enabledSet = new HashSet<>();
