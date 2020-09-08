@@ -5,7 +5,7 @@ An API that constructs lustre programs, runs Kind 2, and shows results/suggestio
 
 ```shell
 git clone https://github.com/kind2-mc/kind2-java-api.git
-cd kind2-explanations
+cd kind2-java-api
 ./gradlew build
 ```
 To import the API, use the jar file `build/libs/kind2-java-api.jar`. 
