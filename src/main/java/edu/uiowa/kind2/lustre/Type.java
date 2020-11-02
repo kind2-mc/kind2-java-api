@@ -7,5 +7,5 @@
 
 package edu.uiowa.kind2.lustre;
 
-abstract class Type {
+public interface Type {
 }

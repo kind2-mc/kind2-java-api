@@ -8,8 +8,6 @@
 
 package edu.uiowa.kind2.lustre;
 
-import static edu.uiowa.kind2.lustre.NamedType.BOOL;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -167,11 +165,11 @@ public class LustreUtil {
   /* Cast Expressions */
 
   public static Expr castInt(Expr expr) {
-    return new CastExpr(NamedType.INT, expr);
+    return new CastExpr(TypeUtil.INT, expr);
   }
 
   public static Expr castReal(Expr expr) {
-    return new CastExpr(NamedType.REAL, expr);
+    return new CastExpr(TypeUtil.REAL, expr);
   }
 
   /* Miscellaneous Expressions */
@@ -273,8 +271,8 @@ public class LustreUtil {
   public static Component historically(String name) {
     NodeBuilder historically = new NodeBuilder(name);
 
-    IdExpr signal = historically.createVarInput("signal", BOOL);
-    IdExpr holds = historically.createVarOutput("holds", BOOL);
+    IdExpr signal = historically.createVarInput("signal", TypeUtil.BOOL);
+    IdExpr holds = historically.createVarOutput("holds", TypeUtil.BOOL);
 
     // historically: holds = signal and (true -> pre holds);
     historically.addEquation(holds, and(signal, arrow(TRUE, pre(holds))));
@@ -289,8 +287,8 @@ public class LustreUtil {
   public static Component once(String name) {
     NodeBuilder once = new NodeBuilder(name);
 
-    IdExpr signal = once.createVarInput("signal", BOOL);
-    IdExpr holds = once.createVarOutput("holds", BOOL);
+    IdExpr signal = once.createVarInput("signal", TypeUtil.BOOL);
+    IdExpr holds = once.createVarOutput("holds", TypeUtil.BOOL);
 
     // once: holds = signal or (false -> pre holds);
     once.addEquation(holds, or(signal, arrow(FALSE, pre(holds))));
@@ -305,10 +303,10 @@ public class LustreUtil {
   public static Component since(String name) {
     NodeBuilder since = new NodeBuilder(name);
 
-    IdExpr a = since.createVarInput("a", BOOL);
-    IdExpr b = since.createVarInput("b", BOOL);
+    IdExpr a = since.createVarInput("a", TypeUtil.BOOL);
+    IdExpr b = since.createVarInput("b", TypeUtil.BOOL);
 
-    IdExpr holds = since.createVarOutput("holds", BOOL);
+    IdExpr holds = since.createVarOutput("holds", TypeUtil.BOOL);
 
     // since: holds = b or (a and (false -> pre holds))
     since.addEquation(holds, or(b, and(a, arrow(FALSE, pre(holds)))));
@@ -323,10 +321,10 @@ public class LustreUtil {
   public static Component triggers(String name) {
     NodeBuilder triggers = new NodeBuilder(name);
 
-    IdExpr a = triggers.createVarInput("a", BOOL);
-    IdExpr b = triggers.createVarInput("b", BOOL);
+    IdExpr a = triggers.createVarInput("a", TypeUtil.BOOL);
+    IdExpr b = triggers.createVarInput("b", TypeUtil.BOOL);
 
-    IdExpr holds = triggers.createVarOutput("holds", BOOL);
+    IdExpr holds = triggers.createVarOutput("holds", TypeUtil.BOOL);
 
     // triggers: holds = b and (a or (true -> pre holds))
     triggers.addEquation(holds, and(b, or(a, arrow(TRUE, pre(holds)))));

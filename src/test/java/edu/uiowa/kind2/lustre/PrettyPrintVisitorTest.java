@@ -80,12 +80,12 @@ class PrettyPrintVisitorTest {
     String expected = "var x : bool = true;";
 
     Assertions.assertThrows(Kind2Exception.class,
-        () -> new VarDef(null, NamedType.BOOL, LustreUtil.TRUE));
+        () -> new VarDef(null, TypeUtil.BOOL, LustreUtil.TRUE));
     Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", null, LustreUtil.TRUE));
-    Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", NamedType.BOOL, null));
+    Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", TypeUtil.BOOL, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new VarDef("x", NamedType.BOOL, LustreUtil.TRUE));
+    visitor.visit(new VarDef("x", TypeUtil.BOOL, LustreUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -161,7 +161,7 @@ class PrettyPrintVisitorTest {
     ModeBuilder m = new ModeBuilder("m");
     c.addMode(m);
     c.createConstant("c", null, LustreUtil.TRUE);
-    c.createVarDef("x", NamedType.BOOL, LustreUtil.TRUE);
+    c.createVarDef("x", TypeUtil.BOOL, LustreUtil.TRUE);
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(c.build());

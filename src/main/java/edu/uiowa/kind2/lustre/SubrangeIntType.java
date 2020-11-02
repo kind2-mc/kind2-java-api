@@ -11,7 +11,7 @@ import java.math.BigInteger;
 
 import edu.uiowa.kind2.Assert;
 
-class SubrangeIntType extends Type {
+class SubrangeIntType implements Type {
   final BigInteger low;
   final BigInteger high;
 

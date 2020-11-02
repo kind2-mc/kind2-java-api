@@ -9,7 +9,6 @@
 package edu.uiowa.kind2.lustre;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -37,29 +36,8 @@ public class ProgramBuilder {
    * @param type the type definition to add
    * @return this program builder
    */
-  public ProgramBuilder addType(TypeDef type) {
-    this.types.add(type);
-    return this;
-  }
-
-  /**
-   * add type definitions
-   *
-   * @param types a collection of type definitions to add
-   * @return this program builder
-   */
-  public ProgramBuilder addTypes(Collection<TypeDef> types) {
-    this.types.addAll(types);
-    return this;
-  }
-
-  /**
-   * remove all type definitions
-   *
-   * @return this program builder
-   */
-  public ProgramBuilder clearTypes() {
-    this.types.clear();
+  public ProgramBuilder addType(String name, Type type) {
+    this.types.add(new TypeDef(name, type));
     return this;
   }
 

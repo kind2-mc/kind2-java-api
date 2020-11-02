@@ -13,7 +13,7 @@ import edu.uiowa.kind2.api.Kind2Api;
 import edu.uiowa.kind2.results.Kind2Result;
 import edu.uiowa.kind2.lustre.IdExpr;
 import edu.uiowa.kind2.lustre.LustreUtil;
-import edu.uiowa.kind2.lustre.NamedType;
+import edu.uiowa.kind2.lustre.TypeUtil;
 import edu.uiowa.kind2.lustre.ContractBodyBuilder;
 import edu.uiowa.kind2.lustre.ContractBuilder;
 import edu.uiowa.kind2.lustre.Expr;
@@ -69,8 +69,8 @@ public class Main {
         LustreUtil.equal(LustreUtil.multiply(r, r), n)));
 
     FunctionBuilder fb = new FunctionBuilder("sqrt");
-    fb.createVarInput("n", NamedType.REAL);
-    fb.createVarOutput("r", NamedType.REAL);
+    fb.createVarInput("n", TypeUtil.REAL);
+    fb.createVarOutput("r", TypeUtil.REAL);
     fb.setContractBody(cbb);
 
     return fb;
@@ -79,13 +79,14 @@ public class Main {
   static ContractBuilder stopWatchSpec() {
     ContractBuilder cb = new ContractBuilder("StopWatchSpec");
 
-    IdExpr toggle = cb.createVarInput("toggle", NamedType.BOOL);
-    IdExpr reset = cb.createVarInput("reset", NamedType.BOOL);
-    IdExpr time = cb.createVarOutput("time", NamedType.INT);
+    IdExpr toggle = cb.createVarInput("toggle", TypeUtil.BOOL);
+    IdExpr reset = cb.createVarInput("reset", TypeUtil.BOOL);
+    IdExpr time = cb.createVarOutput("time", TypeUtil.INT);
 
     IdExpr on = LustreUtil.id("on");
 
-    cb.createVarDef("on", NamedType.BOOL,
+    cb.createVarDef("on", 
+        TypeUtil.BOOL,
         LustreUtil.arrow(toggle,
             LustreUtil.or(LustreUtil.and(LustreUtil.pre(on), LustreUtil.not(toggle)),
                 LustreUtil.and(LustreUtil.not(LustreUtil.pre(on)), toggle))));
@@ -153,8 +154,8 @@ public class Main {
 
   static FunctionBuilder even() {
     FunctionBuilder fb = new FunctionBuilder("even");
-    IdExpr N = fb.createVarInput("N", NamedType.INT);
-    IdExpr B = fb.createVarOutput("B", NamedType.BOOL);
+    IdExpr N = fb.createVarInput("N", TypeUtil.INT);
+    IdExpr B = fb.createVarOutput("B", TypeUtil.BOOL);
     fb.addEquation(B,
         LustreUtil.equal(LustreUtil.mod(N, LustreUtil.integer(2)), LustreUtil.integer(0)));
     return fb;
@@ -162,16 +163,16 @@ public class Main {
 
   static FunctionBuilder toInt() {
     FunctionBuilder f = new FunctionBuilder("toInt");
-    IdExpr X = f.createVarInput("X", NamedType.BOOL);
-    IdExpr N = f.createVarOutput("N", NamedType.INT);
+    IdExpr X = f.createVarInput("X", TypeUtil.BOOL);
+    IdExpr N = f.createVarOutput("N", TypeUtil.INT);
     f.addEquation(N, LustreUtil.ite(X, LustreUtil.integer(1), LustreUtil.integer(0)));
     return f;
   }
 
   static NodeBuilder count() {
     NodeBuilder nb = new NodeBuilder("Count");
-    IdExpr X = nb.createVarInput("X", NamedType.BOOL);
-    IdExpr N = nb.createVarOutput("N", NamedType.INT);
+    IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
+    IdExpr N = nb.createVarOutput("N", TypeUtil.INT);
     Expr toIntX = LustreUtil.nodeCall(LustreUtil.id("toInt"), X);
     nb.addEquation(N, LustreUtil.arrow(toIntX, LustreUtil.plus(toIntX, LustreUtil.pre(N))));
     return nb;
@@ -179,17 +180,17 @@ public class Main {
 
   static NodeBuilder sofar() {
     NodeBuilder nb = new NodeBuilder("Sofar");
-    IdExpr X = nb.createVarInput("X", NamedType.BOOL);
-    IdExpr Y = nb.createVarOutput("Y", NamedType.BOOL);
+    IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
+    IdExpr Y = nb.createVarOutput("Y", TypeUtil.BOOL);
     nb.addEquation(Y, LustreUtil.arrow(X, LustreUtil.and(X, LustreUtil.pre(Y))));
     return nb;
   }
 
   static NodeBuilder since() {
     NodeBuilder nb = new NodeBuilder("Since");
-    IdExpr X = nb.createVarInput("X", NamedType.BOOL);
-    IdExpr Y = nb.createVarInput("Y", NamedType.BOOL);
-    IdExpr Z = nb.createVarOutput("Z", NamedType.BOOL);
+    IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
+    IdExpr Y = nb.createVarInput("Y", TypeUtil.BOOL);
+    IdExpr Z = nb.createVarOutput("Z", TypeUtil.BOOL);
     nb.addEquation(Z,
         LustreUtil.or(X, LustreUtil.and(Y, LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(Z)))));
     return nb;
@@ -197,9 +198,9 @@ public class Main {
 
   static NodeBuilder sinceIncl() {
     NodeBuilder nb = new NodeBuilder("SinceIncl");
-    IdExpr X = nb.createVarInput("X", NamedType.BOOL);
-    IdExpr Y = nb.createVarInput("Y", NamedType.BOOL);
-    IdExpr Z = nb.createVarOutput("Z", NamedType.BOOL);
+    IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
+    IdExpr Y = nb.createVarInput("Y", TypeUtil.BOOL);
+    IdExpr Z = nb.createVarOutput("Z", TypeUtil.BOOL);
     nb.addEquation(Z,
         LustreUtil.and(Y, LustreUtil.or(X, LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(Z)))));
     return nb;
@@ -207,25 +208,25 @@ public class Main {
 
   static NodeBuilder increased() {
     NodeBuilder nb = new NodeBuilder("Increased");
-    IdExpr N = nb.createVarInput("N", NamedType.INT);
-    IdExpr B = nb.createVarOutput("B", NamedType.BOOL);
+    IdExpr N = nb.createVarInput("N", TypeUtil.INT);
+    IdExpr B = nb.createVarOutput("B", TypeUtil.BOOL);
     nb.addEquation(B, LustreUtil.arrow(LustreUtil.TRUE, LustreUtil.greater(N, LustreUtil.pre(N))));
     return nb;
   }
 
   static NodeBuilder stable() {
     NodeBuilder nb = new NodeBuilder("Stable");
-    IdExpr N = nb.createVarInput("N", NamedType.INT);
-    IdExpr B = nb.createVarOutput("B", NamedType.BOOL);
+    IdExpr N = nb.createVarInput("N", TypeUtil.INT);
+    IdExpr B = nb.createVarOutput("B", TypeUtil.BOOL);
     nb.addEquation(B, LustreUtil.arrow(LustreUtil.TRUE, LustreUtil.equal(N, LustreUtil.pre(N))));
     return nb;
   }
 
   static NodeBuilder stopWatch() {
     NodeBuilder nb = new NodeBuilder("Stopwatch");
-    IdExpr toggle = nb.createVarInput("toggle", NamedType.BOOL);
-    IdExpr reset = nb.createVarInput("reset", NamedType.BOOL);
-    IdExpr count = nb.createVarOutput("count", NamedType.INT);
+    IdExpr toggle = nb.createVarInput("toggle", TypeUtil.BOOL);
+    IdExpr reset = nb.createVarInput("reset", TypeUtil.BOOL);
+    IdExpr count = nb.createVarOutput("count", TypeUtil.INT);
 
     ContractBodyBuilder cbb = new ContractBodyBuilder();
     cbb.importContract("StopWatchSpec", Arrays.asList(toggle, reset),
@@ -237,7 +238,7 @@ public class Main {
 
     nb.setContractBody(cbb);
 
-    IdExpr running = nb.createLocalVar("running", NamedType.BOOL);
+    IdExpr running = nb.createLocalVar("running", TypeUtil.BOOL);
 
     nb.addEquation(running,
         LustreUtil.notEqual(LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(running)), toggle));

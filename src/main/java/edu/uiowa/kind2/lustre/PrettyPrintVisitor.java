@@ -494,9 +494,9 @@ public class PrettyPrintVisitor {
   }
 
   private String getCastFunction(Type type) {
-    if (type == NamedType.REAL) {
+    if (type == TypeUtil.REAL) {
       return "real";
-    } else if (type == NamedType.INT) {
+    } else if (type == TypeUtil.INT) {
       return "floor";
     } else {
       throw new IllegalArgumentException("Unable to cast to type: " + type);
