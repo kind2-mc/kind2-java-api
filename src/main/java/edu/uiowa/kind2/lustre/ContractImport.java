@@ -25,35 +25,22 @@ import edu.uiowa.kind2.util.Util;
  * When importing contract {@code c} in the contract of node {@code n}, it is <b>illegal</b> to
  * mention an output of {@code n} in the actual input parameters of the import of {@code c}.
  */
-public class ContractImport extends ContractItem {
-  public final String id;
-  public final List<Expr> inputs;
-  public final List<IdExpr> outputs;
-
-  /**
-   * Constructor
-   *
-   * @param location location of contract import in a Lustre file
-   * @param id       name of contract to import
-   * @param inputs   inputs to the contract
-   * @param outputs  outputs of the contract
-   */
-  public ContractImport(Location loc, String id, List<Expr> inputs, List<IdExpr> outputs) {
-    super(loc);
-    Assert.isNotNull(id);
-    this.id = id;
-    this.inputs = Util.safeList(inputs);
-    this.outputs = Util.safeList(outputs);
-  }
+class ContractImport extends ContractItem {
+  final String id;
+  final List<Expr> inputs;
+  final List<IdExpr> outputs;
 
   /**
    * Constructor
    *
    * @param id      name of contract to import
-   * @param inputs  inputs of the contract
+   * @param inputs  inputs to the contract
    * @param outputs outputs of the contract
    */
-  public ContractImport(String id, List<Expr> inputs, List<IdExpr> outputs) {
-    this(Location.NULL, id, inputs, outputs);
+  ContractImport(String id, List<Expr> inputs, List<IdExpr> outputs) {
+    Assert.isNotNull(id);
+    this.id = id;
+    this.inputs = Util.safeList(inputs);
+    this.outputs = Util.safeList(outputs);
   }
 }

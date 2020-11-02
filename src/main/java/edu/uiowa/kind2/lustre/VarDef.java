@@ -14,34 +14,20 @@ import edu.uiowa.kind2.Assert;
  * the contract. That is, it is not accessible from the body of the node specified. Ghost variables
  * are defined with the {@code var} keyword.
  */
-public class VarDef extends ContractItem {
-  public final VarDecl varDecl;
-  public final Expr expr;
+class VarDef extends ContractItem {
+  final VarDecl varDecl;
+  final Expr expr;
 
   /**
    * Constructor
    *
-   * @param location location of ghost variable definition in a Lustre file
-   * @param varDecl  ghost variable's declaration
-   * @param expr     expression specifying stream of values assigned to ghost variable
+   * @param varDecl ghost variable's declaration
+   * @param expr    expression specifying stream of values assigned to ghost variable
    */
-  public VarDef(Location location, VarDecl varDecl, Expr expr) {
-    super(location);
+  VarDef(VarDecl varDecl, Expr expr) {
     this.varDecl = varDecl;
     Assert.isNotNull(expr);
     this.expr = expr;
-  }
-
-  /**
-   * Constructor
-   *
-   * @param location location of ghost variable definition in a Lustre file
-   * @param id       name of ghost variable
-   * @param type     type of ghost variable
-   * @param expr     expression specifying stream of values assigned to ghost variable
-   */
-  public VarDef(Location location, String id, Type type, Expr expr) {
-    this(location, new VarDecl(id, type), expr);
   }
 
   /**
@@ -51,7 +37,7 @@ public class VarDef extends ContractItem {
    * @param type type of ghost variable
    * @param expr expression specifying stream of values assigned to ghost variable
    */
-  public VarDef(String id, Type type, Expr expr) {
-    this(Location.NULL, id, type, expr);
+  VarDef(String id, Type type, Expr expr) {
+    this(new VarDecl(id, type), expr);
   }
 }

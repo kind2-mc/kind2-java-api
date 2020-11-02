@@ -7,8 +7,8 @@
 
 package edu.uiowa.kind2.lustre;
 
-/**
- * This abstract class represents the items (i.e., statements) that can appear in a contract body.
- */
-abstract class ContractItem extends Ast {
+public class NodeBuilder extends ComponentBuilder {
+  public NodeBuilder(String id) {
+    super(id);
+  }
 }

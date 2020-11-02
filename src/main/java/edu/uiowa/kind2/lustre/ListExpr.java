@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, Rockwell Collins
+ * Copyright (c) 2020, Board of Trustees of the University of Iowa
  * All rights reserved.
  *
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
@@ -11,10 +11,10 @@ import java.util.List;
 
 import edu.uiowa.kind2.util.Util;
 
-class ArrayExpr extends Expr {
-  final List<Expr> elements;
+class ListExpr extends Expr {
+  final List<Expr> list;
 
-  ArrayExpr(List<Expr> elements) {
-    this.elements = Util.safeList(elements);
+  ListExpr(List<? extends Expr> list) {
+    this.list = Util.safeList(list);
   }
 }

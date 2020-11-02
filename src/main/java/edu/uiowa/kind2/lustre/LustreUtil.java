@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import edu.uiowa.kind2.lustre.builders.NodeBuilder;
-
 public class LustreUtil {
 
   /* Binary Expressions */
@@ -147,6 +145,22 @@ public class LustreUtil {
     return new ModeRefExpr(path);
   }
 
+  public static Expr functionCall(IdExpr name, List<Expr> args) {
+    return new NodeCallExpr(name.id, args);
+  }
+
+  public static Expr functionCall(IdExpr name, Expr... args) {
+    return new NodeCallExpr(name.id, Arrays.asList(args));
+  }
+
+  public static Expr nodeCall(IdExpr name, List<Expr> args) {
+    return new NodeCallExpr(name.id, args);
+  }
+
+  public static Expr nodeCall(IdExpr name, Expr... args) {
+    return new NodeCallExpr(name.id, Arrays.asList(args));
+  }
+
   public static Expr TRUE = new BoolExpr(true);
   public static Expr FALSE = new BoolExpr(false);
 
@@ -252,74 +266,70 @@ public class LustreUtil {
 
   /* Nodes */
 
-  public static Node historically() {
+  public static Component historically() {
     return historically("historically");
   }
 
-  public static Node historically(String name) {
+  public static Component historically(String name) {
     NodeBuilder historically = new NodeBuilder(name);
 
-    IdExpr signal = historically.createInput("signal", BOOL);
-    IdExpr holds = historically.createOutput("holds", BOOL);
+    IdExpr signal = historically.createVarInput("signal", BOOL);
+    IdExpr holds = historically.createVarOutput("holds", BOOL);
 
     // historically: holds = signal and (true -> pre holds);
-    Equation equation = eq(holds, and(signal, arrow(TRUE, pre(holds))));
-    historically.addEquation(equation);
+    historically.addEquation(holds, and(signal, arrow(TRUE, pre(holds))));
 
     return historically.build();
   }
 
-  public static Node once() {
+  public static Component once() {
     return once("once");
   }
 
-  public static Node once(String name) {
+  public static Component once(String name) {
     NodeBuilder once = new NodeBuilder(name);
 
-    IdExpr signal = once.createInput("signal", BOOL);
-    IdExpr holds = once.createOutput("holds", BOOL);
+    IdExpr signal = once.createVarInput("signal", BOOL);
+    IdExpr holds = once.createVarOutput("holds", BOOL);
 
     // once: holds = signal or (false -> pre holds);
-    Equation equation = eq(holds, or(signal, arrow(FALSE, pre(holds))));
-    once.addEquation(equation);
+    once.addEquation(holds, or(signal, arrow(FALSE, pre(holds))));
 
     return once.build();
   }
 
-  public static Node since() {
+  public static Component since() {
     return since("since");
   }
 
-  public static Node since(String name) {
+  public static Component since(String name) {
     NodeBuilder since = new NodeBuilder(name);
 
-    IdExpr a = since.createInput("a", BOOL);
-    IdExpr b = since.createInput("b", BOOL);
+    IdExpr a = since.createVarInput("a", BOOL);
+    IdExpr b = since.createVarInput("b", BOOL);
 
-    IdExpr holds = since.createOutput("holds", BOOL);
+    IdExpr holds = since.createVarOutput("holds", BOOL);
 
     // since: holds = b or (a and (false -> pre holds))
-    Equation equation = eq(holds, or(b, and(a, arrow(FALSE, pre(holds)))));
-    since.addEquation(equation);
+    since.addEquation(holds, or(b, and(a, arrow(FALSE, pre(holds)))));
 
     return since.build();
   }
 
-  public static Node triggers() {
+  public static Component triggers() {
     return triggers("triggers");
   }
 
-  public static Node triggers(String name) {
+  public static Component triggers(String name) {
     NodeBuilder triggers = new NodeBuilder(name);
 
-    IdExpr a = triggers.createInput("a", BOOL);
-    IdExpr b = triggers.createInput("b", BOOL);
+    IdExpr a = triggers.createVarInput("a", BOOL);
+    IdExpr b = triggers.createVarInput("b", BOOL);
 
-    IdExpr holds = triggers.createOutput("holds", BOOL);
+    IdExpr holds = triggers.createVarOutput("holds", BOOL);
 
     // triggers: holds = b and (a or (true -> pre holds))
-    Equation equation = eq(holds, and(b, or(a, arrow(TRUE, pre(holds)))));
-    triggers.addEquation(equation);
+    triggers.addEquation(holds, and(b, or(a, arrow(TRUE, pre(holds)))));
 
     return triggers.build();
   }

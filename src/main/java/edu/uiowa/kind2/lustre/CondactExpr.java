@@ -13,13 +13,12 @@ import java.util.List;
 import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-public class CondactExpr extends Expr {
-  public final Expr clock;
-  public final NodeCallExpr call;
-  public final List<Expr> args;
+class CondactExpr extends Expr {
+  final Expr clock;
+  final NodeCallExpr call;
+  final List<Expr> args;
 
-  public CondactExpr(Location loc, Expr clock, NodeCallExpr call, List<Expr> args) {
-    super(loc);
+  CondactExpr(Expr clock, NodeCallExpr call, List<Expr> args) {
     Assert.isNotNull(clock);
     Assert.isNotNull(call);
     this.clock = clock;
@@ -27,11 +26,7 @@ public class CondactExpr extends Expr {
     this.args = Util.safeList(args);
   }
 
-  public CondactExpr(Expr clock, NodeCallExpr call, List<Expr> args) {
-    this(Location.NULL, clock, call, args);
-  }
-
-  public CondactExpr(Expr clock, NodeCallExpr call, Expr... args) {
-    this(Location.NULL, clock, call, Arrays.asList(args));
+  CondactExpr(Expr clock, NodeCallExpr call, Expr... args) {
+    this(clock, call, Arrays.asList(args));
   }
 }

@@ -8,7 +8,6 @@
 
 package edu.uiowa.kind2.lustre;
 
-import java.util.Arrays;
 import java.util.List;
 
 import edu.uiowa.kind2.util.Util;
@@ -26,19 +25,18 @@ import edu.uiowa.kind2.util.Util;
  * </ul>
  */
 public class Program extends Ast {
-  public final List<TypeDef> types;
-  public final List<Constant> constants;
-  public final List<ImportedFunction> importedFunctions;
-  public final List<ImportedNode> importedNodes;
-  public final List<Contract> contracts;
-  public final List<Function> functions;
-  public final List<Node> nodes;
-  public final String main; // Nullable
+  final List<TypeDef> types;
+  final List<Constant> constants;
+  final List<Component> importedFunctions;
+  final List<Component> importedNodes;
+  final List<Contract> contracts;
+  final List<Component> functions;
+  final List<Component> nodes;
+  final String main; // Nullable
 
   /**
    * Constructor
    *
-   * @param location          location of assumption in a Lustre file
    * @param types             a collection of type definitions
    * @param constants         a collection of constant definitions
    * @param importedFunctions a collections of Kind 2 imported functions
@@ -48,10 +46,9 @@ public class Program extends Ast {
    * @param nodes             a collections of nodes
    * @param main              id of the main node/function
    */
-  public Program(Location location, List<TypeDef> types, List<Constant> constants,
-      List<ImportedFunction> importedFunctions, List<ImportedNode> importedNodes,
-      List<Contract> contracts, List<Function> functions, List<Node> nodes, String main) {
-    super(location);
+  Program(List<TypeDef> types, List<Constant> constants, List<Component> importedFunctions,
+      List<Component> importedNodes, List<Contract> contracts, List<Component> functions,
+      List<Component> nodes, String main) {
     this.types = Util.safeList(types);
     this.constants = Util.safeList(constants);
     this.importedFunctions = Util.safeList(importedFunctions);
@@ -60,14 +57,5 @@ public class Program extends Ast {
     this.functions = Util.safeList(functions);
     this.nodes = Util.safeList(nodes);
     this.main = main;
-  }
-
-  /**
-   * Constructor
-   *
-   * @param nodes an array of nodes
-   */
-  public Program(Node... nodes) {
-    this(Location.NULL, null, null, null, null, null, null, Arrays.asList(nodes), null);
   }
 }

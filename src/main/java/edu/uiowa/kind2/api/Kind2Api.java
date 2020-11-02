@@ -19,7 +19,6 @@ import java.util.Set;
 import edu.uiowa.kind2.Kind2Exception;
 import edu.uiowa.kind2.results.Kind2Result;
 import edu.uiowa.kind2.lustre.Program;
-import edu.uiowa.kind2.lustre.visitors.PrettyPrintVisitor;
 
 /**
  * The primary interface to Kind2.
@@ -155,7 +154,7 @@ public class Kind2Api {
     checkSubproperties = null;
   }
 
-  protected DebugLogger debug = new DebugLogger();
+  DebugLogger debug = new DebugLogger();
 
   /**
    * Put the KindApi into debug mode where it saves all output
@@ -184,9 +183,7 @@ public class Kind2Api {
    * @throws .Kind2Exception
    */
   public void execute(Program program, Kind2Result result, IProgressMonitor monitor) {
-    PrettyPrintVisitor kind2Printer = new PrettyPrintVisitor();
-    kind2Printer.visit(program);
-    execute(kind2Printer.toString(), result, monitor);
+    execute(program.toString(), result, monitor);
   }
 
   /**
@@ -270,7 +267,7 @@ public class Kind2Api {
     return builder;
   }
 
-  protected List<String> getArgs() {
+  List<String> getArgs() {
     List<String> args = new ArrayList<>();
     args.add("-json");
     args.add("-v");
@@ -1101,7 +1098,7 @@ public class Kind2Api {
     this.checkSubproperties = checkSubproperties;
   }
 
-  protected void sleep(long interval) {
+  void sleep(long interval) {
     try {
       Thread.sleep(interval);
     } catch (InterruptedException e) {

@@ -6,55 +6,13 @@
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
 
-package edu.uiowa.kind2.lustre.visitors;
+package edu.uiowa.kind2.lustre;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import edu.uiowa.kind2.Kind2Exception;
-import edu.uiowa.kind2.lustre.ArrayAccessExpr;
-import edu.uiowa.kind2.lustre.ArrayExpr;
-import edu.uiowa.kind2.lustre.ArrayType;
-import edu.uiowa.kind2.lustre.Assume;
-import edu.uiowa.kind2.lustre.Ast;
-import edu.uiowa.kind2.lustre.BinaryExpr;
-import edu.uiowa.kind2.lustre.BoolExpr;
-import edu.uiowa.kind2.lustre.CastExpr;
-import edu.uiowa.kind2.lustre.CondactExpr;
-import edu.uiowa.kind2.lustre.Constant;
-import edu.uiowa.kind2.lustre.Contract;
-import edu.uiowa.kind2.lustre.ContractBody;
-import edu.uiowa.kind2.lustre.ContractImport;
-import edu.uiowa.kind2.lustre.ContractItem;
-import edu.uiowa.kind2.lustre.EnumType;
-import edu.uiowa.kind2.lustre.Equation;
-import edu.uiowa.kind2.lustre.Expr;
-import edu.uiowa.kind2.lustre.Function;
-import edu.uiowa.kind2.lustre.FunctionCallExpr;
-import edu.uiowa.kind2.lustre.Guarantee;
-import edu.uiowa.kind2.lustre.IdExpr;
-import edu.uiowa.kind2.lustre.IfThenElseExpr;
-import edu.uiowa.kind2.lustre.ImportedFunction;
-import edu.uiowa.kind2.lustre.ImportedNode;
-import edu.uiowa.kind2.lustre.IntExpr;
-import edu.uiowa.kind2.lustre.Mode;
-import edu.uiowa.kind2.lustre.ModeRefExpr;
-import edu.uiowa.kind2.lustre.NamedType;
-import edu.uiowa.kind2.lustre.Node;
-import edu.uiowa.kind2.lustre.NodeCallExpr;
-import edu.uiowa.kind2.lustre.Program;
-import edu.uiowa.kind2.lustre.RealExpr;
-import edu.uiowa.kind2.lustre.RecordAccessExpr;
-import edu.uiowa.kind2.lustre.RecordExpr;
-import edu.uiowa.kind2.lustre.RecordType;
-import edu.uiowa.kind2.lustre.TupleExpr;
-import edu.uiowa.kind2.lustre.Type;
-import edu.uiowa.kind2.lustre.TypeDef;
-import edu.uiowa.kind2.lustre.UnaryExpr;
-import edu.uiowa.kind2.lustre.UnaryOp;
-import edu.uiowa.kind2.lustre.VarDecl;
-import edu.uiowa.kind2.lustre.VarDef;
 
 public class PrettyPrintVisitor {
   private StringBuilder sb = new StringBuilder();
@@ -64,7 +22,7 @@ public class PrettyPrintVisitor {
     return sb.toString();
   }
 
-  protected void write(Object o) {
+  void write(Object o) {
     sb.append(o);
   }
 
@@ -85,16 +43,14 @@ public class PrettyPrintVisitor {
       visit((Equation) a);
     } else if (a instanceof Expr) {
       expr((Expr) a);
-    } else if (a instanceof ImportedFunction) {
-      visit((ImportedFunction) a);
-    } else if (a instanceof ImportedNode) {
-      visit((ImportedNode) a);
-    } else if (a instanceof Function) {
-      visit((Function) a);
-    } else if (a instanceof Node) {
-      visit((Node) a);
+    } else if (a instanceof Component) {
+      visit((Component) a);
+    } else if (a instanceof Parameter) {
+      visit((Parameter) a);
     } else if (a instanceof Program) {
       visit((Program) a);
+    } else if (a instanceof Property) {
+      visit((Property) a);
     } else if (a instanceof TypeDef) {
       visit((TypeDef) a);
     } else if (a instanceof VarDecl) {
@@ -102,6 +58,15 @@ public class PrettyPrintVisitor {
     } else {
       throw new Kind2Exception("Unknown AST construct!");
     }
+  }
+
+  public void visit(Parameter param) {
+    if (param.isConst) {
+      write("const ");
+    }
+    write(param.id);
+    write(" : ");
+    write(param.type);
   }
 
   public void visit(Program program) {
@@ -124,7 +89,8 @@ public class PrettyPrintVisitor {
     }
 
     if (!program.importedFunctions.isEmpty()) {
-      for (ImportedFunction importedFunction : program.importedFunctions) {
+      for (Component importedFunction : program.importedFunctions) {
+        write("function imported ");
         visit(importedFunction);
         newline();
       }
@@ -132,7 +98,8 @@ public class PrettyPrintVisitor {
     }
 
     if (!program.importedNodes.isEmpty()) {
-      for (ImportedNode importedNode : program.importedNodes) {
+      for (Component importedNode : program.importedNodes) {
+        write("node imported ");
         visit(importedNode);
         newline();
       }
@@ -145,20 +112,33 @@ public class PrettyPrintVisitor {
       newline();
     }
 
-    for (Function function : program.functions) {
+    for (Component function : program.functions) {
+      write("function ");
       visit(function);
       newline();
       newline();
     }
 
-    Iterator<Node> iterator = program.nodes.iterator();
+    Iterator<Component> iterator = program.nodes.iterator();
     while (iterator.hasNext()) {
+      write("node ");
       visit(iterator.next());
       newline();
       if (iterator.hasNext()) {
         newline();
       }
     }
+  }
+
+  public void visit(Property property) {
+    write(" --%PROPERTY ");
+    if (property.name != null) {
+      write("\"");
+      write(property.name);
+      write("\" ");
+    }
+    expr(property.expr);
+    write(";");
   }
 
   public void visit(TypeDef typeDef) {
@@ -203,8 +183,14 @@ public class PrettyPrintVisitor {
   public void visit(Constant constant) {
     write("const ");
     write(constant.id);
-    write(" = ");
-    expr(constant.expr);
+    if (constant.type != null) {
+      write(" : ");
+      writeType(constant.type);
+    }
+    if (constant.expr != null) {
+      write(" = ");
+      expr(constant.expr);
+    }
     write(";");
   }
 
@@ -213,11 +199,11 @@ public class PrettyPrintVisitor {
     write(contract.id);
     write("(");
     newline();
-    varDecls(contract.inputs);
+    params(contract.inputs);
     newline();
     write(") returns (");
     newline();
-    varDecls(contract.outputs);
+    params(contract.outputs);
     newline();
     write(");");
     newline();
@@ -235,7 +221,7 @@ public class PrettyPrintVisitor {
     }
   }
 
-  protected void item(ContractItem i) {
+  void item(ContractItem i) {
     if (i instanceof Assume) {
       visit((Assume) i);
     } else if (i instanceof Constant) {
@@ -280,63 +266,74 @@ public class PrettyPrintVisitor {
     write(");");
   }
 
-  public void visit(Node node) {
-    write("node ");
-    write(node.id);
+  public void visit(Component component) {
+    write(component.id);
     write("(");
     newline();
-    varDecls(node.inputs);
+    params(component.inputs);
     newline();
     write(") returns (");
     newline();
-    varDecls(node.outputs);
+    params(component.outputs);
     newline();
     write(");");
     newline();
 
-    if (node.contractBody != null) {
+    if (component.contractBody != null) {
       write("(*@contract");
       newline();
-      visit(node.contractBody);
+      visit(component.contractBody);
       write("*)");
       newline();
     }
 
-    if (!node.locals.isEmpty()) {
+    if (!component.localVars.isEmpty()) {
       write("var");
       newline();
-      varDecls(node.locals);
+      varDecls(component.localVars);
       write(";");
       newline();
     }
     write("let");
     newline();
 
-    if (node.id.equals(main)) {
+    if (component.id.equals(main)) {
       write("  --%MAIN;");
       newline();
     }
 
-    for (Equation equation : node.equations) {
+    for (Equation equation : component.equations) {
       write("  ");
       visit(equation);
       newline();
       newline();
     }
 
-    for (Expr assertion : node.assertions) {
+    for (Expr assertion : component.assertions) {
       assertion(assertion);
       newline();
     }
 
-    if (!node.properties.isEmpty()) {
-      for (String property : node.properties) {
-        property(property);
+    if (!component.properties.isEmpty()) {
+      for (Property property : component.properties) {
+        visit(property);
         newline();
       }
     }
 
     write("tel;");
+  }
+
+  private void params(List<Parameter> params) {
+    Iterator<Parameter> iterator = params.iterator();
+    while (iterator.hasNext()) {
+      write("  ");
+      visit(iterator.next());
+      if (iterator.hasNext()) {
+        write(";");
+        newline();
+      }
+    }
   }
 
   private void varDecls(List<VarDecl> varDecls) {
@@ -398,13 +395,13 @@ public class PrettyPrintVisitor {
     newline();
   }
 
-  protected void property(String s) {
+  void property(String s) {
     write("  --%PROPERTY ");
     write(s);
     write(";");
   }
 
-  protected void expr(Expr e) {
+  void expr(Expr e) {
     if (e instanceof ArrayAccessExpr) {
       visit((ArrayAccessExpr) e);
     } else if (e instanceof ArrayExpr) {
@@ -425,6 +422,8 @@ public class PrettyPrintVisitor {
       visit((IfThenElseExpr) e);
     } else if (e instanceof IntExpr) {
       visit((IntExpr) e);
+    } else if (e instanceof ListExpr) {
+      visit((ListExpr) e);
     } else if (e instanceof ModeRefExpr) {
       visit((ModeRefExpr) e);
     } else if (e instanceof NodeCallExpr) {
@@ -464,6 +463,11 @@ public class PrettyPrintVisitor {
 
   public void visit(Assume assumption) {
     write("assume ");
+    if (assumption.name != null) {
+      write("\"");
+      write(assumption.name);
+      write("\" ");
+    }
     expr(assumption.expr);
     write(";");
   }
@@ -526,7 +530,34 @@ public class PrettyPrintVisitor {
 
   public void visit(Guarantee guarantee) {
     write("guarantee ");
+    if (guarantee.name != null) {
+      write("\"");
+      write(guarantee.name);
+      write("\" ");
+    }
     expr(guarantee.expr);
+    write(";");
+  }
+
+  public void visit(Require require) {
+    write("    require ");
+    if (require.name != null) {
+      write("\"");
+      write(require.name);
+      write("\" ");
+    }
+    expr(require.expr);
+    write(";");
+  }
+
+  public void visit(Ensure ensure) {
+    write("    ensure ");
+    if (ensure.name != null) {
+      write("\"");
+      write(ensure.name);
+      write("\" ");
+    }
+    expr(ensure.expr);
     write(";");
   }
 
@@ -544,114 +575,21 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
-  public void visit(ImportedFunction importedFunction) {
-    write("function imported ");
-    write(importedFunction.id);
-    write("(");
-    newline();
-    varDecls(importedFunction.inputs);
-    newline();
-    write(") returns (");
-    newline();
-    varDecls(importedFunction.outputs);
-    newline();
-    write(");");
-    newline();
-
-    if (importedFunction.contractBody != null) {
-      write("(*@contract");
-      newline();
-      visit(importedFunction.contractBody);
-      write("*)");
-    }
-  }
-
-  public void visit(ImportedNode importedNode) {
-    write("node imported ");
-    write(importedNode.id);
-    write("(");
-    newline();
-    varDecls(importedNode.inputs);
-    newline();
-    write(") returns (");
-    newline();
-    varDecls(importedNode.outputs);
-    newline();
-    write(");");
-    newline();
-
-    if (importedNode.contractBody != null) {
-      write("(*@contract");
-      newline();
-      visit(importedNode.contractBody);
-      write("*)");
-    }
-  }
-
   public void visit(IntExpr e) {
     write(e.value);
   }
 
-  public void visit(Function function) {
-    write("function ");
-    write(function.id);
-    write("(");
-    newline();
-    varDecls(function.inputs);
-    newline();
-    write(") returns (");
-    newline();
-    varDecls(function.outputs);
-    newline();
-    write(");");
-    newline();
-
-    if (function.contractBody != null) {
-      write("(*@contract");
-      newline();
-      visit(function.contractBody);
-      write("*)");
-      newline();
+  public void visit(ListExpr e) {
+    write('(');
+    Iterator<Expr> it = e.list.iterator();
+    if (it.hasNext()) {
+      expr(it.next());
     }
-
-    if (!function.locals.isEmpty()) {
-      write("var");
-      newline();
-      varDecls(function.locals);
-      write(";");
-      newline();
+    while (it.hasNext()) {
+      write(", ");
+      expr(it.next());
     }
-    write("let");
-    newline();
-
-    if (function.id.equals(main)) {
-      write("  --%MAIN;");
-      newline();
-    }
-
-    for (Equation equation : function.equations) {
-      write("  ");
-      visit(equation);
-      newline();
-    }
-
-    if (!function.assertions.isEmpty()) {
-      newline();
-      for (Expr assertion : function.assertions) {
-        assertion(assertion);
-        newline();
-      }
-    }
-
-    if (!function.properties.isEmpty()) {
-      newline();
-      for (String property : function.properties) {
-        property(property);
-        newline();
-      }
-    }
-
-    write("tel;");
+    write(')');
   }
 
   public void visit(Mode mode) {
@@ -659,16 +597,12 @@ public class PrettyPrintVisitor {
     write(mode.id);
     write(" (");
     newline();
-    for (Expr e : mode.require) {
-      write("    require ");
-      expr(e);
-      write(";");
+    for (Require require : mode.require) {
+      visit(require);
       newline();
     }
-    for (Expr e : mode.ensure) {
-      write("    ensure  ");
-      expr(e);
-      write(";");
+    for (Ensure ensure : mode.ensure) {
+      visit(ensure);
       newline();
     }
     write("  );");
@@ -725,19 +659,14 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(TupleExpr e) {
-    if (e.elements.isEmpty()) {
-      write("()");
-
-    }
-
     Iterator<Expr> iterator = e.elements.iterator();
-    write("(");
+    write("[");
     expr(iterator.next());
     while (iterator.hasNext()) {
       write(", ");
       expr(iterator.next());
     }
-    write(")");
+    write("]");
   }
 
   public void visit(UnaryExpr e) {

@@ -11,16 +11,11 @@ import java.math.BigDecimal;
 
 import edu.uiowa.kind2.Assert;
 
-public class RealExpr extends Expr {
-  public final BigDecimal value;
+class RealExpr extends Expr {
+  final BigDecimal value;
 
-  public RealExpr(Location location, BigDecimal value) {
-    super(location);
+  RealExpr(BigDecimal value) {
     Assert.isNotNull(value);
     this.value = value;
-  }
-
-  public RealExpr(BigDecimal value) {
-    this(Location.NULL, value);
   }
 }

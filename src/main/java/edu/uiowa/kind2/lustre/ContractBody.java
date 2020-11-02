@@ -23,11 +23,11 @@ import edu.uiowa.kind2.util.Util;
  * <li>an import of a contract node.</li>
  * </ul>
  */
-public class ContractBody extends Ast {
+class ContractBody extends Ast {
   /**
    * A list of contract items. Order matters, so we must use one list for all items.
    */
-  public final List<ContractItem> items;
+  final List<ContractItem> items;
 
   /**
    * Constructor
@@ -35,18 +35,8 @@ public class ContractBody extends Ast {
    * @param location location of contract body in a Lustre file
    * @param items    a list of contract items
    */
-  public ContractBody(Location location, List<ContractItem> items) {
-    super(location);
+  ContractBody(List<ContractItem> items) {
     Assert.isFalse(items.isEmpty()); // contract body must contain at least one item
     this.items = Util.safeList(items);
-  }
-
-  /**
-   * Constructor
-   *
-   * @param items a list of contract items
-   */
-  public ContractBody(List<ContractItem> items) {
-    this(Location.NULL, items);
   }
 }
