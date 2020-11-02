@@ -15,27 +15,19 @@ import edu.uiowa.kind2.Assert;
  * state since they express the behavior of the node they specified under the assumptions of this
  * node.
  */
-public class Guarantee extends ContractItem {
-  public final Expr expr;
+class Guarantee extends ContractItem {
+  final String name;
+  final Expr expr;
 
   /**
    * Constructor
    *
-   * @param location location of guarantee in a Lustre file
-   * @param expr     constraint expressing the behavior of a node
-   */
-  public Guarantee(Location location, Expr expr) {
-    super(location);
-    Assert.isNotNull(expr);
-    this.expr = expr;
-  }
-
-  /**
-   * Constructor
-   *
+   * @param name name of the guarantee
    * @param expr constraint expressing the behavior of a node
    */
-  public Guarantee(Expr expr) {
-    this(Location.NULL, expr);
+  Guarantee(String name, Expr expr) {
+    this.name = name;
+    Assert.isNotNull(expr);
+    this.expr = expr;
   }
 }

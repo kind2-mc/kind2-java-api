@@ -7,10 +7,10 @@
 
 package edu.uiowa.kind2.lustre;
 
-public enum BinaryOp {
+enum BinaryOp {
   PLUS("+"), MINUS("-"), MULTIPLY("*"), DIVIDE("/"), INT_DIVIDE("div"), MODULUS("mod"), EQUAL(
       "="), NOTEQUAL("<>"), GREATER(">"), LESS("<"), GREATEREQUAL(
-          ">="), LESSEQUAL("<="), OR("or"), AND("and"), XOR("xor"), IMPLIES("=>"), ARROW("->");
+          ">="), LESSEQUAL("<="), OR("or"), AND("and"), XOR("xor"), IMPLIES("=>"), ARROW("->"), CARTESIAN("^");
 
   private String str;
 
@@ -23,7 +23,7 @@ public enum BinaryOp {
     return str;
   }
 
-  public static BinaryOp fromString(String string) {
+  static BinaryOp fromString(String string) {
     for (BinaryOp op : BinaryOp.values()) {
       if (op.toString().equals(string)) {
         return op;

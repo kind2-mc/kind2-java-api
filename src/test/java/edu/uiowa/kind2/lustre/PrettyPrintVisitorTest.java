@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2012-2013, Rockwell Collins
+ * Copyright (c) 2020, Board of Trustees of the University of Iowa
  * All rights reserved.
  *
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
 
-package edu.uiowa.kind2.lustre.visitors;
+package edu.uiowa.kind2.lustre;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,22 +15,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import edu.uiowa.kind2.Kind2Exception;
-import edu.uiowa.kind2.lustre.Assume;
-import edu.uiowa.kind2.lustre.Constant;
-import edu.uiowa.kind2.lustre.Contract;
-import edu.uiowa.kind2.lustre.ContractImport;
-import edu.uiowa.kind2.lustre.Guarantee;
-import edu.uiowa.kind2.lustre.IdExpr;
-import edu.uiowa.kind2.lustre.ImportedFunction;
-import edu.uiowa.kind2.lustre.ImportedNode;
-import edu.uiowa.kind2.lustre.Function;
-import edu.uiowa.kind2.lustre.LustreUtil;
-import edu.uiowa.kind2.lustre.Mode;
-import edu.uiowa.kind2.lustre.ModeRefExpr;
-import edu.uiowa.kind2.lustre.NamedType;
-import edu.uiowa.kind2.lustre.VarDef;
-import edu.uiowa.kind2.lustre.builders.ContractBodyBuilder;
-import edu.uiowa.kind2.lustre.builders.FunctionBuilder;
 
 class PrettyPrintVisitorTest {
   String removeWhiteSpace(String s) {
@@ -41,24 +25,26 @@ class PrettyPrintVisitorTest {
 
   @Test
   void assumeTest() {
+    // TODO: add tests for name
     String expected = "assume true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Assume(null));
+    Assertions.assertThrows(Kind2Exception.class, () -> new Assume(null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Assume(LustreUtil.TRUE));
+    visitor.visit(new Assume(null, LustreUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
 
   @Test
   void guaranteeTest() {
+    // TODO: add tests for name
     String expected = "guarantee true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(null));
+    Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Guarantee(LustreUtil.TRUE));
+    visitor.visit(new Guarantee(null, LustreUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -126,6 +112,7 @@ class PrettyPrintVisitorTest {
 
   @Test
   void modeTest() {
+    // TODO: add tests for name
     String expected = "mode m1 ();";
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
@@ -136,22 +123,24 @@ class PrettyPrintVisitorTest {
     expected = "mode m2 (require true;);";
 
     visitor = new PrettyPrintVisitor();
-    visitor.visit(new Mode("m2", Collections.singletonList(LustreUtil.TRUE), null));
+    visitor
+        .visit(new Mode("m2", Collections.singletonList(new Require(null, LustreUtil.TRUE)), null));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
 
     expected = "mode m3 (ensure true;);";
 
     visitor = new PrettyPrintVisitor();
-    visitor.visit(new Mode("m3", null, Collections.singletonList(LustreUtil.TRUE)));
+    visitor
+        .visit(new Mode("m3", null, Collections.singletonList(new Ensure(null, LustreUtil.TRUE))));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
 
     expected = "mode m4 (require true; ensure true;);";
 
     visitor = new PrettyPrintVisitor();
-    visitor.visit(new Mode("m4", Collections.singletonList(LustreUtil.TRUE),
-        Collections.singletonList(LustreUtil.TRUE)));
+    visitor.visit(new Mode("m4", Collections.singletonList(new Require(null, LustreUtil.TRUE)),
+        Collections.singletonList(new Ensure(null, LustreUtil.TRUE))));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
   }
@@ -169,7 +158,8 @@ class PrettyPrintVisitorTest {
     c.addGuarantee(LustreUtil.TRUE);
     c.addAssumption(LustreUtil.TRUE);
     c.importContract("Spec", null, null);
-    c.addMode("m", null, null);
+    ModeBuilder m = new ModeBuilder("m");
+    c.addMode(m);
     c.createConstant("c", null, LustreUtil.TRUE);
     c.createVarDef("x", NamedType.BOOL, LustreUtil.TRUE);
 
@@ -193,87 +183,6 @@ class PrettyPrintVisitorTest {
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new Contract("c", null, null, c.build()));
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-  }
-
-  @Test
-  void importedFunctionTest() {
-    Assertions.assertThrows(Kind2Exception.class,
-        () -> new ImportedFunction(null, null, null, null));
-
-    String expected = "function imported f() returns ();";
-
-    PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new ImportedFunction("f", null, null, null));
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-
-    // raw strings require Java 12+
-    expected = "function imported f() returns (); (*@contract guarantee true; *)";
-
-    ContractBodyBuilder c = new ContractBodyBuilder();
-    c.addGuarantee(LustreUtil.TRUE);
-
-    visitor = new PrettyPrintVisitor();
-    visitor.visit(new ImportedFunction("f", null, null, c.build()));
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-  }
-
-  @Test
-  void importedNodeTest() {
-    Assertions.assertThrows(Kind2Exception.class, () -> new ImportedNode(null, null, null, null));
-
-    String expected = "node imported n() returns ();";
-
-    PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new ImportedNode("n", null, null, null));
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-
-    // raw strings require Java 12+
-    expected = "node imported n() returns (); (*@contract guarantee true; *)";
-
-    ContractBodyBuilder c = new ContractBodyBuilder();
-    c.addGuarantee(LustreUtil.TRUE);
-
-    visitor = new PrettyPrintVisitor();
-    visitor.visit(new ImportedNode("n", null, null, c.build()));
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-  }
-
-  @Test
-  void kind2FunctionTest() {
-    Assertions.assertThrows(Kind2Exception.class,
-        () -> new Function(null, null, null, null, null, null, null, null));
-
-    FunctionBuilder f = new FunctionBuilder("even");
-
-    IdExpr N = f.createInput("N", NamedType.INT);
-    IdExpr B = f.createOutput("B", NamedType.BOOL);
-    f.addEquation(B,
-        LustreUtil.equal(LustreUtil.mod(N, LustreUtil.integer(2)), LustreUtil.integer(0)));
-
-    String expected = "function even(N : int) returns (B : bool); let B = ((N mod 2) = 0); tel;";
-
-    PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(f.build());
-
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
-
-    // raw strings require Java 12+
-    expected = "function even(N : int) returns (B : bool); (*@contract guarantee true; *)"
-        + "let B = ((N mod 2) = 0); tel;";
-
-    ContractBodyBuilder c = new ContractBodyBuilder();
-    c.addGuarantee(LustreUtil.TRUE);
-
-    f.setContractBody(c.build());
-
-    visitor = new PrettyPrintVisitor();
-    visitor.visit(f.build());
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
   }

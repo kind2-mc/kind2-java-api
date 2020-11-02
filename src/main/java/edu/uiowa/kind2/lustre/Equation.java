@@ -13,28 +13,18 @@ import java.util.List;
 import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-public class Equation extends Ast {
-  public final List<IdExpr> lhs;
-  public final Expr expr;
+class Equation extends Ast {
+  final List<IdExpr> lhs;
+  final Expr expr;
 
-  public Equation(Location location, List<IdExpr> lhs, Expr expr) {
-    super(location);
+  Equation(List<IdExpr> lhs, Expr expr) {
     Assert.isNotNull(expr);
     this.lhs = Util.safeList(lhs);
     this.expr = expr;
   }
 
-  public Equation(Location location, IdExpr id, Expr expr) {
-    super(location);
+  Equation(IdExpr id, Expr expr) {
     this.lhs = Collections.singletonList(id);
     this.expr = expr;
-  }
-
-  public Equation(List<IdExpr> lhs, Expr expr) {
-    this(Location.NULL, lhs, expr);
-  }
-
-  public Equation(IdExpr id, Expr expr) {
-    this(Location.NULL, id, expr);
   }
 }

@@ -11,20 +11,15 @@ import java.math.BigInteger;
 
 import edu.uiowa.kind2.Assert;
 
-public class IntExpr extends Expr {
-  public final BigInteger value;
+class IntExpr extends Expr {
+  final BigInteger value;
 
-  public IntExpr(Location location, BigInteger value) {
-    super(location);
+  IntExpr(BigInteger value) {
     Assert.isNotNull(value);
     this.value = value;
   }
 
-  public IntExpr(BigInteger value) {
-    this(Location.NULL, value);
-  }
-
-  public IntExpr(int value) {
-    this(Location.NULL, BigInteger.valueOf(value));
+  IntExpr(int value) {
+    this(BigInteger.valueOf(value));
   }
 }
