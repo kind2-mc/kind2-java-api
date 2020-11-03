@@ -7,20 +7,19 @@
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import edu.uiowa.kind2.api.IProgressMonitor;
 import edu.uiowa.kind2.api.Kind2Api;
-import edu.uiowa.kind2.results.Kind2Result;
-import edu.uiowa.kind2.lustre.IdExpr;
-import edu.uiowa.kind2.lustre.LustreUtil;
-import edu.uiowa.kind2.lustre.TypeUtil;
+import edu.uiowa.kind2.lustre.ComponentBuilder;
 import edu.uiowa.kind2.lustre.ContractBodyBuilder;
 import edu.uiowa.kind2.lustre.ContractBuilder;
 import edu.uiowa.kind2.lustre.Expr;
-import edu.uiowa.kind2.lustre.FunctionBuilder;
+import edu.uiowa.kind2.lustre.ExprUtil;
+import edu.uiowa.kind2.lustre.IdExpr;
+import edu.uiowa.kind2.lustre.ImportedComponentBuilder;
 import edu.uiowa.kind2.lustre.ModeBuilder;
-import edu.uiowa.kind2.lustre.NodeBuilder;
 import edu.uiowa.kind2.lustre.ProgramBuilder;
+import edu.uiowa.kind2.lustre.TypeUtil;
+import edu.uiowa.kind2.results.Kind2Result;
 
 public class Main {
   public static void main(String[] args) {
@@ -59,16 +58,16 @@ public class Main {
     }
   }
 
-  static FunctionBuilder sqrt() {
-    IdExpr n = LustreUtil.id("n");
-    IdExpr r = LustreUtil.id("r");
+  static ImportedComponentBuilder sqrt() {
+    IdExpr n = ExprUtil.id("n");
+    IdExpr r = ExprUtil.id("r");
 
     ContractBodyBuilder cbb = new ContractBodyBuilder();
-    cbb.addAssumption(LustreUtil.greaterEqual(n, LustreUtil.real("0.0")));
-    cbb.addGuarantee(LustreUtil.and(LustreUtil.greaterEqual(r, LustreUtil.real("0.0")),
-        LustreUtil.equal(LustreUtil.multiply(r, r), n)));
+    cbb.addAssumption(ExprUtil.greaterEqual(n, ExprUtil.real("0.0")));
+    cbb.addGuarantee(ExprUtil.and(ExprUtil.greaterEqual(r, ExprUtil.real("0.0")),
+        ExprUtil.equal(ExprUtil.multiply(r, r), n)));
 
-    FunctionBuilder fb = new FunctionBuilder("sqrt");
+    ImportedComponentBuilder fb = new ImportedComponentBuilder("sqrt");
     fb.createVarInput("n", TypeUtil.REAL);
     fb.createVarOutput("r", TypeUtil.REAL);
     fb.setContractBody(cbb);
@@ -83,147 +82,147 @@ public class Main {
     IdExpr reset = cb.createVarInput("reset", TypeUtil.BOOL);
     IdExpr time = cb.createVarOutput("time", TypeUtil.INT);
 
-    IdExpr on = LustreUtil.id("on");
+    IdExpr on = ExprUtil.id("on");
 
-    cb.createVarDef("on", 
-        TypeUtil.BOOL,
-        LustreUtil.arrow(toggle,
-            LustreUtil.or(LustreUtil.and(LustreUtil.pre(on), LustreUtil.not(toggle)),
-                LustreUtil.and(LustreUtil.not(LustreUtil.pre(on)), toggle))));
+    ContractBodyBuilder cbb = new ContractBodyBuilder();
 
-    cb.addAssumption(LustreUtil.not(LustreUtil.and(toggle, reset)));
-    cb.addGuarantee(LustreUtil.arrow(
-        LustreUtil.implies(on, LustreUtil.equal(time, LustreUtil.integer(1))), LustreUtil.TRUE));
-    cb.addGuarantee(LustreUtil.arrow(
-        LustreUtil.implies(LustreUtil.not(on), LustreUtil.equal(time, LustreUtil.integer(0))),
-        LustreUtil.TRUE));
-    cb.addGuarantee(LustreUtil.greaterEqual(time, LustreUtil.integer(0)));
+    cbb.createVarDef("on", TypeUtil.BOOL,
+        ExprUtil.arrow(toggle, ExprUtil.or(ExprUtil.and(ExprUtil.pre(on), ExprUtil.not(toggle)),
+            ExprUtil.and(ExprUtil.not(ExprUtil.pre(on)), toggle))));
 
-    cb.addGuarantee(LustreUtil.implies(
-        LustreUtil.and(LustreUtil.not(reset),
-            LustreUtil.nodeCall(LustreUtil.id("Since"), reset,
-                LustreUtil.functionCall(LustreUtil.id("even"),
-                    LustreUtil.nodeCall(LustreUtil.id("Count"), toggle)))),
-        LustreUtil.nodeCall(LustreUtil.id("Stable"), time)));
+    cbb.addAssumption(ExprUtil.not(ExprUtil.and(toggle, reset)));
+    cbb.addGuarantee(ExprUtil.arrow(ExprUtil.implies(on, ExprUtil.equal(time, ExprUtil.integer(1))),
+        ExprUtil.TRUE));
+    cbb.addGuarantee(ExprUtil.arrow(
+        ExprUtil.implies(ExprUtil.not(on), ExprUtil.equal(time, ExprUtil.integer(0))),
+        ExprUtil.TRUE));
+    cbb.addGuarantee(ExprUtil.greaterEqual(time, ExprUtil.integer(0)));
 
-    cb.addGuarantee(
-        LustreUtil.implies(
-            LustreUtil.and(LustreUtil.not(reset),
-                LustreUtil.nodeCall(LustreUtil.id("Since"), reset,
-                    LustreUtil.not(LustreUtil.functionCall(LustreUtil.id("even"),
-                        LustreUtil.nodeCall(LustreUtil.id("Count"),
-                            Collections.singletonList(toggle)))))),
-            LustreUtil.nodeCall(LustreUtil.id("Increased"), Collections.singletonList(time))));
+    cbb.addGuarantee(ExprUtil.implies(
+        ExprUtil.and(ExprUtil.not(reset),
+            ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
+                ExprUtil.functionCall(ExprUtil.id("even"),
+                    ExprUtil.nodeCall(ExprUtil.id("Count"), toggle)))),
+        ExprUtil.nodeCall(ExprUtil.id("Stable"), time)));
 
-    cb.addGuarantee(
-        LustreUtil
-            .arrow(LustreUtil.TRUE,
-                LustreUtil.implies(
-                    LustreUtil.and(
-                        LustreUtil.not(LustreUtil.functionCall(LustreUtil.id("even"),
-                            LustreUtil.nodeCall(LustreUtil.id("Count"),
-                                Collections.singletonList(toggle)))),
-                        LustreUtil.equal(LustreUtil.nodeCall(LustreUtil.id("Count"), reset),
-                            LustreUtil.integer(0))),
-                    LustreUtil.greater(time, LustreUtil.pre(time)))));
+    cbb.addGuarantee(
+        ExprUtil
+            .implies(
+                ExprUtil.and(ExprUtil.not(reset),
+                    ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
+                        ExprUtil.not(ExprUtil.functionCall(ExprUtil.id("even"),
+                            ExprUtil.nodeCall(ExprUtil.id("Count"),
+                                Collections.singletonList(toggle)))))),
+                ExprUtil.nodeCall(ExprUtil.id("Increased"), Collections.singletonList(time))));
+
+    cbb.addGuarantee(
+        ExprUtil
+            .arrow(ExprUtil.TRUE,
+                ExprUtil.implies(ExprUtil.and(
+                    ExprUtil.not(ExprUtil.functionCall(ExprUtil.id("even"),
+                        ExprUtil.nodeCall(ExprUtil.id("Count"),
+                            Collections.singletonList(toggle)))),
+                    ExprUtil.equal(ExprUtil.nodeCall(ExprUtil.id("Count"), reset),
+                        ExprUtil.integer(0))),
+                    ExprUtil.greater(time, ExprUtil.pre(time)))));
 
     ModeBuilder resetting = new ModeBuilder("resetting");
     resetting.addRequire(reset);
-    resetting.addEnsure(LustreUtil.equal(time, LustreUtil.integer(0)));
+    resetting.addEnsure(ExprUtil.equal(time, ExprUtil.integer(0)));
 
-    cb.addMode(resetting);
+    cbb.addMode(resetting);
 
     ModeBuilder running = new ModeBuilder("running");
     running.addEnsure(on);
-    running.addEnsure(LustreUtil.not(reset));
-    running.addRequire(LustreUtil.arrow(LustreUtil.TRUE,
-        LustreUtil.equal(time, LustreUtil.plus(LustreUtil.pre(time), LustreUtil.integer(1)))));
+    running.addEnsure(ExprUtil.not(reset));
+    running.addRequire(ExprUtil.arrow(ExprUtil.TRUE,
+        ExprUtil.equal(time, ExprUtil.plus(ExprUtil.pre(time), ExprUtil.integer(1)))));
 
-    cb.addMode(running);
+    cbb.addMode(running);
 
     ModeBuilder stopped = new ModeBuilder("stopped");
-    stopped.addEnsure(LustreUtil.not(reset));
-    stopped.addEnsure(LustreUtil.not(on));
-    stopped.addRequire(
-        LustreUtil.arrow(LustreUtil.TRUE, LustreUtil.equal(time, LustreUtil.pre(time))));
+    stopped.addEnsure(ExprUtil.not(reset));
+    stopped.addEnsure(ExprUtil.not(on));
+    stopped.addRequire(ExprUtil.arrow(ExprUtil.TRUE, ExprUtil.equal(time, ExprUtil.pre(time))));
 
-    cb.addMode(stopped);
+    cbb.addMode(stopped);
+
+    cb.setContractBody(cbb);
 
     return cb;
   }
 
-  static FunctionBuilder even() {
-    FunctionBuilder fb = new FunctionBuilder("even");
+  static ComponentBuilder even() {
+    ComponentBuilder fb = new ComponentBuilder("even");
     IdExpr N = fb.createVarInput("N", TypeUtil.INT);
     IdExpr B = fb.createVarOutput("B", TypeUtil.BOOL);
-    fb.addEquation(B,
-        LustreUtil.equal(LustreUtil.mod(N, LustreUtil.integer(2)), LustreUtil.integer(0)));
+    fb.addEquation(B, ExprUtil.equal(ExprUtil.mod(N, ExprUtil.integer(2)), ExprUtil.integer(0)));
     return fb;
   }
 
-  static FunctionBuilder toInt() {
-    FunctionBuilder f = new FunctionBuilder("toInt");
+  static ComponentBuilder toInt() {
+    ComponentBuilder f = new ComponentBuilder("toInt");
     IdExpr X = f.createVarInput("X", TypeUtil.BOOL);
     IdExpr N = f.createVarOutput("N", TypeUtil.INT);
-    f.addEquation(N, LustreUtil.ite(X, LustreUtil.integer(1), LustreUtil.integer(0)));
+    f.addEquation(N, ExprUtil.ite(X, ExprUtil.integer(1), ExprUtil.integer(0)));
     return f;
   }
 
-  static NodeBuilder count() {
-    NodeBuilder nb = new NodeBuilder("Count");
+  static ComponentBuilder count() {
+    ComponentBuilder nb = new ComponentBuilder("Count");
     IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
     IdExpr N = nb.createVarOutput("N", TypeUtil.INT);
-    Expr toIntX = LustreUtil.nodeCall(LustreUtil.id("toInt"), X);
-    nb.addEquation(N, LustreUtil.arrow(toIntX, LustreUtil.plus(toIntX, LustreUtil.pre(N))));
+    Expr toIntX = ExprUtil.nodeCall(ExprUtil.id("toInt"), X);
+    nb.addEquation(N, ExprUtil.arrow(toIntX, ExprUtil.plus(toIntX, ExprUtil.pre(N))));
     return nb;
   }
 
-  static NodeBuilder sofar() {
-    NodeBuilder nb = new NodeBuilder("Sofar");
+  static ComponentBuilder sofar() {
+    ComponentBuilder nb = new ComponentBuilder("Sofar");
     IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
     IdExpr Y = nb.createVarOutput("Y", TypeUtil.BOOL);
-    nb.addEquation(Y, LustreUtil.arrow(X, LustreUtil.and(X, LustreUtil.pre(Y))));
+    nb.addEquation(Y, ExprUtil.arrow(X, ExprUtil.and(X, ExprUtil.pre(Y))));
     return nb;
   }
 
-  static NodeBuilder since() {
-    NodeBuilder nb = new NodeBuilder("Since");
+  static ComponentBuilder since() {
+    ComponentBuilder nb = new ComponentBuilder("Since");
     IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
     IdExpr Y = nb.createVarInput("Y", TypeUtil.BOOL);
     IdExpr Z = nb.createVarOutput("Z", TypeUtil.BOOL);
     nb.addEquation(Z,
-        LustreUtil.or(X, LustreUtil.and(Y, LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(Z)))));
+        ExprUtil.or(X, ExprUtil.and(Y, ExprUtil.arrow(ExprUtil.FALSE, ExprUtil.pre(Z)))));
     return nb;
   }
 
-  static NodeBuilder sinceIncl() {
-    NodeBuilder nb = new NodeBuilder("SinceIncl");
+  static ComponentBuilder sinceIncl() {
+    ComponentBuilder nb = new ComponentBuilder("SinceIncl");
     IdExpr X = nb.createVarInput("X", TypeUtil.BOOL);
     IdExpr Y = nb.createVarInput("Y", TypeUtil.BOOL);
     IdExpr Z = nb.createVarOutput("Z", TypeUtil.BOOL);
     nb.addEquation(Z,
-        LustreUtil.and(Y, LustreUtil.or(X, LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(Z)))));
+        ExprUtil.and(Y, ExprUtil.or(X, ExprUtil.arrow(ExprUtil.FALSE, ExprUtil.pre(Z)))));
     return nb;
   }
 
-  static NodeBuilder increased() {
-    NodeBuilder nb = new NodeBuilder("Increased");
+  static ComponentBuilder increased() {
+    ComponentBuilder nb = new ComponentBuilder("Increased");
     IdExpr N = nb.createVarInput("N", TypeUtil.INT);
     IdExpr B = nb.createVarOutput("B", TypeUtil.BOOL);
-    nb.addEquation(B, LustreUtil.arrow(LustreUtil.TRUE, LustreUtil.greater(N, LustreUtil.pre(N))));
+    nb.addEquation(B, ExprUtil.arrow(ExprUtil.TRUE, ExprUtil.greater(N, ExprUtil.pre(N))));
     return nb;
   }
 
-  static NodeBuilder stable() {
-    NodeBuilder nb = new NodeBuilder("Stable");
+  static ComponentBuilder stable() {
+    ComponentBuilder nb = new ComponentBuilder("Stable");
     IdExpr N = nb.createVarInput("N", TypeUtil.INT);
     IdExpr B = nb.createVarOutput("B", TypeUtil.BOOL);
-    nb.addEquation(B, LustreUtil.arrow(LustreUtil.TRUE, LustreUtil.equal(N, LustreUtil.pre(N))));
+    nb.addEquation(B, ExprUtil.arrow(ExprUtil.TRUE, ExprUtil.equal(N, ExprUtil.pre(N))));
     return nb;
   }
 
-  static NodeBuilder stopWatch() {
-    NodeBuilder nb = new NodeBuilder("Stopwatch");
+  static ComponentBuilder stopWatch() {
+    ComponentBuilder nb = new ComponentBuilder("Stopwatch");
     IdExpr toggle = nb.createVarInput("toggle", TypeUtil.BOOL);
     IdExpr reset = nb.createVarInput("reset", TypeUtil.BOOL);
     IdExpr count = nb.createVarOutput("count", TypeUtil.INT);
@@ -232,22 +231,22 @@ public class Main {
     cbb.importContract("StopWatchSpec", Arrays.asList(toggle, reset),
         Collections.singletonList(count));
 
-    cbb.addGuarantee(LustreUtil.not(LustreUtil.and(LustreUtil.modeRef("StopWatchSpec", "resetting"),
-        LustreUtil.modeRef("StopWatchSpec", "running"),
-        LustreUtil.modeRef("StopWatchSpec", "stopped"))));
+    cbb.addGuarantee(ExprUtil.not(ExprUtil.and(ExprUtil.modeRef("StopWatchSpec", "resetting"),
+        ExprUtil.modeRef("StopWatchSpec", "running"),
+        ExprUtil.modeRef("StopWatchSpec", "stopped"))));
 
     nb.setContractBody(cbb);
 
     IdExpr running = nb.createLocalVar("running", TypeUtil.BOOL);
 
     nb.addEquation(running,
-        LustreUtil.notEqual(LustreUtil.arrow(LustreUtil.FALSE, LustreUtil.pre(running)), toggle));
+        ExprUtil.notEqual(ExprUtil.arrow(ExprUtil.FALSE, ExprUtil.pre(running)), toggle));
     nb.addEquation(count,
-        LustreUtil.ite(reset, LustreUtil.integer(0),
-            LustreUtil.ite(running,
-                LustreUtil.arrow(LustreUtil.integer(1),
-                    LustreUtil.plus(LustreUtil.pre(count), LustreUtil.integer(1))),
-                LustreUtil.arrow(LustreUtil.integer(0), LustreUtil.pre(count)))));
+        ExprUtil.ite(reset, ExprUtil.integer(0),
+            ExprUtil.ite(running,
+                ExprUtil.arrow(ExprUtil.integer(1),
+                    ExprUtil.plus(ExprUtil.pre(count), ExprUtil.integer(1))),
+                ExprUtil.arrow(ExprUtil.integer(0), ExprUtil.pre(count)))));
 
     return nb;
   }

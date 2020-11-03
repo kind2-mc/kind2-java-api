@@ -31,7 +31,7 @@ class PrettyPrintVisitorTest {
     Assertions.assertThrows(Kind2Exception.class, () -> new Assume(null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Assume(null, LustreUtil.TRUE));
+    visitor.visit(new Assume(null, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -44,7 +44,7 @@ class PrettyPrintVisitorTest {
     Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Guarantee(null, LustreUtil.TRUE));
+    visitor.visit(new Guarantee(null, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -57,7 +57,7 @@ class PrettyPrintVisitorTest {
     Assertions.assertThrows(Kind2Exception.class, () -> new ModeRefExpr((String) null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(LustreUtil.modeRef("a", "b", "c"));
+    visitor.visit(ExprUtil.modeRef("a", "b", "c"));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -66,11 +66,11 @@ class PrettyPrintVisitorTest {
   void constantTest() {
     String expected = "const c = true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Constant(null, null, LustreUtil.TRUE));
+    Assertions.assertThrows(Kind2Exception.class, () -> new Constant(null, null, ExprUtil.TRUE));
     Assertions.assertThrows(Kind2Exception.class, () -> new Constant("c", null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Constant("c", null, LustreUtil.TRUE));
+    visitor.visit(new Constant("c", null, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -80,12 +80,12 @@ class PrettyPrintVisitorTest {
     String expected = "var x : bool = true;";
 
     Assertions.assertThrows(Kind2Exception.class,
-        () -> new VarDef(null, TypeUtil.BOOL, LustreUtil.TRUE));
-    Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", null, LustreUtil.TRUE));
+        () -> new VarDef(null, TypeUtil.BOOL, ExprUtil.TRUE));
+    Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", null, ExprUtil.TRUE));
     Assertions.assertThrows(Kind2Exception.class, () -> new VarDef("x", TypeUtil.BOOL, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new VarDef("x", TypeUtil.BOOL, LustreUtil.TRUE));
+    visitor.visit(new VarDef("x", TypeUtil.BOOL, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -104,8 +104,8 @@ class PrettyPrintVisitorTest {
     expected = "import Spec(x) returns (y);";
 
     visitor = new PrettyPrintVisitor();
-    visitor.visit(new ContractImport("Spec", Collections.singletonList(LustreUtil.id("x")),
-        Collections.singletonList(LustreUtil.id("y"))));
+    visitor.visit(new ContractImport("Spec", Collections.singletonList(ExprUtil.id("x")),
+        Collections.singletonList(ExprUtil.id("y"))));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -124,7 +124,7 @@ class PrettyPrintVisitorTest {
 
     visitor = new PrettyPrintVisitor();
     visitor
-        .visit(new Mode("m2", Collections.singletonList(new Require(null, LustreUtil.TRUE)), null));
+        .visit(new Mode("m2", Collections.singletonList(new Require(null, ExprUtil.TRUE)), null));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
 
@@ -132,15 +132,15 @@ class PrettyPrintVisitorTest {
 
     visitor = new PrettyPrintVisitor();
     visitor
-        .visit(new Mode("m3", null, Collections.singletonList(new Ensure(null, LustreUtil.TRUE))));
+        .visit(new Mode("m3", null, Collections.singletonList(new Ensure(null, ExprUtil.TRUE))));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
 
     expected = "mode m4 (require true; ensure true;);";
 
     visitor = new PrettyPrintVisitor();
-    visitor.visit(new Mode("m4", Collections.singletonList(new Require(null, LustreUtil.TRUE)),
-        Collections.singletonList(new Ensure(null, LustreUtil.TRUE))));
+    visitor.visit(new Mode("m4", Collections.singletonList(new Require(null, ExprUtil.TRUE)),
+        Collections.singletonList(new Ensure(null, ExprUtil.TRUE))));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
   }
@@ -155,13 +155,13 @@ class PrettyPrintVisitorTest {
 
     Assertions.assertThrows(Kind2Exception.class, c::build);
 
-    c.addGuarantee(LustreUtil.TRUE);
-    c.addAssumption(LustreUtil.TRUE);
+    c.addGuarantee(ExprUtil.TRUE);
+    c.addAssumption(ExprUtil.TRUE);
     c.importContract("Spec", null, null);
     ModeBuilder m = new ModeBuilder("m");
     c.addMode(m);
-    c.createConstant("c", null, LustreUtil.TRUE);
-    c.createVarDef("x", TypeUtil.BOOL, LustreUtil.TRUE);
+    c.createConstant("c", null, ExprUtil.TRUE);
+    c.createVarDef("x", TypeUtil.BOOL, ExprUtil.TRUE);
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(c.build());
@@ -175,7 +175,7 @@ class PrettyPrintVisitorTest {
     String expected = "contract c() returns (); let guarantee true; tel;";
 
     ContractBodyBuilder c = new ContractBodyBuilder();
-    c.addGuarantee(LustreUtil.TRUE);
+    c.addGuarantee(ExprUtil.TRUE);
 
     Assertions.assertThrows(Kind2Exception.class, () -> new Contract(null, null, null, c.build()));
 
