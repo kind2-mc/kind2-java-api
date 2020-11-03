@@ -13,9 +13,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 
-public class LustreUtil {
+public class ExprUtil {
 
   /* Binary Expressions */
 
@@ -101,16 +102,6 @@ public class LustreUtil {
     return new UnaryExpr(UnaryOp.PRE, expr);
   }
 
-  public static Expr optimizeNot(Expr expr) {
-    if (expr instanceof UnaryExpr) {
-      UnaryExpr ue = (UnaryExpr) expr;
-      if (ue.op == UnaryOp.NOT) {
-        return ue.expr;
-      }
-    }
-    return new UnaryExpr(UnaryOp.NOT, expr);
-  }
-
   /* IdExpr Expressions */
 
   public static IdExpr id(String id) {
@@ -142,6 +133,8 @@ public class LustreUtil {
   public static ModeRefExpr modeRef(String... path) {
     return new ModeRefExpr(path);
   }
+
+  /* component calls */
 
   public static Expr functionCall(IdExpr name, List<Expr> args) {
     return new NodeCallExpr(name.id, args);
@@ -207,128 +200,42 @@ public class LustreUtil {
   }
 
   public static Expr lessEqual(Expr... e) {
-    return chainRelation(LustreUtil::lessEqual, e);
+    return chainRelation(ExprUtil::lessEqual, e);
   }
 
   public static Expr less(Expr... e) {
-    return chainRelation(LustreUtil::less, e);
+    return chainRelation(ExprUtil::less, e);
   }
 
   public static Expr greaterEqual(Expr... e) {
-    return chainRelation(LustreUtil::greaterEqual, e);
+    return chainRelation(ExprUtil::greaterEqual, e);
   }
 
   public static Expr greater(Expr... e) {
-    return chainRelation(LustreUtil::greater, e);
+    return chainRelation(ExprUtil::greater, e);
   }
 
   public static Expr equal(Expr... e) {
-    return chainRelation(LustreUtil::equal, e);
+    return chainRelation(ExprUtil::equal, e);
   }
 
   public static Expr ite(Expr cond, Expr thenExpr, Expr elseExpr) {
     return new IfThenElseExpr(cond, thenExpr, elseExpr);
   }
 
-  public static Expr typeConstraint(String id, Type type) {
-    if (type instanceof SubrangeIntType) {
-      return subrangeConstraint(id, (SubrangeIntType) type);
-    } else if (type instanceof EnumType) {
-      return enumConstraint(id, (EnumType) type);
-    } else {
-      return null;
-    }
+  public static Expr list(List<? extends Expr> list) {
+    return new ListExpr(list);
   }
 
-  public static Expr subrangeConstraint(String id, SubrangeIntType subrange) {
-    return boundConstraint(id, new IntExpr(subrange.low), new IntExpr(subrange.high));
+  public static Expr recordLiteral(String id, Map<String, Expr> fields) {
+    return new RecordExpr(id, fields);
   }
 
-  public static Expr enumConstraint(String id, EnumType et) {
-    return boundConstraint(id, new IntExpr(0), new IntExpr(et.values.size() - 1));
+  public static Expr array(List<? extends Expr> elements) {
+    return new ArrayExpr(elements);
   }
 
-  private static Expr boundConstraint(String id, Expr low, Expr high) {
-    return and(lessEqual(low, id(id)), lessEqual(id(id), high));
-  }
-
-  /* Decls */
-
-  public static VarDecl varDecl(String name, Type type) {
-    return new VarDecl(name, type);
-  }
-
-  public static Equation eq(IdExpr id, Expr expr) {
-    return new Equation(id, expr);
-  }
-
-  /* Nodes */
-
-  public static Component historically() {
-    return historically("historically");
-  }
-
-  public static Component historically(String name) {
-    NodeBuilder historically = new NodeBuilder(name);
-
-    IdExpr signal = historically.createVarInput("signal", TypeUtil.BOOL);
-    IdExpr holds = historically.createVarOutput("holds", TypeUtil.BOOL);
-
-    // historically: holds = signal and (true -> pre holds);
-    historically.addEquation(holds, and(signal, arrow(TRUE, pre(holds))));
-
-    return historically.build();
-  }
-
-  public static Component once() {
-    return once("once");
-  }
-
-  public static Component once(String name) {
-    NodeBuilder once = new NodeBuilder(name);
-
-    IdExpr signal = once.createVarInput("signal", TypeUtil.BOOL);
-    IdExpr holds = once.createVarOutput("holds", TypeUtil.BOOL);
-
-    // once: holds = signal or (false -> pre holds);
-    once.addEquation(holds, or(signal, arrow(FALSE, pre(holds))));
-
-    return once.build();
-  }
-
-  public static Component since() {
-    return since("since");
-  }
-
-  public static Component since(String name) {
-    NodeBuilder since = new NodeBuilder(name);
-
-    IdExpr a = since.createVarInput("a", TypeUtil.BOOL);
-    IdExpr b = since.createVarInput("b", TypeUtil.BOOL);
-
-    IdExpr holds = since.createVarOutput("holds", TypeUtil.BOOL);
-
-    // since: holds = b or (a and (false -> pre holds))
-    since.addEquation(holds, or(b, and(a, arrow(FALSE, pre(holds)))));
-
-    return since.build();
-  }
-
-  public static Component triggers() {
-    return triggers("triggers");
-  }
-
-  public static Component triggers(String name) {
-    NodeBuilder triggers = new NodeBuilder(name);
-
-    IdExpr a = triggers.createVarInput("a", TypeUtil.BOOL);
-    IdExpr b = triggers.createVarInput("b", TypeUtil.BOOL);
-
-    IdExpr holds = triggers.createVarOutput("holds", TypeUtil.BOOL);
-
-    // triggers: holds = b and (a or (true -> pre holds))
-    triggers.addEquation(holds, and(b, or(a, arrow(TRUE, pre(holds)))));
-
-    return triggers.build();
+  public static Expr recordAccess(Expr record, String field) {
+    return new RecordAccessExpr(record, field);
   }
 }
