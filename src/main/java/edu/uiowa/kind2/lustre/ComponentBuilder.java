@@ -11,7 +11,7 @@ package edu.uiowa.kind2.lustre;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class ComponentBuilder {
+public class ComponentBuilder {
   private String id;
   private List<Parameter> inputs = new ArrayList<>();
   private List<Parameter> outputs = new ArrayList<>();

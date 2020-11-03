@@ -8,7 +8,6 @@
 package edu.uiowa.kind2.lustre;
 
 import java.util.List;
-
 import edu.uiowa.kind2.util.Util;
 
 class ListExpr extends Expr {

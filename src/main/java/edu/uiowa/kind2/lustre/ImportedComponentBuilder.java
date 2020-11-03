@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2012-2013, Rockwell Collins
  * Copyright (c) 2020, Board of Trustees of the University of Iowa
  * All rights reserved.
  *
@@ -10,17 +11,14 @@ package edu.uiowa.kind2.lustre;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContractBuilder {
+public class ImportedComponentBuilder {
   private String id;
-  private List<Parameter> inputs;
-  private List<Parameter> outputs;
-  private ContractBodyBuilder contractBodyBuilder;
+  private List<Parameter> inputs = new ArrayList<>();
+  private List<Parameter> outputs = new ArrayList<>();
+  private ContractBody contractBody = null;
 
-
-  public ContractBuilder(String id) {
+  public ImportedComponentBuilder(String id) {
     this.id = id;
-    inputs = new ArrayList<>();
-    outputs = new ArrayList<>();
   }
 
   public IdExpr createConstInput(String name, Type type) {
@@ -39,15 +37,10 @@ public class ContractBuilder {
   }
 
   public void setContractBody(ContractBodyBuilder contractBodyBuilder) {
-    this.contractBodyBuilder = contractBodyBuilder;
+    this.contractBody = contractBodyBuilder.build();
   }
 
-  /**
-   * construct a contract
-   *
-   * @return constructed contract
-   */
-  Contract buildContract() {
-    return new Contract(id, inputs, outputs, contractBodyBuilder.build());
+  ImportedComponent build() {
+    return new ImportedComponent(id, inputs, outputs, contractBody);
   }
 }

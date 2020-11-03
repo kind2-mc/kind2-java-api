@@ -14,7 +14,7 @@ import edu.uiowa.kind2.util.Util;
 class ArrayExpr extends Expr {
   final List<Expr> elements;
 
-  ArrayExpr(List<Expr> elements) {
+  ArrayExpr(List<? extends Expr> elements) {
     this.elements = Util.safeList(elements);
   }
 }

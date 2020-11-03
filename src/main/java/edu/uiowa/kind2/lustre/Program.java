@@ -27,8 +27,8 @@ import edu.uiowa.kind2.util.Util;
 public class Program extends Ast {
   final List<TypeDef> types;
   final List<Constant> constants;
-  final List<Component> importedFunctions;
-  final List<Component> importedNodes;
+  final List<ImportedComponent> importedFunctions;
+  final List<ImportedComponent> importedNodes;
   final List<Contract> contracts;
   final List<Component> functions;
   final List<Component> nodes;
@@ -46,8 +46,8 @@ public class Program extends Ast {
    * @param nodes             a collections of nodes
    * @param main              id of the main node/function
    */
-  Program(List<TypeDef> types, List<Constant> constants, List<Component> importedFunctions,
-      List<Component> importedNodes, List<Contract> contracts, List<Component> functions,
+  Program(List<TypeDef> types, List<Constant> constants, List<ImportedComponent> importedFunctions,
+      List<ImportedComponent> importedNodes, List<Contract> contracts, List<Component> functions,
       List<Component> nodes, String main) {
     this.types = Util.safeList(types);
     this.constants = Util.safeList(constants);

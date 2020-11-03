@@ -12,7 +12,7 @@ import edu.uiowa.kind2.Assert;
 /**
  * The type of an array variable.
  */
-class ArrayType extends Type {
+class ArrayType implements Type {
   final Type base;
   final int size;
 

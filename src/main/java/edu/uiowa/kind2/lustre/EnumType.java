@@ -9,25 +9,12 @@ package edu.uiowa.kind2.lustre;
 
 import java.util.List;
 
-import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-class EnumType extends Type {
-  final String id;
+class EnumType implements Type {
   final List<String> values;
 
-  EnumType(String id, List<String> values) {
-    Assert.isNotNull(id);
-    this.id = id;
+  EnumType(List<String> values) {
     this.values = Util.safeList(values);
-  }
-
-  String getValue(int i) {
-    return values.get(i);
-  }
-
-  @Override
-  public String toString() {
-    return id;
   }
 }

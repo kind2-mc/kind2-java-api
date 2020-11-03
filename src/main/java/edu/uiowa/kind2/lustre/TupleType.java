@@ -11,7 +11,7 @@ import java.util.List;
 
 import edu.uiowa.kind2.util.Util;
 
-class TupleType extends Type {
+class TupleType implements Type {
   final List<Type> types;
 
   TupleType(List<? extends Type> types) {

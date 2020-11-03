@@ -13,15 +13,12 @@ import java.util.SortedMap;
 import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-class RecordType extends Type {
-  final String id;
+class RecordType implements Type {
   final SortedMap<String, Type> fields;
 
-  RecordType(String id, Map<String, Type> fields) {
-    Assert.isNotNull(id);
+  RecordType(Map<String, Type> fields) {
     Assert.isNotNull(fields);
     Assert.isTrue(fields.size() > 0);
-    this.id = id;
     this.fields = Util.safeStringSortedMap(fields);
   }
 }

@@ -9,7 +9,6 @@
 package edu.uiowa.kind2.lustre;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -18,8 +17,8 @@ import java.util.List;
 public class ProgramBuilder {
   private List<TypeDef> types = new ArrayList<>();
   private List<Constant> constants = new ArrayList<>();
-  private List<Component> importedFunctions = new ArrayList<>();
-  private List<Component> importedNodes = new ArrayList<>();
+  private List<ImportedComponent> importedFunctions = new ArrayList<>();
+  private List<ImportedComponent> importedNodes = new ArrayList<>();
   private List<Contract> contracts = new ArrayList<>();
   private List<Component> functions = new ArrayList<>();
   private List<Component> nodes = new ArrayList<>();
@@ -32,34 +31,14 @@ public class ProgramBuilder {
   }
 
   /**
-   * add a type definition
+   * define a type
    *
-   * @param type the type definition to add
+   * @param name name of the type to define
+   * @param type the type to define
    * @return this program builder
    */
-  public ProgramBuilder addType(TypeDef type) {
-    this.types.add(type);
-    return this;
-  }
-
-  /**
-   * add type definitions
-   *
-   * @param types a collection of type definitions to add
-   * @return this program builder
-   */
-  public ProgramBuilder addTypes(Collection<TypeDef> types) {
-    this.types.addAll(types);
-    return this;
-  }
-
-  /**
-   * remove all type definitions
-   *
-   * @return this program builder
-   */
-  public ProgramBuilder clearTypes() {
-    this.types.clear();
+  public ProgramBuilder defineType(String name, Type type) {
+    this.types.add(new TypeDef(name, type));
     return this;
   }
 
@@ -92,44 +71,44 @@ public class ProgramBuilder {
   /**
    * import a function
    *
-   * @param functionBuilder a builder for the function to add
+   * @param importedComponentBuilder a builder for the function to import
    * @return this program builder
    */
-  public ProgramBuilder importFunction(FunctionBuilder functionBuilder) {
-    this.importedFunctions.add(functionBuilder.build());
+  public ProgramBuilder importFunction(ImportedComponentBuilder importedComponentBuilder) {
+    this.importedFunctions.add(importedComponentBuilder.build());
     return this;
   }
 
   /**
    * add a function
    *
-   * @param nodeBuilder a builder for the function to add
+   * @param componentBuilder a builder for the function to add
    * @return this program builder
    */
-  public ProgramBuilder addFunction(FunctionBuilder functionBuilder) {
-    this.functions.add(functionBuilder.build());
+  public ProgramBuilder addFunction(ComponentBuilder componentBuilder) {
+    this.functions.add(componentBuilder.build());
+    return this;
+  }
+
+  /**
+   * import a node
+   *
+   * @param importedComponentBuilder a builder for the node to import
+   * @return this program builder
+   */
+  public ProgramBuilder importNode(ImportedComponentBuilder importedComponentBuilder) {
+    this.importedNodes.add(importedComponentBuilder.build());
     return this;
   }
 
   /**
    * add a node
    *
-   * @param nodeBuilder a builder for the node to add
+   * @param componentBuilder a builder for the node to add
    * @return this program builder
    */
-  public ProgramBuilder importNode(NodeBuilder nodeBuilder) {
-    this.importedNodes.add(nodeBuilder.build());
-    return this;
-  }
-
-  /**
-   * add a node
-   *
-   * @param nodeBuilder a builder for the node to add
-   * @return this program builder
-   */
-  public ProgramBuilder addNode(NodeBuilder nodeBuilder) {
-    this.nodes.add(nodeBuilder.build());
+  public ProgramBuilder addNode(ComponentBuilder componentBuilder) {
+    this.nodes.add(componentBuilder.build());
     return this;
   }
 

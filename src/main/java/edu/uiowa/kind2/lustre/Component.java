@@ -9,29 +9,19 @@
 package edu.uiowa.kind2.lustre;
 
 import java.util.List;
-
-import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-class Component extends Ast {
-  final String id;
-  final List<Parameter> inputs;
-  final List<Parameter> outputs;
+class Component extends ImportedComponent {
   final List<Constant> localConsts;
   final List<VarDecl> localVars;
   final List<Equation> equations;
   final List<Property> properties;
   final List<Expr> assertions;
-  final ContractBody contractBody; // Nullable
 
   Component(String id, List<Parameter> inputs, List<Parameter> outputs, ContractBody contractBody,
       List<Constant> localConsts, List<VarDecl> localVars, List<Equation> equations,
       List<Expr> assertions, List<Property> properties) {
-    Assert.isNotNull(id);
-    this.id = id;
-    this.inputs = Util.safeList(inputs);
-    this.outputs = Util.safeList(outputs);
-    this.contractBody = contractBody;
+    super(id, inputs, outputs, contractBody);
     this.localConsts = Util.safeList(localConsts);
     this.localVars = Util.safeList(localVars);
     this.equations = Util.safeList(equations);

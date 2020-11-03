@@ -45,6 +45,8 @@ public class PrettyPrintVisitor {
       expr((Expr) a);
     } else if (a instanceof Component) {
       visit((Component) a);
+    } else if (a instanceof ImportedComponent) {
+      visit((ImportedComponent) a);
     } else if (a instanceof Parameter) {
       visit((Parameter) a);
     } else if (a instanceof Program) {
@@ -89,7 +91,7 @@ public class PrettyPrintVisitor {
     }
 
     if (!program.importedFunctions.isEmpty()) {
-      for (Component importedFunction : program.importedFunctions) {
+      for (ImportedComponent importedFunction : program.importedFunctions) {
         write("function imported ");
         visit(importedFunction);
         newline();
@@ -98,7 +100,7 @@ public class PrettyPrintVisitor {
     }
 
     if (!program.importedNodes.isEmpty()) {
-      for (Component importedNode : program.importedNodes) {
+      for (ImportedComponent importedNode : program.importedNodes) {
         write("node imported ");
         visit(importedNode);
         newline();
@@ -266,26 +268,30 @@ public class PrettyPrintVisitor {
     write(");");
   }
 
-  public void visit(Component component) {
-    write(component.id);
+  public void visit(ImportedComponent importedComponent) {
+    write(importedComponent.id);
     write("(");
     newline();
-    params(component.inputs);
+    params(importedComponent.inputs);
     newline();
     write(") returns (");
     newline();
-    params(component.outputs);
+    params(importedComponent.outputs);
     newline();
     write(");");
     newline();
 
-    if (component.contractBody != null) {
+    if (importedComponent.contractBody != null) {
       write("(*@contract");
       newline();
-      visit(component.contractBody);
+      visit(importedComponent.contractBody);
       write("*)");
       newline();
     }
+  }
+
+  public void visit(Component component) {
+    visit((ImportedComponent) component);
 
     if (!component.localVars.isEmpty()) {
       write("var");
@@ -494,9 +500,9 @@ public class PrettyPrintVisitor {
   }
 
   private String getCastFunction(Type type) {
-    if (type == NamedType.REAL) {
+    if (type == TypeUtil.REAL) {
       return "real";
-    } else if (type == NamedType.INT) {
+    } else if (type == TypeUtil.INT) {
       return "floor";
     } else {
       throw new IllegalArgumentException("Unable to cast to type: " + type);
