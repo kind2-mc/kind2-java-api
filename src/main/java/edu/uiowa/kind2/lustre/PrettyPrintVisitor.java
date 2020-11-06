@@ -11,7 +11,6 @@ package edu.uiowa.kind2.lustre;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
 import edu.uiowa.kind2.Kind2Exception;
 
 public class PrettyPrintVisitor {
@@ -177,6 +176,17 @@ public class PrettyPrintVisitor {
         }
       }
       write("}");
+    } else if (type instanceof TupleType) {
+      TupleType tupleType = (TupleType) type;
+      Iterator<Type> iterator = tupleType.types.iterator();
+      write('[');
+      while (iterator.hasNext()) {
+        write(iterator.next());
+        if (iterator.hasNext()) {
+          write(", ");
+        }
+      }
+      write(']');
     } else {
       write(type);
     }
@@ -199,7 +209,7 @@ public class PrettyPrintVisitor {
   public void visit(Contract contract) {
     write("contract ");
     write(contract.id);
-    write("(");
+    write(" (");
     newline();
     params(contract.inputs);
     newline();
@@ -212,7 +222,7 @@ public class PrettyPrintVisitor {
     write("let");
     newline();
     visit(contract.contractBody);
-    write("tel;");
+    write("tel");
   }
 
   public void visit(ContractBody contractBody) {
@@ -244,7 +254,7 @@ public class PrettyPrintVisitor {
   public void visit(ContractImport contractImport) {
     write("import ");
     write(contractImport.id);
-    write("(");
+    write(" (");
 
     Iterator<Expr> inputIt = contractImport.inputs.iterator();
 
@@ -270,7 +280,7 @@ public class PrettyPrintVisitor {
 
   public void visit(ImportedComponent importedComponent) {
     write(importedComponent.id);
-    write("(");
+    write(" (");
     newline();
     params(importedComponent.inputs);
     newline();
@@ -312,7 +322,6 @@ public class PrettyPrintVisitor {
       write("  ");
       visit(equation);
       newline();
-      newline();
     }
 
     for (Expr assertion : component.assertions) {
@@ -320,14 +329,12 @@ public class PrettyPrintVisitor {
       newline();
     }
 
-    if (!component.properties.isEmpty()) {
-      for (Property property : component.properties) {
-        visit(property);
-        newline();
-      }
+    for (Property property : component.properties) {
+      visit(property);
+      newline();
     }
 
-    write("tel;");
+    write("tel");
   }
 
   private void params(List<Parameter> params) {
@@ -398,7 +405,6 @@ public class PrettyPrintVisitor {
     write("  assert ");
     expr(assertion);
     write(";");
-    newline();
   }
 
   void property(String s) {
@@ -494,16 +500,14 @@ public class PrettyPrintVisitor {
 
   public void visit(CastExpr e) {
     write(getCastFunction(e.type));
-    write("(");
+    write(" (");
     expr(e.expr);
     write(")");
   }
 
   private String getCastFunction(Type type) {
-    if (type == TypeUtil.REAL) {
-      return "real";
-    } else if (type == TypeUtil.INT) {
-      return "floor";
+    if (type instanceof NamedType) {
+      return ((NamedType) type).name;
     } else {
       throw new IllegalArgumentException("Unable to cast to type: " + type);
     }

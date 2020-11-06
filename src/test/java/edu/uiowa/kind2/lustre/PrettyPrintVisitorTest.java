@@ -94,14 +94,14 @@ class PrettyPrintVisitorTest {
   void contractImportTest() {
     Assertions.assertThrows(Kind2Exception.class, () -> new ContractImport(null, null, null));
 
-    String expected = "import Spec() returns ();";
+    String expected = "import Spec () returns ();";
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new ContractImport("Spec", null, null));
 
     assertEquals(visitor.toString(), expected);
 
-    expected = "import Spec(x) returns (y);";
+    expected = "import Spec (x) returns (y);";
 
     visitor = new PrettyPrintVisitor();
     visitor.visit(new ContractImport("Spec", Collections.singletonList(ExprUtil.id("x")),
@@ -172,7 +172,7 @@ class PrettyPrintVisitorTest {
   @Test
   void contractTest() {
     // raw strings require Java 12+
-    String expected = "contract c() returns (); let guarantee true; tel;";
+    String expected = "contract c() returns (); let guarantee true; tel";
 
     ContractBodyBuilder c = new ContractBodyBuilder();
     c.addGuarantee(ExprUtil.TRUE);
