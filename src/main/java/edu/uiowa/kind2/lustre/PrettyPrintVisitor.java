@@ -89,6 +89,24 @@ public class PrettyPrintVisitor {
       newline();
     }
 
+    for (Component function : program.functions) {
+      if (function.contractBody == null) {
+        write("function ");
+        visit(function);
+        newline();
+        newline();
+      }
+    }
+
+    for (Component node : program.nodes) {
+      if (node.contractBody == null) {
+        write("node ");
+        visit(node);
+        newline();
+        newline();
+      }
+    }
+
     if (!program.importedFunctions.isEmpty()) {
       for (ImportedComponent importedFunction : program.importedFunctions) {
         write("function imported ");
@@ -114,18 +132,19 @@ public class PrettyPrintVisitor {
     }
 
     for (Component function : program.functions) {
-      write("function ");
-      visit(function);
-      newline();
-      newline();
+      if (function.contractBody != null) {
+        write("function ");
+        visit(function);
+        newline();
+        newline();
+      }
     }
 
-    Iterator<Component> iterator = program.nodes.iterator();
-    while (iterator.hasNext()) {
-      write("node ");
-      visit(iterator.next());
-      newline();
-      if (iterator.hasNext()) {
+    for (Component node : program.nodes) {
+      if (node.contractBody != null) {
+        write("node ");
+        visit(node);
+        newline();
         newline();
       }
     }
