@@ -179,11 +179,51 @@ public class Kind2Api {
    *
    * @param program Lustre program
    * @param result  Place to store results as they come in
+   * @throws .Kind2Exception
+   */
+  public void execute(Program program, Kind2Result result) {
+    execute(program, result, new IProgressMonitor() {
+      @Override
+      public boolean isCanceled() {
+        return false;
+      }
+
+      @Override
+      public void done() {
+      }
+    });
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program
+   * @param result  Place to store results as they come in
    * @param monitor Used to check for cancellation
    * @throws .Kind2Exception
    */
   public void execute(Program program, Kind2Result result, IProgressMonitor monitor) {
     execute(program.toString(), result, monitor);
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @param result  Place to store results as they come in
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Kind2Result result) {
+    execute(program, result, new IProgressMonitor() {
+      @Override
+      public boolean isCanceled() {
+        return false;
+      }
+
+      @Override
+      public void done() {
+      }
+    });
   }
 
   /**

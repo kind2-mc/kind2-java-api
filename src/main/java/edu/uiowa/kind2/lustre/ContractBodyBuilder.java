@@ -11,7 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class provides helper functions for constructing a contract body.
+ * This class provides helper functions for constructing a contract body which can be embedded in a
+ * node's/function's inline contract or an external contract node. The body is composed of items,
+ * each of which define
+ * <ul>
+ * <li>a ghost variable / constant,</li>
+ * <li>an assumption,</li>
+ * <li>a guarantee,</li>
+ * <li>a mode, or</li>
+ * <li>an import of a contract node.</li>
+ * </ul>
  */
 public class ContractBodyBuilder {
   private final List<ContractItem> items;
@@ -88,9 +97,8 @@ public class ContractBodyBuilder {
    * @param expr an expression representing a constraint
    * @return this contract body builder
    */
-  public ContractBodyBuilder addAssumption(Expr expr) {
+  public void addAssumption(Expr expr) {
     this.items.add(new Assume(null, expr));
-    return this;
   }
 
   /**
@@ -100,9 +108,8 @@ public class ContractBodyBuilder {
    * @param expr an expression representing a constraint
    * @return this contract body builder
    */
-  public ContractBodyBuilder addAssumption(String name, Expr expr) {
+  public void addAssumption(String name, Expr expr) {
     this.items.add(new Assume(name, expr));
-    return this;
   }
 
   /**
@@ -111,9 +118,8 @@ public class ContractBodyBuilder {
    * @param expr constraint expressing the behavior of a node
    * @return this contract body builder
    */
-  public ContractBodyBuilder addGuarantee(Expr expr) {
+  public void addGuarantee(Expr expr) {
     this.items.add(new Guarantee(null, expr));
-    return this;
   }
 
   /**
@@ -123,9 +129,8 @@ public class ContractBodyBuilder {
    * @param expr constraint expressing the behavior of a node
    * @return this contract body builder
    */
-  public ContractBodyBuilder addGuarantee(String name, Expr expr) {
+  public void addGuarantee(String name, Expr expr) {
     this.items.add(new Guarantee(name, expr));
-    return this;
   }
 
   /**
@@ -133,9 +138,8 @@ public class ContractBodyBuilder {
    *
    * @param modeBuilder a mode builder
    */
-  public ContractBodyBuilder addMode(ModeBuilder modeBuilder) {
+  public void addMode(ModeBuilder modeBuilder) {
     this.items.add(modeBuilder.build());
-    return this;
   }
 
   /**
@@ -146,9 +150,8 @@ public class ContractBodyBuilder {
    * @param outputs outputs of the contract
    * @return this contract body builder
    */
-  public ContractBodyBuilder importContract(String name, List<Expr> inputs, List<IdExpr> outputs) {
+  public void importContract(String name, List<Expr> inputs, List<IdExpr> outputs) {
     this.items.add(new ContractImport(name, inputs, outputs));
-    return this;
   }
 
   /**

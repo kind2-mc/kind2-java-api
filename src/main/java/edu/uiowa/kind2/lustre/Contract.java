@@ -14,13 +14,7 @@ import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
 /**
- * This class represents a contract node. A contract node is very similar to a traditional Lustre
- * node. The two differences are that
- * <ul>
- * <li>it starts with {@code contract} instead of {@code node} and</li>
- * <li>its body can only mention contract items.</li>
- * </ul>
- * To use a contract node one needs to import it through an inline contract.
+ * This class represents a contract node
  */
 class Contract extends Ast {
   final String id;

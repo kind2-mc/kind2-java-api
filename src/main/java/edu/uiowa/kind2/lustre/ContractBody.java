@@ -13,15 +13,7 @@ import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
 /**
- * This class represents a contract body which can be embedded in a node's inline contract or an
- * external contract node. The body is composed of items, each of which define
- * <ul>
- * <li>a ghost variable / constant,</li>
- * <li>an assumption,</li>
- * <li>a guarantee,</li>
- * <li>a mode, or</li>
- * <li>an import of a contract node.</li>
- * </ul>
+ * This class represents a contract body.
  */
 class ContractBody extends Ast {
   /**

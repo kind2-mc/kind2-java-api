@@ -13,9 +13,7 @@ import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
 /**
- * A mode {@code (R,E)} is a set of requires {@code R} and a set of ensures {@code E}. Requires have
- * the same restrictions as assumptions: they cannot mention outputs of the node they specify in the
- * current state. Ensures, like guarantees, have no restriction.
+ * This class represents a contract mode.
  */
 class Mode extends ContractItem {
   final String id;

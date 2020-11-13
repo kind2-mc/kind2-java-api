@@ -113,7 +113,7 @@ public class ProgramBuilder {
   }
 
   /**
-   * set the main node
+   * set the main node/function
    *
    * @return this program builder
    */

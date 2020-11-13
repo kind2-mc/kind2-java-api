@@ -11,16 +11,28 @@ package edu.uiowa.kind2.lustre;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a builder for a function/node. Kind 2 supports the {@code function} and
+ * {@code node} keywords, which have slightly different semantics. Like the name suggests, the
+ * output(s) of a function should be a <i>non-temporal</i> combination of its inputs. That is, a
+ * function cannot use the {@code ->}, {@code pre}, {@code merge}, {@code when}, {@code condact}, or
+ * {@code activate} operators. A function is also not allowed to call a node, only other functions.
+ * In Lustre terms, functions are stateless.
+ * <p>
+ * In Kind 2, these restrictions extend to the contract attached to the function, if any. Note that
+ * besides the ones mentioned here, no additional restrictions are enforced on functions compared to
+ * nodes.
+ */
 public class ComponentBuilder {
   private String id;
-  private List<Parameter> inputs = new ArrayList<>();
-  private List<Parameter> outputs = new ArrayList<>();
-  private ContractBody contractBody = null;
-  private List<Constant> localConsts = new ArrayList<>();
-  private List<VarDecl> localVars = new ArrayList<>();
-  private List<Equation> equations = new ArrayList<>();
-  private List<Expr> assertions = new ArrayList<>();
-  private List<Property> properties = new ArrayList<>();
+  private List<Parameter> inputs;
+  private List<Parameter> outputs;
+  private ContractBody contractBody;
+  private List<Constant> localConsts;
+  private List<VarDecl> localVars;
+  private List<Equation> equations;
+  private List<Expr> assertions;
+  private List<Property> properties;
 
   /**
    * Constructor
@@ -29,6 +41,13 @@ public class ComponentBuilder {
    */
   public ComponentBuilder(String id) {
     this.id = id;
+    inputs = new ArrayList<>();
+    outputs = new ArrayList<>();
+    localConsts = new ArrayList<>();
+    localVars = new ArrayList<>();
+    equations = new ArrayList<>();
+    assertions = new ArrayList<>();
+    properties = new ArrayList<>();
   }
 
   /**
@@ -65,6 +84,15 @@ public class ComponentBuilder {
   public IdExpr createVarOutput(String name, Type type) {
     this.outputs.add(new Parameter(name, type));
     return new IdExpr(name);
+  }
+
+  /**
+   * set the contract body for the component
+   *
+   * @param contractBodyBuilder a builder for the contract body
+   */
+  public void setContractBody(ContractBodyBuilder contractBodyBuilder) {
+    this.contractBody = contractBodyBuilder.build();
   }
 
   /**
@@ -165,16 +193,7 @@ public class ComponentBuilder {
   }
 
   /**
-   * set the contract body for the component
-   *
-   * @param contractBodyBuilder a builder for the contract body
-   */
-  public void setContractBody(ContractBodyBuilder contractBodyBuilder) {
-    this.contractBody = contractBodyBuilder.build();
-  }
-
-  /**
-   * construct a component from this builder
+   * construct a component
    *
    * @return constructed component
    */

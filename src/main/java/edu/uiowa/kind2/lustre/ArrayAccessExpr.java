@@ -7,6 +7,7 @@
 
 package edu.uiowa.kind2.lustre;
 
+import java.math.BigInteger;
 import edu.uiowa.kind2.Assert;
 
 class ArrayAccessExpr extends Expr {
@@ -20,7 +21,7 @@ class ArrayAccessExpr extends Expr {
     this.index = index;
   }
 
-  ArrayAccessExpr(Expr array, int index) {
-    this(array, new IntExpr(index));
+  ArrayAccessExpr(Expr array, long index) {
+    this(array, new IntExpr(BigInteger.valueOf(index)));
   }
 }

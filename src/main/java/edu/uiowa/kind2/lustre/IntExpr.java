@@ -18,8 +18,4 @@ class IntExpr extends Expr {
     Assert.isNotNull(value);
     this.value = value;
   }
-
-  IntExpr(int value) {
-    this(BigInteger.valueOf(value));
-  }
 }

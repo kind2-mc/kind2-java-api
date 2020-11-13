@@ -12,7 +12,10 @@ import java.util.List;
 import edu.uiowa.kind2.Assert;
 
 /**
- * This class provides helper functions for constructing a mode.
+ * This class provides helper functions for constructing a mode. A mode {@code (R,E)} is a set of
+ * requires {@code R} and a set of ensures {@code E}. Requires have the same restrictions as
+ * assumptions: they cannot mention outputs of the node they specify in the current state. Ensures,
+ * like guarantees, have no restriction.
  */
 public class ModeBuilder {
   private String id;
@@ -36,7 +39,7 @@ public class ModeBuilder {
    *
    * @param expr an expression representing a constraint
    */
-  public void addRequire(Expr expr) {
+  public void require(Expr expr) {
     this.require.add(new Require(null, expr));
   }
 
@@ -46,7 +49,7 @@ public class ModeBuilder {
    * @param name name of the mode require
    * @param expr an expression representing a constraint
    */
-  public void addRequire(String name, Expr expr) {
+  public void require(String name, Expr expr) {
     this.require.add(new Require(name, expr));
   }
 
@@ -55,7 +58,7 @@ public class ModeBuilder {
    *
    * @param expr an expression representing a constraint
    */
-  public void addEnsure(Expr expr) {
+  public void ensure(Expr expr) {
     this.ensure.add(new Ensure(null, expr));
   }
 
@@ -65,7 +68,7 @@ public class ModeBuilder {
    * @param name name of the mode ensure
    * @param expr an expression representing a constraint
    */
-  public void addEnsure(String name, Expr expr) {
+  public void ensure(String name, Expr expr) {
     this.ensure.add(new Ensure(name, expr));
   }
 

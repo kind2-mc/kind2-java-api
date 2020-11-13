@@ -325,11 +325,11 @@ public class ExprUtil {
    * <p>
    * Lustre: {@code <i>}
    *
-   * @param i an integer number
+   * @param value an integer number
    * @return the integer value expression
    */
-  public static Expr integer(int i) {
-    return new IntExpr(i);
+  public static Expr integer(long value) {
+    return new IntExpr(BigInteger.valueOf(value));
   }
 
   /**
@@ -398,18 +398,7 @@ public class ExprUtil {
     return new NodeCallExpr(name.id, Arrays.asList(args));
   }
 
-  /**
-   * true value expression
-   * <p>
-   * Lustre: {@code true}
-   */
   public static Expr TRUE = new BoolExpr(true);
-
-  /**
-   * false value expression
-   * <p>
-   * Lustre: {@code false}
-   */
   public static Expr FALSE = new BoolExpr(false);
 
   /* Cast Expressions */
