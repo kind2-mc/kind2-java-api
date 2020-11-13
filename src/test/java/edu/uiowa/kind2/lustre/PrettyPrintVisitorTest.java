@@ -57,7 +57,7 @@ class PrettyPrintVisitorTest {
     Assertions.assertThrows(Kind2Exception.class, () -> new ModeRefExpr((String) null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(ExprUtil.modeRef("a", "b", "c"));
+    visitor.expr(ExprUtil.modeRef("a", "b", "c"));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -131,8 +131,7 @@ class PrettyPrintVisitorTest {
     expected = "mode m3 (ensure true;);";
 
     visitor = new PrettyPrintVisitor();
-    visitor
-        .visit(new Mode("m3", null, Collections.singletonList(new Ensure(null, ExprUtil.TRUE))));
+    visitor.visit(new Mode("m3", null, Collections.singletonList(new Ensure(null, ExprUtil.TRUE))));
 
     assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
 

@@ -32,7 +32,11 @@ public class PrettyPrintVisitor {
   }
 
   public void ast(Ast a) {
-    if (a instanceof Contract) {
+    if (a instanceof Type) {
+      writeType((Type) a);
+    } else if (a instanceof Expr) {
+      expr((Expr) a);
+    } else if (a instanceof Contract) {
       visit((Contract) a);
     } else if (a instanceof ContractBody) {
       visit((ContractBody) a);
