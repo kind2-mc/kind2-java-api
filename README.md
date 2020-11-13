@@ -16,7 +16,6 @@ An example of how to use the API is provided in `src/main/java/StopWatch.java`. 
 1. Add `build/libs/kind2-java-api.jar` to your java class path.
 2. Import package `edu.uiowa.kind2`.
 3. Construct a lustre `program` object.
-4. Implement the `IProgressMonitor` interface.
 5. Construct a `Kind2Api` object and call `Kind2Api.execute`.
 6. Analyze the results.
 
