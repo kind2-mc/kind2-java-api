@@ -12,7 +12,7 @@ To import the API, use the jar file `build/libs/kind2-java-api.jar`.
 Alternatively you can just copy the package `edu.uiowa.kind2` to your source code.
 
 ### API usage
-An example of how to use the API is provided in `src/main/java/Main.java`. Follow these steps when using the API:
+An example of how to use the API is provided in `src/main/java/StopWatch.java`. Follow these steps when using the API:
 1. Add `build/libs/kind2-java-api.jar` to your java class path.
 2. Import package `edu.uiowa.kind2`.
 3. Construct a lustre `program` object.
