@@ -28,10 +28,10 @@ class PrettyPrintVisitorTest {
     // TODO: add tests for name
     String expected = "assume true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Assume(null, null));
+    Assertions.assertThrows(Kind2Exception.class, () -> new Assume(false, null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Assume(null, ExprUtil.TRUE));
+    visitor.visit(new Assume(false, null, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -41,10 +41,10 @@ class PrettyPrintVisitorTest {
     // TODO: add tests for name
     String expected = "guarantee true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(null, null));
+    Assertions.assertThrows(Kind2Exception.class, () -> new Guarantee(false, null, null));
 
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Guarantee(null, ExprUtil.TRUE));
+    visitor.visit(new Guarantee(false, null, ExprUtil.TRUE));
 
     assertEquals(visitor.toString(), expected);
   }
@@ -154,8 +154,8 @@ class PrettyPrintVisitorTest {
 
     Assertions.assertThrows(Kind2Exception.class, c::build);
 
-    c.addGuarantee(ExprUtil.TRUE);
-    c.addAssumption(ExprUtil.TRUE);
+    c.guarantee(ExprUtil.TRUE);
+    c.assume(ExprUtil.TRUE);
     c.importContract("Spec", null, null);
     ModeBuilder m = new ModeBuilder("m");
     c.addMode(m);
@@ -174,7 +174,7 @@ class PrettyPrintVisitorTest {
     String expected = "contract c() returns (); let guarantee true; tel";
 
     ContractBodyBuilder c = new ContractBodyBuilder();
-    c.addGuarantee(ExprUtil.TRUE);
+    c.guarantee(ExprUtil.TRUE);
 
     Assertions.assertThrows(Kind2Exception.class, () -> new Contract(null, null, null, c.build()));
 

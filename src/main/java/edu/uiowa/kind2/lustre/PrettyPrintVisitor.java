@@ -449,8 +449,6 @@ public class PrettyPrintVisitor {
       visit((CastExpr) e);
     } else if (e instanceof CondactExpr) {
       visit((CondactExpr) e);
-    } else if (e instanceof FunctionCallExpr) {
-      visit((FunctionCallExpr) e);
     } else if (e instanceof IdExpr) {
       visit((IdExpr) e);
     } else if (e instanceof IfThenElseExpr) {
@@ -461,8 +459,8 @@ public class PrettyPrintVisitor {
       visit((ListExpr) e);
     } else if (e instanceof ModeRefExpr) {
       visit((ModeRefExpr) e);
-    } else if (e instanceof NodeCallExpr) {
-      visit((NodeCallExpr) e);
+    } else if (e instanceof ComponentCallExpr) {
+      visit((ComponentCallExpr) e);
     } else if (e instanceof RealExpr) {
       visit((RealExpr) e);
     } else if (e instanceof RecordAccessExpr) {
@@ -479,7 +477,9 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(ArrayAccessExpr e) {
+    write("(");
     expr(e.array);
+    write(")");
     write("[");
     expr(e.index);
     write("]");
@@ -497,6 +497,9 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(Assume assumption) {
+    if (assumption.weak) {
+      write("weakly ");
+    }
     write("assume ");
     if (assumption.name != null) {
       write("\"");
@@ -510,9 +513,11 @@ public class PrettyPrintVisitor {
   public void visit(BinaryExpr e) {
     write("(");
     expr(e.left);
+    write(")");
     write(" ");
     write(e.op);
     write(" ");
+    write("(");
     expr(e.right);
     write(")");
   }
@@ -548,20 +553,10 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
-  public void visit(FunctionCallExpr e) {
-    write(e.function);
-    write("(");
-    Iterator<Expr> iterator = e.args.iterator();
-    while (iterator.hasNext()) {
-      expr(iterator.next());
-      if (iterator.hasNext()) {
-        write(", ");
-      }
-    }
-    write(")");
-  }
-
   public void visit(Guarantee guarantee) {
+    if (guarantee.weak) {
+      write("weakly ");
+    }
     write("guarantee ");
     if (guarantee.name != null) {
       write("\"");
@@ -599,11 +594,16 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(IfThenElseExpr e) {
-    write("(if ");
+    write("if ");
+    write("(");
     expr(e.cond);
+    write(")");
     write(" then ");
+    write("(");
     expr(e.thenExpr);
+    write(")");
     write(" else ");
+    write("(");
     expr(e.elseExpr);
     write(")");
   }
@@ -648,15 +648,16 @@ public class PrettyPrintVisitor {
     }
   }
 
-  public void visit(NodeCallExpr e) {
+  public void visit(ComponentCallExpr e) {
     write(e.node);
     write("(");
     Iterator<Expr> iterator = e.args.iterator();
-    while (iterator.hasNext()) {
+    if (iterator.hasNext()) {
       expr(iterator.next());
-      if (iterator.hasNext()) {
-        write(", ");
-      }
+    }
+    while (iterator.hasNext()) {
+      write(", ");
+      expr(iterator.next());
     }
     write(")");
   }
@@ -670,9 +671,13 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(RecordAccessExpr e) {
+    write("(");
     expr(e.record);
+    write(")");
     write(".");
+    write("(");
     write(e.field);
+    write(")");
   }
 
   public void visit(RecordExpr e) {
@@ -703,11 +708,11 @@ public class PrettyPrintVisitor {
   }
 
   public void visit(UnaryExpr e) {
-    write("(");
     write(e.op);
     if (e.op != UnaryOp.NEGATIVE) {
       write(" ");
     }
+    write("(");
     expr(e.expr);
     write(")");
   }

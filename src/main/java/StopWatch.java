@@ -85,8 +85,8 @@ public class StopWatch {
 
     // Use ContractBodyBuilder to construct a contract body
     ContractBodyBuilder cbb = new ContractBodyBuilder();
-    cbb.addAssumption(ExprUtil.greaterEqual(n, ExprUtil.real("0.0")));
-    cbb.addGuarantee(ExprUtil.and(ExprUtil.greaterEqual(r, ExprUtil.real("0.0")),
+    cbb.assume(ExprUtil.greaterEqual(n, ExprUtil.real("0.0")));
+    cbb.guarantee(ExprUtil.and(ExprUtil.greaterEqual(r, ExprUtil.real("0.0")),
         ExprUtil.equal(ExprUtil.multiply(r, r), n)));
 
     // Use ImportedComponentBuilder to construct an imported component (a function in this case)
@@ -150,29 +150,29 @@ public class StopWatch {
         ExprUtil.arrow(toggle, ExprUtil.or(ExprUtil.and(ExprUtil.pre(on), ExprUtil.not(toggle)),
             ExprUtil.and(ExprUtil.not(ExprUtil.pre(on)), toggle))));
 
-    cbb.addAssumption(ExprUtil.not(ExprUtil.and(toggle, reset)));
-    cbb.addGuarantee(ExprUtil.arrow(ExprUtil.implies(on, ExprUtil.equal(time, ExprUtil.integer(1))),
+    cbb.assume(ExprUtil.not(ExprUtil.and(toggle, reset)));
+    cbb.guarantee(ExprUtil.arrow(ExprUtil.implies(on, ExprUtil.equal(time, ExprUtil.integer(1))),
         ExprUtil.TRUE));
-    cbb.addGuarantee(ExprUtil.arrow(
+    cbb.guarantee(ExprUtil.arrow(
         ExprUtil.implies(ExprUtil.not(on), ExprUtil.equal(time, ExprUtil.integer(0))),
         ExprUtil.TRUE));
-    cbb.addGuarantee(ExprUtil.greaterEqual(time, ExprUtil.integer(0)));
+    cbb.guarantee(ExprUtil.greaterEqual(time, ExprUtil.integer(0)));
 
-    cbb.addGuarantee(ExprUtil.implies(
+    cbb.guarantee(ExprUtil.implies(
         ExprUtil.and(ExprUtil.not(reset),
             ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
                 ExprUtil.functionCall(ExprUtil.id("even"),
                     ExprUtil.nodeCall(ExprUtil.id("Count"), toggle)))),
         ExprUtil.nodeCall(ExprUtil.id("Stable"), time)));
 
-    cbb.addGuarantee(ExprUtil.implies(
+    cbb.guarantee(ExprUtil.implies(
         ExprUtil.and(ExprUtil.not(reset),
             ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
                 ExprUtil.not(ExprUtil.functionCall(ExprUtil.id("even"),
                     ExprUtil.nodeCall(ExprUtil.id("Count"), toggle))))),
         ExprUtil.nodeCall(ExprUtil.id("Increased"), time)));
 
-    cbb.addGuarantee(
+    cbb.guarantee(
         ExprUtil
             .arrow(ExprUtil.TRUE,
                 ExprUtil.implies(ExprUtil.and(
@@ -405,7 +405,7 @@ public class StopWatch {
     cbb.importContract("StopWatchSpec", Arrays.asList(toggle, reset),
         Collections.singletonList(count));
 
-    cbb.addGuarantee(ExprUtil.not(ExprUtil.and(ExprUtil.modeRef("StopWatchSpec", "resetting"),
+    cbb.guarantee(ExprUtil.not(ExprUtil.and(ExprUtil.modeRef("StopWatchSpec", "resetting"),
         ExprUtil.modeRef("StopWatchSpec", "running"),
         ExprUtil.modeRef("StopWatchSpec", "stopped"))));
 

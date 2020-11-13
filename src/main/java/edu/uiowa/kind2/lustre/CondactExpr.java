@@ -15,10 +15,10 @@ import edu.uiowa.kind2.util.Util;
 
 class CondactExpr extends Expr {
   final Expr clock;
-  final NodeCallExpr call;
+  final ComponentCallExpr call;
   final List<Expr> args;
 
-  CondactExpr(Expr clock, NodeCallExpr call, List<Expr> args) {
+  CondactExpr(Expr clock, ComponentCallExpr call, List<Expr> args) {
     Assert.isNotNull(clock);
     Assert.isNotNull(call);
     this.clock = clock;
@@ -26,7 +26,7 @@ class CondactExpr extends Expr {
     this.args = Util.safeList(args);
   }
 
-  CondactExpr(Expr clock, NodeCallExpr call, Expr... args) {
+  CondactExpr(Expr clock, ComponentCallExpr call, Expr... args) {
     this(clock, call, Arrays.asList(args));
   }
 }

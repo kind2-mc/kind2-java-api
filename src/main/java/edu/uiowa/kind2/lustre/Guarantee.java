@@ -10,22 +10,22 @@ package edu.uiowa.kind2.lustre;
 import edu.uiowa.kind2.Assert;
 
 /**
- * This class represents a contract guarantee. Unlike assumptions, guarantees do not have any
- * restrictions on the streams they can mention. They typically mention the outputs in the current
- * state since they express the behavior of the node they specified under the assumptions of this
- * node.
+ * This class represents a contract guarantee.
  */
 class Guarantee extends ContractItem {
-  final String name;
+  final boolean weak;
+  final String name; // Nullable
   final Expr expr;
 
   /**
    * Constructor
    *
+   * @param weak whether this is a weakly guarantee or not
    * @param name name of the guarantee
    * @param expr constraint expressing the behavior of a node
    */
-  Guarantee(String name, Expr expr) {
+  Guarantee(boolean weak, String name, Expr expr) {
+    this.weak = weak;
     this.name = name;
     Assert.isNotNull(expr);
     this.expr = expr;

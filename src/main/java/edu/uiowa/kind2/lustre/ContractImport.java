@@ -13,17 +13,7 @@ import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
 /**
- * This class represents a contract import. A contract import merges the current contract with the
- * one imported. That is, if the current contract is {@code (A,G,M)} and we import
- * {@code (A',G',M')}, the resulting contract is {@code (A U A', G U G', M U M')} where U is set
- * union.
- * <p>
- * When importing a contract, it is necessary to specify how the instantiation of the contract is
- * performed. This defines a mapping from the input (output) formal parameters to the actual ones of
- * the import.
- * <p>
- * When importing contract {@code c} in the contract of node {@code n}, it is <b>illegal</b> to
- * mention an output of {@code n} in the actual input parameters of the import of {@code c}.
+ * This class represents a contract import.
  */
 class ContractImport extends ContractItem {
   final String id;

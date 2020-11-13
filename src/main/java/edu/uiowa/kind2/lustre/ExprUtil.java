@@ -356,7 +356,7 @@ public class ExprUtil {
    * @return the function-call expression
    */
   public static Expr functionCall(IdExpr name, List<Expr> args) {
-    return new NodeCallExpr(name.id, args);
+    return new ComponentCallExpr(name.id, args);
   }
 
   /**
@@ -369,7 +369,7 @@ public class ExprUtil {
    * @return the function-call expression
    */
   public static Expr functionCall(IdExpr name, Expr... args) {
-    return new NodeCallExpr(name.id, Arrays.asList(args));
+    return new ComponentCallExpr(name.id, Arrays.asList(args));
   }
 
   /**
@@ -382,7 +382,7 @@ public class ExprUtil {
    * @return the node-call expression
    */
   public static Expr nodeCall(IdExpr name, List<Expr> args) {
-    return new NodeCallExpr(name.id, args);
+    return new ComponentCallExpr(name.id, args);
   }
 
   /**
@@ -395,7 +395,7 @@ public class ExprUtil {
    * @return the node-call expression
    */
   public static Expr nodeCall(IdExpr name, Expr... args) {
-    return new NodeCallExpr(name.id, Arrays.asList(args));
+    return new ComponentCallExpr(name.id, Arrays.asList(args));
   }
 
   public static Expr TRUE = new BoolExpr(true);

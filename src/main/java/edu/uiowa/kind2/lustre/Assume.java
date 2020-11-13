@@ -10,21 +10,22 @@ package edu.uiowa.kind2.lustre;
 import edu.uiowa.kind2.Assert;
 
 /**
- * This class represents a contract assumption. An assumption over a node {@code n} is a constraint
- * one must respect in order to use {@code n} legally. It cannot mention the outputs of {@code n} in
- * the current state, but referring to outputs under a {@code pre} is fine.
+ * This class represents a contract assumption.
  */
 class Assume extends ContractItem {
+  final boolean weak;
   final String name; // Nullable
   final Expr expr;
 
   /**
    * Constructor
    *
+   * @param weak whether this is a weakly assume or not
    * @param name name of the assumption
    * @param expr an expression representing a constraint
    */
-  Assume(String name, Expr expr) {
+  Assume(boolean weak, String name, Expr expr) {
+    this.weak = weak;
     this.name = name;
     Assert.isNotNull(expr);
     this.expr = expr;

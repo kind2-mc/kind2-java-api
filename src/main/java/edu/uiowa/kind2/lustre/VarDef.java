@@ -10,9 +10,7 @@ package edu.uiowa.kind2.lustre;
 import edu.uiowa.kind2.Assert;
 
 /**
- * This class represents a ghost variable definition. A ghost variable is a stream that is local to
- * the contract. That is, it is not accessible from the body of the node specified. Ghost variables
- * are defined with the {@code var} keyword.
+ * This class represents a ghost variable definition.
  */
 class VarDef extends ContractItem {
   final VarDecl varDecl;

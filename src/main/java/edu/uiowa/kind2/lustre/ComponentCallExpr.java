@@ -12,11 +12,11 @@ import java.util.List;
 import edu.uiowa.kind2.Assert;
 import edu.uiowa.kind2.util.Util;
 
-class NodeCallExpr extends Expr {
+class ComponentCallExpr extends Expr {
   final String node;
   final List<Expr> args;
 
-  NodeCallExpr(String node, List<Expr> args) {
+  ComponentCallExpr(String node, List<Expr> args) {
     Assert.isNotNull(node);
     this.node = node;
     this.args = Util.safeList(args);

@@ -33,16 +33,8 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * Constructor
-   *
-   * @param contractBody contract body to clone
-   */
-  public ContractBodyBuilder(ContractBody contractBody) {
-    this.items = new ArrayList<>(contractBody.items);
-  }
-
-  /**
-   * create a ghost constant
+   * Create a ghost constant. A ghost constant is a stream that is local to the contract. That is,
+   * it is not accessible from the body of the node specified.
    *
    * @param name name of ghost constant
    * @param type type of ghost constant
@@ -54,7 +46,8 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * create a ghost constant
+   * Create a ghost constant. A ghost constant is a stream that is local to the contract. That is,
+   * it is not accessible from the body of the node specified.
    *
    * @param name name of ghost constant
    * @param expr expression specifying value assigned to ghost constant
@@ -66,7 +59,8 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * create a ghost constant
+   * Create a ghost constant. A ghost constant is a stream that is local to the contract. That is,
+   * it is not accessible from the body of the node specified.
    *
    * @param name name of ghost constant
    * @param type type of ghost constant
@@ -79,7 +73,8 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * create a ghost variable
+   * Create a ghost variable. A ghost variable is a stream that is local to the contract. That is,
+   * it is not accessible from the body of the node specified.
    *
    * @param name name of ghost variable
    * @param type type of ghost variable
@@ -92,49 +87,111 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * add an assumption
+   * Add an assumption. An assumption over a node {@code n} is a constraint one must respect in
+   * order to use {@code n} legally. It cannot mention the outputs of {@code n} in the current
+   * state, but referring to outputs under a {@code pre} is fine.
    *
    * @param expr an expression representing a constraint
    * @return this contract body builder
    */
-  public void addAssumption(Expr expr) {
-    this.items.add(new Assume(null, expr));
+  public void assume(Expr expr) {
+    this.items.add(new Assume(false, null, expr));
   }
 
   /**
-   * add an assumption
+   * Add an assumption. An assumption over a node {@code n} is a constraint one must respect in
+   * order to use {@code n} legally. It cannot mention the outputs of {@code n} in the current
+   * state, but referring to outputs under a {@code pre} is fine.
    *
    * @param name name of the assumption
    * @param expr an expression representing a constraint
    * @return this contract body builder
    */
-  public void addAssumption(String name, Expr expr) {
-    this.items.add(new Assume(name, expr));
+  public void assume(String name, Expr expr) {
+    this.items.add(new Assume(false, name, expr));
   }
 
   /**
-   * add a guarantee
+   * Add a a weakly assume. An assumption over a node {@code n} is a constraint one must respect in
+   * order to use {@code n} legally. It cannot mention the outputs of {@code n} in the current
+   * state, but referring to outputs under a {@code pre} is fine. Use this function if you are
+   * interested in computing an IVC among a subset of the assumptions.
+   *
+   * @param expr an expression representing a constraint
+   * @return this contract body builder
+   */
+  public void weaklyAssume(Expr expr) {
+    this.items.add(new Assume(true, null, expr));
+  }
+
+  /**
+   * Add a weakly assume. An assumption over a node {@code n} is a constraint one must respect in
+   * order to use {@code n} legally. It cannot mention the outputs of {@code n} in the current
+   * state, but referring to outputs under a {@code pre} is fine. Use this function if you are
+   * interested in computing an IVC among a subset of the assumptions.
+   *
+   * @param name name of the assumption
+   * @param expr an expression representing a constraint
+   * @return this contract body builder
+   */
+  public void weaklyAssume(String name, Expr expr) {
+    this.items.add(new Assume(true, name, expr));
+  }
+
+  /**
+   * Add a guarantee. Unlike assumptions, guarantees do not have any restrictions on the streams
+   * they can mention. They typically mention the outputs in the current state since they express
+   * the behavior of the node they specified under the assumptions of this node.
    *
    * @param expr constraint expressing the behavior of a node
    * @return this contract body builder
    */
-  public void addGuarantee(Expr expr) {
-    this.items.add(new Guarantee(null, expr));
+  public void guarantee(Expr expr) {
+    this.items.add(new Guarantee(false, null, expr));
   }
 
   /**
-   * add a guarantee
+   * Add a guarantee. Unlike assumptions, guarantees do not have any restrictions on the streams
+   * they can mention. They typically mention the outputs in the current state since they express
+   * the behavior of the node they specified under the assumptions of this node.
    *
    * @param name name of the guarantee
    * @param expr constraint expressing the behavior of a node
    * @return this contract body builder
    */
-  public void addGuarantee(String name, Expr expr) {
-    this.items.add(new Guarantee(name, expr));
+  public void guarantee(String name, Expr expr) {
+    this.items.add(new Guarantee(false, name, expr));
   }
 
   /**
-   * add a mode
+   * Add a guarantee. Unlike assumptions, guarantees do not have any restrictions on the streams
+   * they can mention. They typically mention the outputs in the current state since they express
+   * the behavior of the node they specified under the assumptions of this node. Use this function
+   * if you are interested in computing an IVC among a subset of the guarantees.
+   *
+   * @param expr constraint expressing the behavior of a node
+   * @return this contract body builder
+   */
+  public void weaklyGuarantee(Expr expr) {
+    this.items.add(new Guarantee(true, null, expr));
+  }
+
+  /**
+   * Add a weakly guarantee. Unlike assumptions, guarantees do not have any restrictions on the
+   * streams they can mention. They typically mention the outputs in the current state since they
+   * express the behavior of the node they specified under the assumptions of this node. Use this
+   * function if you are interested in computing an IVC among a subset of the guarantees.
+   *
+   * @param name name of the guarantee
+   * @param expr constraint expressing the behavior of a node
+   * @return this contract body builder
+   */
+  public void weaklyGuarantee(String name, Expr expr) {
+    this.items.add(new Guarantee(true, name, expr));
+  }
+
+  /**
+   * Add a mode
    *
    * @param modeBuilder a mode builder
    */
@@ -143,7 +200,16 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * import a contract
+   * Import a contract. A contract import merges the current contract with the one imported. That
+   * is, if the current contract is {@code (A,G,M)} and we import {@code (A',G',M')}, the resulting
+   * contract is {@code (A U A', G U G', M U M')} where U is set union.
+   * <p>
+   * When importing a contract, it is necessary to specify how the instantiation of the contract is
+   * performed. This defines a mapping from the input (output) formal parameters to the actual ones
+   * of the import.
+   * <p>
+   * When importing contract {@code c} in the contract of node {@code n}, it is <b>illegal</b> to
+   * mention an output of {@code n} in the actual input parameters of the import of {@code c}.
    *
    * @param id      name of contract to import
    * @param inputs  inputs to the contract
@@ -155,7 +221,7 @@ public class ContractBodyBuilder {
   }
 
   /**
-   * construct a contract body
+   * Construct a contract body.
    *
    * @return constructed contract body
    */
