@@ -178,10 +178,33 @@ public class Kind2Api {
    * Run Kind on a Lustre program
    *
    * @param program Lustre program
-   * @param result  Place to store results as they come in
+   * @return result of running kind2 on program
    * @throws .Kind2Exception
    */
-  public void execute(Program program, Kind2Result result) {
+  public Kind2Result execute(Program program) {
+    Kind2Result result = new Kind2Result();
+    execute(program.toString(), result, new IProgressMonitor() {
+      @Override
+      public boolean isCanceled() {
+        return false;
+      }
+
+      @Override
+      public void done() {
+      }
+    });
+    return result;
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @return result of running kind2 on program
+   * @throws Kind2Exception
+   */
+  public Kind2Result execute(String program) {
+    Kind2Result result = new Kind2Result();
     execute(program, result, new IProgressMonitor() {
       @Override
       public boolean isCanceled() {
@@ -192,38 +215,7 @@ public class Kind2Api {
       public void done() {
       }
     });
-  }
-
-  /**
-   * Run Kind on a Lustre program
-   *
-   * @param program Lustre program
-   * @param result  Place to store results as they come in
-   * @param monitor Used to check for cancellation
-   * @throws .Kind2Exception
-   */
-  public void execute(Program program, Kind2Result result, IProgressMonitor monitor) {
-    execute(program.toString(), result, monitor);
-  }
-
-  /**
-   * Run Kind on a Lustre program
-   *
-   * @param program Lustre program as text
-   * @param result  Place to store results as they come in
-   * @throws Kind2Exception
-   */
-  public void execute(String program, Kind2Result result) {
-    execute(program, result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
-
-      @Override
-      public void done() {
-      }
-    });
+    return result;
   }
 
   /**
@@ -234,7 +226,7 @@ public class Kind2Api {
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
    */
-  public void execute(String program, Kind2Result result, IProgressMonitor monitor) {
+  private void execute(String program, Kind2Result result, IProgressMonitor monitor) {
     File lustreFile = null;
     try {
       lustreFile = ApiUtil.writeLustreFile(program);
@@ -252,7 +244,7 @@ public class Kind2Api {
    * @param monitor    Used to check for cancellation
    * @throws Kind2Exception
    */
-  public void execute(File lustreFile, Kind2Result result, IProgressMonitor monitor) {
+  private void execute(File lustreFile, Kind2Result result, IProgressMonitor monitor) {
     debug.println("Lustre file", lustreFile);
     try {
       callKind2(lustreFile, result, monitor);

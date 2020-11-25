@@ -53,11 +53,9 @@ public class StopWatch {
 
     // Create a Kind2Api object to set options and check the Lustre program
     Kind2Api api = new Kind2Api();
-    // The results of calling Kind2 on the Lustre program are saved in a Kind2Result object
-    Kind2Result result = new Kind2Result();
-
-    // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program
-    api.execute(pb.build(), result);
+    // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program. The results of
+    // the analysis are saved in a Kind2Result object
+    Kind2Result result = api.execute(pb.build());
 
     // Check if the result object is initialized before printing it.
     if (result.isInitialized()) {
