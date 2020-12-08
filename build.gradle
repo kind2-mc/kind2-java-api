@@ -1,6 +1,10 @@
 plugins {
   id 'java-library'
+  id 'maven-publish'
 }
+
+group = 'edu.uiowa.cs.clc'
+version = '0.1'
 
 repositories {
   mavenCentral()
@@ -15,4 +19,17 @@ dependencies {
 
 test {
   useJUnitPlatform()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }
