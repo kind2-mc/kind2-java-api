@@ -92,7 +92,6 @@ public class ContractBodyBuilder {
    * state, but referring to outputs under a {@code pre} is fine.
    *
    * @param expr an expression representing a constraint
-   * @return this contract body builder
    */
   public void assume(Expr expr) {
     this.items.add(new Assume(false, null, expr));
@@ -105,7 +104,6 @@ public class ContractBodyBuilder {
    *
    * @param name name of the assumption
    * @param expr an expression representing a constraint
-   * @return this contract body builder
    */
   public void assume(String name, Expr expr) {
     this.items.add(new Assume(false, name, expr));
@@ -118,7 +116,6 @@ public class ContractBodyBuilder {
    * interested in computing an IVC among a subset of the assumptions.
    *
    * @param expr an expression representing a constraint
-   * @return this contract body builder
    */
   public void weaklyAssume(Expr expr) {
     this.items.add(new Assume(true, null, expr));
@@ -132,7 +129,6 @@ public class ContractBodyBuilder {
    *
    * @param name name of the assumption
    * @param expr an expression representing a constraint
-   * @return this contract body builder
    */
   public void weaklyAssume(String name, Expr expr) {
     this.items.add(new Assume(true, name, expr));
@@ -144,7 +140,6 @@ public class ContractBodyBuilder {
    * the behavior of the node they specified under the assumptions of this node.
    *
    * @param expr constraint expressing the behavior of a node
-   * @return this contract body builder
    */
   public void guarantee(Expr expr) {
     this.items.add(new Guarantee(false, null, expr));
@@ -157,7 +152,6 @@ public class ContractBodyBuilder {
    *
    * @param name name of the guarantee
    * @param expr constraint expressing the behavior of a node
-   * @return this contract body builder
    */
   public void guarantee(String name, Expr expr) {
     this.items.add(new Guarantee(false, name, expr));
@@ -170,7 +164,6 @@ public class ContractBodyBuilder {
    * if you are interested in computing an IVC among a subset of the guarantees.
    *
    * @param expr constraint expressing the behavior of a node
-   * @return this contract body builder
    */
   public void weaklyGuarantee(Expr expr) {
     this.items.add(new Guarantee(true, null, expr));
@@ -184,7 +177,6 @@ public class ContractBodyBuilder {
    *
    * @param name name of the guarantee
    * @param expr constraint expressing the behavior of a node
-   * @return this contract body builder
    */
   public void weaklyGuarantee(String name, Expr expr) {
     this.items.add(new Guarantee(true, name, expr));
@@ -214,10 +206,9 @@ public class ContractBodyBuilder {
    * @param id      name of contract to import
    * @param inputs  inputs to the contract
    * @param outputs outputs of the contract
-   * @return this contract body builder
    */
-  public void importContract(String name, List<Expr> inputs, List<IdExpr> outputs) {
-    this.items.add(new ContractImport(name, inputs, outputs));
+  public void importContract(String id, List<Expr> inputs, List<IdExpr> outputs) {
+    this.items.add(new ContractImport(id, inputs, outputs));
   }
 
   /**

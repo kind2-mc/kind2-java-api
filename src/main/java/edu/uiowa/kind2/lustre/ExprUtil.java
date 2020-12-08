@@ -249,7 +249,7 @@ public class ExprUtil {
    * <p>
    * Lustre: {@code -<expr>}
    *
-   * @param right expression to get the negative value of
+   * @param expr expression to get the negative value of
    * @return the negative expression
    */
   public static Expr negative(Expr expr) {
@@ -558,7 +558,7 @@ public class ExprUtil {
    * Lustre: {@code <record>.<field>}
    *
    * @param record record of the field to access
-   * @param fields field to access
+   * @param field field to access
    * @return the record-access expression
    */
   public static Expr recordAccess(Expr record, String field) {

@@ -60,7 +60,7 @@ public class ProgramBuilder {
   /**
    * add a contract
    *
-   * @param contract the contract to add
+   * @param contractBuilder builder for the contract to add
    * @return this program builder
    */
   public ProgramBuilder addContract(ContractBuilder contractBuilder) {

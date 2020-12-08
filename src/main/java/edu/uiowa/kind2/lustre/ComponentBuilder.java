@@ -186,7 +186,7 @@ public class ComponentBuilder {
   /**
    * add an assertion
    *
-   * @param expr the assertion to add
+   * @param assertion the assertion to add
    */
   public void addAssertion(Expr assertion) {
     this.assertions.add(assertion);
