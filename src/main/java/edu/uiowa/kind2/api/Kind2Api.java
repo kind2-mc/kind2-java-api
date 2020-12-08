@@ -179,7 +179,6 @@ public class Kind2Api {
    *
    * @param program Lustre program
    * @return result of running kind2 on program
-   * @throws .Kind2Exception
    */
   public Kind2Result execute(Program program) {
     Kind2Result result = new Kind2Result();
