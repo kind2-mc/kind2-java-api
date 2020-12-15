@@ -53,13 +53,15 @@ public class StopWatch {
 
     // Create a Kind2Api object to set options and check the Lustre program
     Kind2Api api = new Kind2Api();
+    api.setArgs(Arrays.asList(new String[] {"-json", "--only_parse", "true"}));
     // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program. The results of
     // the analysis are saved in a Kind2Result object
-    Kind2Result result = api.execute(pb.build());
+    Kind2Result result = api.execute(pb.build().toString());
 
     // Check if the result object is initialized before printing it.
     if (result.isInitialized()) {
-      System.out.println(result);
+      System.out.println(result.getKind2Logs());
+      //System.out.println(result);
     }
   }
 
@@ -159,7 +161,7 @@ public class StopWatch {
     cbb.guarantee(ExprUtil.implies(
         ExprUtil.and(ExprUtil.not(reset),
             ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
-                ExprUtil.functionCall(ExprUtil.id("even"),
+                ExprUtil.functionCall(ExprUtil.id("evn"),
                     ExprUtil.nodeCall(ExprUtil.id("Count"), toggle)))),
         ExprUtil.nodeCall(ExprUtil.id("Stable"), time)));
 

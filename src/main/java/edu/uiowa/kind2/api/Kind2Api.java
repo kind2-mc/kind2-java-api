@@ -27,6 +27,8 @@ public class Kind2Api {
   public static final String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
 
+  private List<String> args;
+
   // module smt
   private SolverOption smtSolver;
   private String smtLogic;
@@ -99,6 +101,7 @@ public class Kind2Api {
   private Boolean checkSubproperties;
 
   public Kind2Api() {
+    args = new ArrayList<>();
     smtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
@@ -200,20 +203,22 @@ public class Kind2Api {
    *
    * @param program Lustre program as text
    * @return result of running kind2 on program
-   * @throws Kind2Exception
    */
   public Kind2Result execute(String program) {
     Kind2Result result = new Kind2Result();
-    execute(program, result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
+    try {
+      execute(program, result, new IProgressMonitor() {
+        @Override
+        public boolean isCanceled() {
+          return false;
+        }
 
-      @Override
-      public void done() {
-      }
-    });
+        @Override
+        public void done() {
+        }
+      });
+    } catch (Exception e) {
+    }
     return result;
   }
 
@@ -290,12 +295,25 @@ public class Kind2Api {
   private ProcessBuilder getKind2ProcessBuilder(File lustreFile) {
     List<String> args = new ArrayList<>();
     args.add(KIND2);
-    args.addAll(getArgs());
+    if (this.args.isEmpty()) {
+      args.addAll(getArgs());
+    } else {
+      args.addAll(this.args);
+    }
     args.add(lustreFile.toString());
 
     ProcessBuilder builder = new ProcessBuilder(args);
     builder.redirectErrorStream(true);
     return builder;
+  }
+
+  /**
+   * Sets the arguments to pass to Kind 2 executable.
+   *
+   * @param args the options to use pass to kind2
+   */
+  public void setArgs(List<String> args) {
+    this.args = args;
   }
 
   List<String> getArgs() {
