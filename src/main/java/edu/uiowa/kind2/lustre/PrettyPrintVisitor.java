@@ -675,9 +675,7 @@ public class PrettyPrintVisitor {
     expr(e.record);
     write(")");
     write(".");
-    write("(");
     write(e.field);
-    write(")");
   }
 
   public void visit(RecordExpr e) {
