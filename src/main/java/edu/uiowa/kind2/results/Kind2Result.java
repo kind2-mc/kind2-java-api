@@ -76,6 +76,10 @@ public class Kind2Result
    */
   private final List<Kind2Log> kind2Logs;
   /**
+   * a list of kind2 logs.
+   */
+  private final List<AstInfo> astInfos;
+  /**
    * Is this object properly initialized?
    */
   private boolean isInitialized;
@@ -86,6 +90,7 @@ public class Kind2Result
   public Kind2Result()
   {
     kind2Logs = new ArrayList<>();
+    astInfos = new ArrayList<>();
     isInitialized = false;
   }
 
@@ -208,6 +213,11 @@ public class Kind2Result
       {
         Kind2Log log = new Kind2Log(this, jsonElement);
         this.kind2Logs.add(log);
+      }
+
+      if (kind2Object == Kind2Object.lsp) {
+        AstInfo astInfo = new AstInfo(this, jsonElement);
+        this.astInfos.add(astInfo);
       }
 
       if (kind2Object == Kind2Object.analysisStart)
@@ -514,6 +524,13 @@ public class Kind2Result
   public List<Kind2Log> getKind2Logs()
   {
     return kind2Logs.stream().filter(l -> !l.isHidden()).collect(Collectors.toList());
+  }
+
+  /**
+   * @return a list of {@link AstInfo}.
+   */
+  public List<AstInfo> getAstInfos() {
+    return astInfos;
   }
 
   /**

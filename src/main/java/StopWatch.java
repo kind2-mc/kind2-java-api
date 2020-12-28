@@ -53,7 +53,7 @@ public class StopWatch {
 
     // Create a Kind2Api object to set options and check the Lustre program
     Kind2Api api = new Kind2Api();
-    api.setArgs(Arrays.asList(new String[] {"-json", "--only_parse", "true"}));
+    api.setArgs(Arrays.asList(new String[] {"-json", "--only_parse", "true", "--lsp", "true"}));
     // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program. The results of
     // the analysis are saved in a Kind2Result object
     Kind2Result result = api.execute(pb.build().toString());
