@@ -10,6 +10,7 @@ package edu.uiowa.kind2.results;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.annotations.Expose;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +58,7 @@ public class Kind2Analysis
   /**
    * The associated node result for this analysis.
    */
+  @Expose(serialize = false)
   private Kind2NodeResult nodeResult = null;
   /**
    * The post analysis performed after the current analysis.

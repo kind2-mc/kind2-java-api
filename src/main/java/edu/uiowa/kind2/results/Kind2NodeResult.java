@@ -7,6 +7,8 @@
 
 package edu.uiowa.kind2.results;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,7 @@ public class Kind2NodeResult
   /**
    * The associated kind2 result.
    */
+  @Expose(serialize = false)
   private final Kind2Result kind2Result;
 
   public Kind2NodeResult(Kind2Result kind2Result, String name)

@@ -10,6 +10,7 @@ package edu.uiowa.kind2.results;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 
 /**
  * Kind2 output log.
@@ -18,6 +19,7 @@ public class AstInfo {
     /**
      * Associated kind2Result object
      */
+    @Expose(serialize = false)
     private final Kind2Result kind2Result;
     /**
      * The original kind2 output for this object in pretty json format.

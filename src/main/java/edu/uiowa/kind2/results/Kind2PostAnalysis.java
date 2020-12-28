@@ -9,6 +9,7 @@ package edu.uiowa.kind2.results;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ public class Kind2PostAnalysis
   /**
    * The associated kind2 analysis.
    */
+  @Expose(serialize = false)
   private final Kind2Analysis analysis;
 
   public Kind2PostAnalysis(Kind2Analysis analysis, JsonElement jsonElement)

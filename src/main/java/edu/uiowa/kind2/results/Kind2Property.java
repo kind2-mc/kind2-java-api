@@ -10,6 +10,7 @@ package edu.uiowa.kind2.results;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 
 /**
  * This class stores information about kind2 properties.
@@ -71,6 +72,7 @@ public class Kind2Property
    * It also gives the list of contract modes that are active at each step, if any.
    */
   private final Kind2CounterExample counterExample;
+  @Expose(serialize = false)
   private final Kind2Analysis analysis;
   /**
    * The value of k in a k-inductive proof, if any.

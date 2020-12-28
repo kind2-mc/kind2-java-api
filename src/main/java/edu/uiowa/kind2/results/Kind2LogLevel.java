@@ -9,21 +9,14 @@ package edu.uiowa.kind2.results;
 
 public enum Kind2LogLevel
 {
-  off("off"), // -1: off disables all messages
-  fatal("fatal"), // 0: most severe
-  error("error"), // 1
-  warn("warn"), // 2
-  note("note"), // 3
-  info("info"), // 4
-  debug("debug"), // 5
-  trace("trace"); // 6: least severe
-
-  private final String value;
-
-  Kind2LogLevel(String value)
-  {
-    this.value = value;
-  }
+  off,
+  fatal,
+  error,
+  warn,
+  note,
+  info,
+  debug,
+  trace;
 
   public static Kind2LogLevel getLevel(String level)
   {
@@ -49,11 +42,5 @@ public enum Kind2LogLevel
       default:
         throw new UnsupportedOperationException("Log " + level + " is not defined");
     }
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.value;
   }
 }
