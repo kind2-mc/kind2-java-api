@@ -20,6 +20,7 @@ public class Labels
   public static final String assumptions = "assumptions";
   public static final String name = "name";
   public static final String scope = "scope";
+  public static final String file = "file";
   public static final String line = "line";
   public static final String column = "column";
   public static final String answer = "answer";

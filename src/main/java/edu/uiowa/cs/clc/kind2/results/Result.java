@@ -76,6 +76,10 @@ public class Result
    */
   private final List<Log> kind2Logs;
   /**
+   * a list of kind2 logs.
+   */
+  private final List<AstInfo> astInfos;
+  /**
    * Is this object properly initialized?
    */
   private boolean isInitialized;
@@ -86,6 +90,7 @@ public class Result
   public Result()
   {
     kind2Logs = new ArrayList<>();
+    astInfos = new ArrayList<>();
     isInitialized = false;
   }
 
@@ -210,7 +215,12 @@ public class Result
         this.kind2Logs.add(log);
       }
 
-      if (kind2Object == Object.analysisStart)
+      if (kind2Object == Kind2Object.lsp) {
+        AstInfo astInfo = new AstInfo(this, jsonElement);
+        this.astInfos.add(astInfo);
+      }
+
+      if (kind2Object == Kind2Object.analysisStart)
       {
         // define new analysis
         kind2Analysis = new Analysis(jsonElement);
@@ -517,7 +527,14 @@ public class Result
   }
 
   /**
-   * @return a list of {@link Log} for all kind2 logs.
+   * @return a list of {@link AstInfo}.
+   */
+  public List<AstInfo> getAstInfos() {
+    return astInfos;
+  }
+
+  /**
+   * @return a list of {@link Kind2Log} for all kind2 logs.
    */
   public List<Log> getAllKind2Logs()
   {
