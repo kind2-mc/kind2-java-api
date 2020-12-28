@@ -10,6 +10,7 @@ package edu.uiowa.cs.clc.kind2.results;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 
 /**
  * This class stores information about kind2 properties.

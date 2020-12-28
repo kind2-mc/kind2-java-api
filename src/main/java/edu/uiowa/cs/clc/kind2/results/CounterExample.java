@@ -9,6 +9,7 @@ package edu.uiowa.cs.clc.kind2.results;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.annotations.Expose;
 
 /**
  * Counterexample to the property satisfaction (only available when answer is falsifiable).
