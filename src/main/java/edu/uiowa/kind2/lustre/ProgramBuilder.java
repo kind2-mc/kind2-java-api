@@ -10,6 +10,7 @@ package edu.uiowa.kind2.lustre;
 
 import java.util.ArrayList;
 import java.util.List;
+import edu.uiowa.kind2.Assert;
 
 /**
  * This class provides helper functions for constructing a lustre program.
@@ -35,91 +36,110 @@ public class ProgramBuilder {
    *
    * @param name name of the type to define
    * @param type the type to define
-   * @return this program builder
+   * @return the defined type
    */
-  public ProgramBuilder defineType(String name, Type type) {
+  public Type defineType(String name, Type type) {
+    Assert.isNotNull(name);
+    Assert.isNotNull(type);
     this.types.add(new TypeDef(name, type));
-    return this;
+    return new NamedType(name);
   }
 
-  public ProgramBuilder createConst(String name, Type type) {
+  /**
+   * define a global symbolic constant
+   *
+   * @param name name of the global constant
+   * @param type type of the global constant
+   * @return an id-expr for the global constant
+   */
+  public IdExpr createConst(String name, Type type) {
+    Assert.isNotNull(name);
+    Assert.isNotNull(type);
     this.constants.add(new Constant(name, type, null));
-    return this;
+    return new IdExpr(name);
   }
 
-  public ProgramBuilder createConst(String name, Expr expr) {
+  /**
+   * define a global constant
+   *
+   * @param name name of the global constant
+   * @param expr definition of the global constant
+   * @return an id-expr for the global constant
+   */
+  public IdExpr createConst(String name, Expr expr) {
+    Assert.isNotNull(name);
+    Assert.isNotNull(expr);
     this.constants.add(new Constant(name, null, expr));
-    return this;
+    return new IdExpr(name);
   }
 
-  public ProgramBuilder createConst(String name, Type type, Expr expr) {
+  /**
+   * define a global constant
+   *
+   * @param name name of the global constant
+   * @param type type of the global constant
+   * @param expr definition of the global constant
+   * @return an id-expr for the global constant
+   */
+  public IdExpr createConst(String name, Type type, Expr expr) {
+    Assert.isNotNull(name);
+    Assert.isTrue(type != null || expr != null);
     this.constants.add(new Constant(name, type, expr));
-    return this;
+    return new IdExpr(name);
   }
 
   /**
    * add a contract
    *
    * @param contractBuilder builder for the contract to add
-   * @return this program builder
    */
-  public ProgramBuilder addContract(ContractBuilder contractBuilder) {
+  public void addContract(ContractBuilder contractBuilder) {
     this.contracts.add(contractBuilder.buildContract());
-    return this;
   }
 
   /**
    * import a function
    *
    * @param importedComponentBuilder a builder for the function to import
-   * @return this program builder
    */
-  public ProgramBuilder importFunction(ImportedComponentBuilder importedComponentBuilder) {
+  public void importFunction(ImportedComponentBuilder importedComponentBuilder) {
     this.importedFunctions.add(importedComponentBuilder.build());
-    return this;
   }
 
   /**
    * add a function
    *
    * @param componentBuilder a builder for the function to add
-   * @return this program builder
    */
-  public ProgramBuilder addFunction(ComponentBuilder componentBuilder) {
+  public void addFunction(ComponentBuilder componentBuilder) {
     this.functions.add(componentBuilder.build());
-    return this;
   }
 
   /**
    * import a node
    *
    * @param importedComponentBuilder a builder for the node to import
-   * @return this program builder
    */
-  public ProgramBuilder importNode(ImportedComponentBuilder importedComponentBuilder) {
+  public void importNode(ImportedComponentBuilder importedComponentBuilder) {
     this.importedNodes.add(importedComponentBuilder.build());
-    return this;
   }
 
   /**
    * add a node
    *
    * @param componentBuilder a builder for the node to add
-   * @return this program builder
    */
-  public ProgramBuilder addNode(ComponentBuilder componentBuilder) {
+  public void addNode(ComponentBuilder componentBuilder) {
     this.nodes.add(componentBuilder.build());
-    return this;
   }
 
   /**
    * set the main node/function
    *
-   * @return this program builder
+   * @param main name of the main node/function
    */
-  public ProgramBuilder setMain(String main) {
+  public void setMain(String main) {
     this.main = main;
-    return this;
   }
 
   /**

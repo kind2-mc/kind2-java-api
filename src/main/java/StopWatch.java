@@ -69,8 +69,8 @@ public class StopWatch {
    * <pre>
    * function imported sqrt (n : real) returns (r : real);
    * (*@contract
-   *   assume (n >= 0.0);
-   *   guarantee ((r >= 0.0) and ((r * r) = n));
+   *   assume (n) >= (0.0);
+   *   guarantee ((r) >= (0.0)) and (((r) * (r)) = (n));
    * *)
    * </pre>
    *
@@ -102,27 +102,27 @@ public class StopWatch {
    * <pre>
    * contract StopWatchSpec (toggle : bool; reset : bool) returns (time : int);
    * let
-   *   var on : bool = (toggle -> (((pre on) and (not toggle)) or ((not (pre on)) and toggle)));
-   *   assume (not (toggle and reset));
-   *   guarantee ((on => (time = 1)) -> true);
-   *   guarantee (((not on) => (time = 0)) -> true);
-   *   guarantee (time >= 0);
-   *   guarantee (((not reset) and Since(reset, even(Count(toggle)))) => Stable(time));
-   *   guarantee (((not reset) and Since(reset, (not even(Count(toggle))))) => Increased(time));
-   *   guarantee (true -> (((not even(Count(toggle))) and (Count(reset) = 0)) => (time > (pre time))));
+   *   var on : bool = (toggle) -> (((pre (on)) and (not (toggle))) or ((not (pre (on))) and (toggle)));
+   *   assume not ((toggle) and (reset));
+   *   guarantee ((on) => ((time) = (1))) -> (true);
+   *   guarantee ((not (on)) => ((time) = (0))) -> (true);
+   *   guarantee (time) >= (0);
+   *   guarantee ((not (reset)) and (Since(reset, even(Count(toggle))))) => (Stable(time));
+   *   guarantee ((not (reset)) and (Since(reset, not (even(Count(toggle)))))) => (Increased(time));
+   *   guarantee (true) -> (((not (even(Count(toggle)))) and ((Count(reset)) = (0))) => ((time) > (pre (time))));
    *   mode resetting (
    *     require reset;
-   *     ensure (time = 0);
+   *     ensure (time) = (0);
    *   );
    *   mode running (
-   *     require (true -> (time = ((pre time) + 1)));
-   *     ensure on;
-   *     ensure (not reset);
+   *     require on;
+   *     require not (reset);
+   *     ensure (true) -> ((time) = ((pre (time)) + (1)));
    *   );
    *   mode stopped (
-   *     require (true -> (time = (pre time)));
-   *     ensure (not reset);
-   *     ensure (not on);
+   *     require not (reset);
+   *     require not (on);
+   *     ensure (true) -> ((time) = (pre (time)));
    *   );
    * tel
    * </pre>
@@ -189,17 +189,17 @@ public class StopWatch {
     cbb.addMode(resetting);
 
     ModeBuilder running = new ModeBuilder("running");
-    running.ensure(on);
-    running.ensure(ExprUtil.not(reset));
-    running.require(ExprUtil.arrow(ExprUtil.TRUE,
+    running.require(on);
+    running.require(ExprUtil.not(reset));
+    running.ensure(ExprUtil.arrow(ExprUtil.TRUE,
         ExprUtil.equal(time, ExprUtil.plus(ExprUtil.pre(time), ExprUtil.integer(1)))));
 
     cbb.addMode(running);
 
     ModeBuilder stopped = new ModeBuilder("stopped");
-    stopped.ensure(ExprUtil.not(reset));
-    stopped.ensure(ExprUtil.not(on));
-    stopped.require(ExprUtil.arrow(ExprUtil.TRUE, ExprUtil.equal(time, ExprUtil.pre(time))));
+    stopped.require(ExprUtil.not(reset));
+    stopped.require(ExprUtil.not(on));
+    stopped.ensure(ExprUtil.arrow(ExprUtil.TRUE, ExprUtil.equal(time, ExprUtil.pre(time))));
 
     cbb.addMode(stopped);
 
@@ -214,7 +214,7 @@ public class StopWatch {
    * <pre>
    * function even (N : int) returns (B : bool);
    * let
-   *   B = ((N mod 2) = 0);
+   *   B = ((N) mod (2)) = (0);
    * tel
    * </pre>
    *
@@ -235,7 +235,7 @@ public class StopWatch {
    * <pre>
    * function toInt (X : bool) returns (N : int);
    * let
-   *   N = (if X then 1 else 0);
+   * N = if (X) then (1) else (0);
    * tel
    * </pre>
    *
@@ -255,7 +255,7 @@ public class StopWatch {
    * <pre>
    * node Count (X : bool) returns (N : int);
    * let
-   *   N = (toInt(X) -> (toInt(X) + (pre N)));
+   *   N = (toInt(X)) -> ((toInt(X)) + (pre (N)));
    * tel
    * </pre>
    *
@@ -276,7 +276,7 @@ public class StopWatch {
    * <pre>
    * node Sofar (X : bool) returns (Y : bool);
    * let
-   *   Y = (X -> (X and (pre Y)));
+   *   Y = (X) -> ((X) and (pre (Y)));
    * tel
    * </pre>
    *
@@ -296,7 +296,7 @@ public class StopWatch {
    * <pre>
    * node Since (X : bool; Y : bool) returns (Z : bool);
    * let
-   *   Z = (X or (Y and (false -> (pre Z))));
+   *   Z = (X) or ((Y) and ((false) -> (pre (Z))));
    * tel
    * </pre>
    *
@@ -318,7 +318,7 @@ public class StopWatch {
    * <pre>
    * node SinceIncl (X : bool; Y : bool) returns (Z : bool);
    * let
-   *   Z = (Y and (X or (false -> (pre Z))));
+   *   Z = (Y) and ((X) or ((false) -> (pre (Z))));
    * tel
    * </pre>
    *
@@ -340,7 +340,7 @@ public class StopWatch {
    * <pre>
    * node Increased (N : int) returns (B : bool);
    * let
-   *   B = (true -> (N > (pre N)));
+   *   B = (true) -> ((N) > (pre (N)));
    * tel
    * </pre>
    *
@@ -360,7 +360,7 @@ public class StopWatch {
    * <pre>
    * node Stable (N : int) returns (B : bool);
    * let
-   *   B = (true -> (N = (pre N)));
+   *   B = (true) -> ((N) = (pre (N)));
    * tel
    * </pre>
    *
@@ -381,13 +381,13 @@ public class StopWatch {
    * node Stopwatch (toggle : bool; reset : bool) returns (count : int);
    * (*@contract
    *   import StopWatchSpec (toggle, reset) returns (count);
-   *   guarantee (not ((::StopWatchSpec::resetting and ::StopWatchSpec::running) and ::StopWatchSpec::stopped));
+   *   guarantee not (((::StopWatchSpec::resetting) and (::StopWatchSpec::running)) and (::StopWatchSpec::stopped));
    * *)
    * var
    *   running : bool;
    * let
-   *   running = ((false -> (pre running)) <> toggle);
-   *   count = (if reset then 0 else (if running then (1 -> ((pre count) + 1)) else (0 -> (pre count))));
+   *   running = ((false) -> (pre (running))) <> (toggle);
+   *   count = if (reset) then (0) else (if (running) then ((1) -> ((pre (count)) + (1))) else ((0) -> (pre (count))));
    * tel
    * </pre>
    *

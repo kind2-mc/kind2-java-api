@@ -398,8 +398,8 @@ public class ExprUtil {
     return new ComponentCallExpr(name.id, Arrays.asList(args));
   }
 
-  public static Expr TRUE = new BoolExpr(true);
-  public static Expr FALSE = new BoolExpr(false);
+  public static final Expr TRUE = new BoolExpr(true);
+  public static final Expr FALSE = new BoolExpr(false);
 
   /* Cast Expressions */
 

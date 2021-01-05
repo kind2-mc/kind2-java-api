@@ -7,13 +7,10 @@
 
 package edu.uiowa.kind2.lustre;
 
-import edu.uiowa.kind2.Assert;
-
 class NamedType implements Type {
   final String name;
 
   NamedType(String name) {
-    Assert.isNotNull(name);
     this.name = name;
   }
 

@@ -7,16 +7,12 @@
 
 package edu.uiowa.kind2.lustre;
 
-import edu.uiowa.kind2.Assert;
-
 class Constant extends ContractItem {
   final String id;
   final Type type; // Nullable
   final Expr expr; // Nullable
 
   Constant(String id, Type type, Expr expr) {
-    Assert.isNotNull(id);
-    // 'type' can be null
     this.id = id;
     this.type = type;
     this.expr = expr;

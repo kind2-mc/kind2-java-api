@@ -96,7 +96,7 @@ public class ComponentBuilder {
   }
 
   /**
-   * define a symbolic local constant
+   * define a local symbolic constant
    *
    * @param name name of the local constant
    * @param type type of the local constant

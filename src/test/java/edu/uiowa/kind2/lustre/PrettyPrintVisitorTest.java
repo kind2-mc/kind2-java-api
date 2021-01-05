@@ -33,7 +33,7 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new Assume(false, null, ExprUtil.TRUE));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
   }
 
   @Test
@@ -46,7 +46,7 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new Guarantee(false, null, ExprUtil.TRUE));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
   }
 
   @Test
@@ -59,20 +59,34 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.expr(ExprUtil.modeRef("a", "b", "c"));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
   }
 
   @Test
   void constantTest() {
-    String expected = "const c = true;";
+    String expected = "const c1: bool;" + "const c2: bool;" + "const c3 = true;"
+        + "const c4 = true;" + "const c5: bool = true;";
 
-    Assertions.assertThrows(Kind2Exception.class, () -> new Constant(null, null, ExprUtil.TRUE));
-    Assertions.assertThrows(Kind2Exception.class, () -> new Constant("c", null, null));
+    ProgramBuilder pb = new ProgramBuilder();
 
-    PrettyPrintVisitor visitor = new PrettyPrintVisitor();
-    visitor.visit(new Constant("c", null, ExprUtil.TRUE));
+    Type nullType = null;
+    Expr nullExpr = null;
 
-    assertEquals(visitor.toString(), expected);
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.createConst("c", nullType));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.createConst(null, TypeUtil.BOOL));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.createConst("c", nullExpr));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.createConst(null, ExprUtil.TRUE));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.createConst("c", null, null));
+    Assertions.assertThrows(Kind2Exception.class,
+        () -> pb.createConst(null, TypeUtil.BOOL, ExprUtil.TRUE));
+
+    pb.createConst("c1", TypeUtil.BOOL);
+    pb.createConst("c2", TypeUtil.BOOL, null);
+    pb.createConst("c3", ExprUtil.TRUE);
+    pb.createConst("c4", null, ExprUtil.TRUE);
+    pb.createConst("c5", TypeUtil.BOOL, ExprUtil.TRUE);
+
+    assertEquals(removeWhiteSpace(expected), removeWhiteSpace(pb.build().toString()));
   }
 
   @Test
@@ -87,7 +101,7 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new VarDef("x", TypeUtil.BOOL, ExprUtil.TRUE));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
   }
 
   @Test
@@ -99,7 +113,7 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new ContractImport("Spec", null, null));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
 
     expected = "import Spec (x) returns (y);";
 
@@ -107,7 +121,7 @@ class PrettyPrintVisitorTest {
     visitor.visit(new ContractImport("Spec", Collections.singletonList(ExprUtil.id("x")),
         Collections.singletonList(ExprUtil.id("y"))));
 
-    assertEquals(visitor.toString(), expected);
+    assertEquals(expected, visitor.toString());
   }
 
   @Test
@@ -141,7 +155,7 @@ class PrettyPrintVisitorTest {
     visitor.visit(new Mode("m4", Collections.singletonList(new Require(null, ExprUtil.TRUE)),
         Collections.singletonList(new Ensure(null, ExprUtil.TRUE))));
 
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
+    assertEquals(removeWhiteSpace(expected), removeWhiteSpace(visitor.toString()));
   }
 
   @Test
@@ -165,7 +179,7 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(c.build());
 
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
+    assertEquals(removeWhiteSpace(expected), removeWhiteSpace(visitor.toString()));
   }
 
   @Test
@@ -183,6 +197,6 @@ class PrettyPrintVisitorTest {
     PrettyPrintVisitor visitor = new PrettyPrintVisitor();
     visitor.visit(new Contract("c", null, null, c.build()));
 
-    assertEquals(removeWhiteSpace(visitor.toString()), removeWhiteSpace(expected));
+    assertEquals(removeWhiteSpace(expected), removeWhiteSpace(visitor.toString()));
   }
 }
