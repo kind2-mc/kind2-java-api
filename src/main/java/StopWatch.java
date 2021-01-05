@@ -7,18 +7,18 @@
 
 import java.util.Arrays;
 import java.util.Collections;
-import edu.uiowa.kind2.api.Kind2Api;
-import edu.uiowa.kind2.lustre.ComponentBuilder;
-import edu.uiowa.kind2.lustre.ContractBodyBuilder;
-import edu.uiowa.kind2.lustre.ContractBuilder;
-import edu.uiowa.kind2.lustre.Expr;
-import edu.uiowa.kind2.lustre.ExprUtil;
-import edu.uiowa.kind2.lustre.IdExpr;
-import edu.uiowa.kind2.lustre.ImportedComponentBuilder;
-import edu.uiowa.kind2.lustre.ModeBuilder;
-import edu.uiowa.kind2.lustre.ProgramBuilder;
-import edu.uiowa.kind2.lustre.TypeUtil;
-import edu.uiowa.kind2.results.Kind2Result;
+import edu.uiowa.cs.clc.kind2.api.Kind2Api;
+import edu.uiowa.cs.clc.kind2.lustre.ComponentBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.ContractBodyBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.ContractBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.Expr;
+import edu.uiowa.cs.clc.kind2.lustre.ExprUtil;
+import edu.uiowa.cs.clc.kind2.lustre.IdExpr;
+import edu.uiowa.cs.clc.kind2.lustre.ImportedComponentBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.ModeBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.ProgramBuilder;
+import edu.uiowa.cs.clc.kind2.lustre.TypeUtil;
+import edu.uiowa.cs.clc.kind2.results.Kind2Result;
 
 /**
  * This is an illustration of how to use the Java API for Kind 2 to implement a StopWatch Lustre

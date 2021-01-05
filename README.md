@@ -9,15 +9,17 @@ cd kind2-java-api
 ./gradlew build
 ```
 To import the API, use the jar file `build/libs/kind2-java-api.jar`. 
-Alternatively you can just copy the package `edu.uiowa.kind2` to your source code.
+Alternatively you can just copy the package `edu.uiowa.cs.clc.kind2` to your source code.
 
 ### API usage
 An example of how to use the API is provided in `src/main/java/StopWatch.java`. Follow these steps when using the API:
 1. Add `build/libs/kind2-java-api.jar` to your java class path.
-2. Import package `edu.uiowa.kind2`.
-3. Construct a lustre `program` object.
-4. Construct a `Kind2Api` object and call `Kind2Api.execute`.
-5. Analyze the results.
+2. Import package `edu.uiowa.cs.clc.kind2`.
+3. Construct a lustre `Program` object using the following utilities:
+    - Builder objects: `ProgramBuilder`, `ComponentBuilder`, etc.
+    - Utility classes: `TypeUtil` and `ExprUtil`.
+4. Construct a `Kind2Api` object and call `Kind2Api.execute`, passing the constructed program object.
+5. Analyze the `Kind2Result` object returned by `Kind2Api.execute`.
 
 ### Results
 `Kind2Result` contains the following features:
