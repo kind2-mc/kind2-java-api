@@ -7,6 +7,7 @@ plugins {
 
 group = 'edu.uiowa.cs.clc'
 version = gitVersion()
+ext.isReleaseVersion = version.matches("v[0-9](.[0-9])+")
 
 repositories {
   mavenCentral()
@@ -79,5 +80,9 @@ publishing {
 }
 
 signing {
+  required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+  def signingKey = findProperty("signingKey")
+  def signingPassword = findProperty("signingPassword")
+  useInMemoryPgpKeys(signingKey, signingPassword)
   sign publishing.publications.maven
 }
