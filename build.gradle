@@ -1,11 +1,12 @@
 plugins {
+  id 'com.palantir.git-version' version '0.12.3'
   id 'java-library'
   id 'maven-publish'
   id 'signing'
 }
 
 group = 'edu.uiowa.cs.clc'
-version = '0.1'
+version = gitVersion()
 
 repositories {
   mavenCentral()
