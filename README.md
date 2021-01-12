@@ -1,4 +1,8 @@
-# Java API for Kind 2 ![Java CI with Gradle](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
+[![](https://img.shields.io/github/license/kind2-mc/kind2-java-api)](https://github.com/kind2-mc/kind2-java-api/blob/master/LICENSE)
+[![](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/kind2-mc/kind2-java-api/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
+[![](https://img.shields.io/github/v/release/kind2-mc/kind2-java-api.svg)](https://github.com/kind2-mc/kind2-java-api/releases/latest)
+
+# Java API for Kind 2
 An API that constructs lustre programs, runs Kind 2, and shows results/suggestions.
 
 ### Build instructions
