@@ -1,6 +1,7 @@
 plugins {
   id 'java-library'
   id 'maven-publish'
+  id 'signing'
 }
 
 group = 'edu.uiowa.cs.clc'
@@ -22,14 +23,60 @@ test {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
+  withJavadocJar()
+  withSourcesJar()
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
+  publications {
+    maven(MavenPublication) {
+      from components.java
+      pom {
+        name = 'Kind 2 Java API'
+        description = 'An API for constructing Lustre programs, running Kind 2, and showing results/suggestions.'
+        url = 'https://github.com/kind2-mc/kind2-java-api'
+        licenses {
+          license {
+            name = 'BSD 3-Clause License'
+            url = 'https://github.com/kind2-mc/kind2-java-api/blob/master/LICENSE'
+          }
         }
+        developers {
+          developer {
+            id = 'abdmohamed'
+            name = 'Abdalrhman Mohamed'
+            email = 'abdalrhman-mohamed@uiowa.edu'
+          }
+        }
+        scm {
+          connection = 'scm:git:https://github.com/kind2-mc/kind2-java-api.git'
+          developerConnection = 'scm:git:ssh:github.com/kind2-mc/kind2-java-api.git'
+          url = 'https://github.com/kind2-mc/kind2-java-api'
+        }
+      }
     }
+  }
+
+  repositories {
+    maven {
+      name = "OSSRH"
+      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      credentials {
+        username = System.getenv("MAVEN_USERNAME")
+        password = System.getenv("MAVEN_PASSWORD")
+      }
+    }
+    maven {
+      name = "GitHubPackages"
+      url = "https://maven.pkg.github.com/kind2-mc/kind2-java-api"
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
+}
+
+signing {
+  sign publishing.publications.maven
 }
