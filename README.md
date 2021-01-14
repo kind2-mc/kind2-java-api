@@ -79,19 +79,19 @@ An example of how to use the API is provided in [`StopWatch.java`](https://githu
     - Builder objects: `ProgramBuilder`, `ComponentBuilder`, etc.
     - Utility classes: `TypeUtil` and `ExprUtil`.
 4. Construct a `Kind2Api` object and call `Kind2Api.execute`, passing the constructed program object.
-5. Analyze the `Kind2Result` object returned by `Kind2Api.execute`.
+5. Analyze the `Result` object returned by `Kind2Api.execute`.
 
 ## Results
-`Kind2Result` contains the following features:
-- `Kind2Result` features:
+`Result` contains the following features:
+- `Result` features:
   - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for all components.
-  - `getNodeResult` returns an object of `Kind2NodeResult` that summarizes all analyses done by kind2 for a given component.
+  - `getNodeResult` returns an object of `NodeResult` that summarizes all analyses done by kind2 for a given component.
 
-- `Kind2NodeResult` features:
-  - `getSuggestions` returns an object of `Kind2Suggestion` that provides explanations and suggestions based on kind2 analyses for the current component.
+- `NodeResult` features:
+  - `getSuggestions` returns an object of `Suggestion` that provides explanations and suggestions based on kind2 analyses for the current component.
   - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for the current component, and all its subcomponents.
 
-- `Kind2Suggestion` contains explanations and a suggestion for the associated component. If `N` is the current component, and `M` is possibly a subcomponent of `N`, then the suggestion is one of the following:
+- `Suggestion` contains explanations and a suggestion for the associated component. If `N` is the current component, and `M` is possibly a subcomponent of `N`, then the suggestion is one of the following:
   - `noActionRequired`: no action required because all components of the system satisfy their contracts, and no component of the system was refined.
   - `strengthenSubComponentContract`: fix `M`s contract because `N` is correct after refinement, but `M`'s contract is too weak to prove `N`'s contract, but `M`'s definition is strong enough.
   - `completeSpecificationOrRemoveComponent`: Either complete specification of `N`'s contract, or remove component `M`, because component `N` satisfies its current contract and one or more assumptions of `M` are not satisfied by `N`.
