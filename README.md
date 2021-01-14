@@ -1,12 +1,68 @@
-[![](https://img.shields.io/github/license/kind2-mc/kind2-java-api)](https://github.com/kind2-mc/kind2-java-api/blob/master/LICENSE)
-[![](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/kind2-mc/kind2-java-api/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
-[![](https://img.shields.io/github/v/release/kind2-mc/kind2-java-api.svg)](https://github.com/kind2-mc/kind2-java-api/releases/latest)
+[![License](https://img.shields.io/github/license/kind2-mc/kind2-java-api)](https://github.com/kind2-mc/kind2-java-api/blob/master/LICENSE)
+[![CI](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/kind2-mc/kind2-java-api/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
+[![Maven Central](https://img.shields.io/maven-central/v/edu.uiowa.cs.clc/kind2-java-api.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22edu.uiowa.cs.clc%22%20AND%20a:%22kind2-java-api%22)
 
 # Java API for Kind 2
-An API that constructs lustre programs, runs Kind 2, and shows results/suggestions.
+An API for constructing Lustre programs, running Kind 2, and showing results/suggestions.
 
-### Build instructions
+## Install Instructions
+There are three ways to install the Java API artifact for Kind 2 for use in your development environment. The instructions for each are listed below:
 
+### Install artifact from Maven Central
+#### Maven
+Add the following dependency tag to your `pom.xml` file:
+```xml
+<dependency>
+  <groupId>edu.uiowa.cs.clc</groupId>
+  <artifactId>kind2-java-api</artifactId>
+  <version>v0.2</version>
+</dependency>
+```
+
+#### Gradle
+Add the following dependency DSL to your `build.gradle` file:
+```groove
+implementation 'edu.uiowa.cs.clc:kind2-java-api:0.2'
+```
+
+#### Other build management tools
+Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-java-api/0.2/jar) and copy the appropriate code snippet for your build management tool.
+
+### Install artifact from Github Packages
+#### Maven
+1. Authenticate to GitHub Packages. For more information, see "[Authenticating to GitHub Packages](https://docs.github.com/articles/configuring-apache-maven-for-use-with-github-package-registry/#authenticating-to-github-packages)."
+2. Add the following repository tag to your `pom.xml` file:
+  ```xml
+  <repository>
+    <id>github</id>
+    <name>GitHub kind2-mc Apache Maven Packages</name>
+    <url>https://maven.pkg.github.com/kind2-mc/kind2-java-api</url>
+  </repository>
+  ```
+3. Add the following dependency tag to your `pom.xml` file:
+  ```xml
+  <dependency>
+    <groupId>edu.uiowa.cs.clc</groupId>
+    <artifactId>kind2-java-api</artifactId>
+    <version>v0.2</version>
+  </dependency>
+  ```
+
+#### Gradle
+1. Authenticate to GitHub Packages. For more information, see "[Authenticating to GitHub Packages](https://docs.github.com/articles/configuring-gradle-for-use-with-github-package-registry/#authenticating-to-github-packages)."
+2. Add the following repository DSL to your `build.gradle` file:
+  ```groove
+  maven {
+    name = "GitHubPackages"
+    url = uri("https://maven.pkg.github.com/kind2-mc/kind2-java-api")
+  }
+  ```
+3. Add the following dependency DSL to your `build.gradle` file:
+  ```groove
+  implementation 'edu.uiowa.cs.clc:kind2-java-api:0.2'
+  ```
+
+### Build from sources
 ```shell
 git clone https://github.com/kind2-mc/kind2-java-api.git
 cd kind2-java-api
@@ -15,17 +71,17 @@ cd kind2-java-api
 To import the API, use the jar file `build/libs/kind2-java-api.jar`. 
 Alternatively you can just copy the package `edu.uiowa.cs.clc.kind2` to your source code.
 
-### API usage
-An example of how to use the API is provided in `src/main/java/StopWatch.java`. Follow these steps when using the API:
-1. Add `build/libs/kind2-java-api.jar` to your java class path.
-2. Import package `edu.uiowa.cs.clc.kind2`.
+## API Usage
+An example of how to use the API is provided in [`StopWatch.java`](https://github.com/kind2-mc/kind2-java-api/blob/master/src/main/java/StopWatch.java). Follow these steps when using the API:
+1. Install `kind2-java-api` artifact following the steps in the above section.
+2. Import `edu.uiowa.cs.clc.kind2` package in your source code.
 3. Construct a lustre `Program` object using the following utilities:
     - Builder objects: `ProgramBuilder`, `ComponentBuilder`, etc.
     - Utility classes: `TypeUtil` and `ExprUtil`.
 4. Construct a `Kind2Api` object and call `Kind2Api.execute`, passing the constructed program object.
 5. Analyze the `Kind2Result` object returned by `Kind2Api.execute`.
 
-### Results
+## Results
 `Kind2Result` contains the following features:
 - `Kind2Result` features:
   - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for all components.
@@ -45,5 +101,5 @@ An example of how to use the API is provided in `src/main/java/StopWatch.java`. 
   - `fixOneModeActive`: define all modes of component `N`, because kind2 found a state that is not covered by any of the modes in `N`'s contract.
   - `increaseTimeout`: increase the timeout for kind2, because it fails to prove or disprove one of the properties with the previous timeout.
 
-### Credits
+## Credits
 This project barrows heavily from [loonworks/jkind](https://github.com/loonwerks/jkind) by Rockwell Collins.
