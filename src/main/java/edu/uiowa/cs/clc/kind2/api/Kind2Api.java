@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
-import edu.uiowa.cs.clc.kind2.results.Kind2Result;
+import edu.uiowa.cs.clc.kind2.results.Result;
 import edu.uiowa.cs.clc.kind2.lustre.Program;
 
 /**
@@ -180,8 +180,8 @@ public class Kind2Api {
    * @param program Lustre program
    * @return result of running kind2 on program
    */
-  public Kind2Result execute(Program program) {
-    Kind2Result result = new Kind2Result();
+  public Result execute(Program program) {
+    Result result = new Result();
     execute(program.toString(), result, new IProgressMonitor() {
       @Override
       public boolean isCanceled() {
@@ -202,8 +202,8 @@ public class Kind2Api {
    * @return result of running kind2 on program
    * @throws Kind2Exception
    */
-  public Kind2Result execute(String program) {
-    Kind2Result result = new Kind2Result();
+  public Result execute(String program) {
+    Result result = new Result();
     execute(program, result, new IProgressMonitor() {
       @Override
       public boolean isCanceled() {
@@ -225,7 +225,7 @@ public class Kind2Api {
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
    */
-  private void execute(String program, Kind2Result result, IProgressMonitor monitor) {
+  private void execute(String program, Result result, IProgressMonitor monitor) {
     File lustreFile = null;
     try {
       lustreFile = ApiUtil.writeLustreFile(program);
@@ -243,7 +243,7 @@ public class Kind2Api {
    * @param monitor    Used to check for cancellation
    * @throws Kind2Exception
    */
-  private void execute(File lustreFile, Kind2Result result, IProgressMonitor monitor) {
+  private void execute(File lustreFile, Result result, IProgressMonitor monitor) {
     debug.println("Lustre file", lustreFile);
     try {
       callKind2(lustreFile, result, monitor);
@@ -254,7 +254,7 @@ public class Kind2Api {
     }
   }
 
-  private void callKind2(File lustreFile, Kind2Result result, IProgressMonitor monitor)
+  private void callKind2(File lustreFile, Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));

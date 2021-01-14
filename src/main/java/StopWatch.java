@@ -18,7 +18,7 @@ import edu.uiowa.cs.clc.kind2.lustre.ImportedComponentBuilder;
 import edu.uiowa.cs.clc.kind2.lustre.ModeBuilder;
 import edu.uiowa.cs.clc.kind2.lustre.ProgramBuilder;
 import edu.uiowa.cs.clc.kind2.lustre.TypeUtil;
-import edu.uiowa.cs.clc.kind2.results.Kind2Result;
+import edu.uiowa.cs.clc.kind2.results.Result;
 
 /**
  * This is an illustration of how to use the Java API for Kind 2 to implement a StopWatch Lustre
@@ -55,7 +55,7 @@ public class StopWatch {
     Kind2Api api = new Kind2Api();
     // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program. The results of
     // the analysis are saved in a Kind2Result object
-    Kind2Result result = api.execute(pb.build());
+    Result result = api.execute(pb.build());
 
     // Check if the result object is initialized before printing it.
     if (result.isInitialized()) {

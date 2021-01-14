@@ -7,7 +7,7 @@ plugins {
 
 group = 'edu.uiowa.cs.clc'
 version = gitVersion()
-ext.isReleaseVersion = version.matches("v[0-9](.[0-9])+")
+ext.isReleaseVersion = version.matches("[0-9].[0-9].[0-9]")
 
 repositories {
   mavenCentral()
