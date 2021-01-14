@@ -48,6 +48,18 @@ public class TypeUtil {
   }
 
   /**
+   * Construct a named type
+   * <p>
+   * Lustre: {@code <name>}
+   *
+   * @param name name of the type
+   * @return the named type
+   */
+  public static Type named(String name) {
+    return new NamedType(name);
+  }
+
+  /**
    * Construct a record type
    * <p>
    * Lustre: <code>struct {{@code <fields[0].key> : <fields[0].value>, ...}}</code>
