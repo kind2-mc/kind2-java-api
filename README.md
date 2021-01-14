@@ -21,7 +21,7 @@ Add the following dependency tag to your `pom.xml` file:
 
 #### Gradle
 Add the following dependency DSL to your `build.gradle` file:
-```groove
+```groovy
 implementation 'edu.uiowa.cs.clc:kind2-java-api:0.2.0'
 ```
 
@@ -51,14 +51,14 @@ Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-j
 #### Gradle
 1. Authenticate to GitHub Packages. For more information, see "[Authenticating to GitHub Packages](https://docs.github.com/articles/configuring-gradle-for-use-with-github-package-registry/#authenticating-to-github-packages)."
 2. Add the following repository DSL to your `build.gradle` file:
-  ```groove
+  ```groovy
   maven {
     name = "GitHubPackages"
     url = uri("https://maven.pkg.github.com/kind2-mc/kind2-java-api")
   }
   ```
 3. Add the following dependency DSL to your `build.gradle` file:
-  ```groove
+  ```groovy
   implementation 'edu.uiowa.cs.clc:kind2-java-api:0.2.0'
   ```
 
