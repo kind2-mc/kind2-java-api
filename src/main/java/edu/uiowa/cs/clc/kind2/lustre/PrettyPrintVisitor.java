@@ -168,8 +168,10 @@ public class PrettyPrintVisitor {
   public void visit(TypeDef typeDef) {
     write("type ");
     write(typeDef.id);
-    write(" = ");
-    writeType(typeDef.type);
+    if (typeDef.type != null) {
+      write(" = ");
+      writeType(typeDef.type);
+    }
     write(";");
   }
 

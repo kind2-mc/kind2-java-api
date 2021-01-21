@@ -63,7 +63,23 @@ class PrettyPrintVisitorTest {
   }
 
   @Test
-  void constantTest() {
+  void defineTypeTest() {
+    String expected = "type t1;" + "type t2 = bool;";
+
+    ProgramBuilder pb = new ProgramBuilder();
+
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.defineType(null));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.defineType(null, TypeUtil.BOOL));
+    Assertions.assertThrows(Kind2Exception.class, () -> pb.defineType("t", null));
+
+    pb.defineType("t1");
+    pb.defineType("t2", TypeUtil.BOOL);
+
+    assertEquals(removeWhiteSpace(expected), removeWhiteSpace(pb.build().toString()));
+  }
+
+  @Test
+  void createConstTest() {
     String expected = "const c1: bool;" + "const c2: bool;" + "const c3 = true;"
         + "const c4 = true;" + "const c5: bool = true;";
 

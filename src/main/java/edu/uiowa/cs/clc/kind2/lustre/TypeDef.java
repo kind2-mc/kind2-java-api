@@ -7,15 +7,11 @@
 
 package edu.uiowa.cs.clc.kind2.lustre;
 
-import edu.uiowa.cs.clc.kind2.Assert;
-
 class TypeDef extends Ast {
   final String id;
-  final Type type;
+  final Type type; // Nullable
 
   TypeDef(String id, Type type) {
-    Assert.isNotNull(id);
-    Assert.isNotNull(type);
     this.id = id;
     this.type = type;
   }

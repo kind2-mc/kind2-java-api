@@ -35,6 +35,18 @@ public class ProgramBuilder {
    * define a type
    *
    * @param name name of the type to define
+   * @return the defined type
+   */
+  public Type defineType(String name) {
+    Assert.isNotNull(name);
+    this.types.add(new TypeDef(name, null));
+    return new NamedType(name);
+  }
+
+  /**
+   * define a type
+   *
+   * @param name name of the type to define
    * @param type the type to define
    * @return the defined type
    */
