@@ -69,7 +69,7 @@ cd kind2-java-api
 ./gradlew build
 ```
 To import the API, use the jar file `build/libs/kind2-java-api.jar`. 
-Alternatively you can just copy the package `edu.uiowa.cs.clc.kind2` to your source code.
+Alternatively, you can just copy the package `edu.uiowa.cs.clc.kind2` to your source code.
 
 ## API Usage
 An example of how to use the API is provided in [`StopWatch.java`](https://github.com/kind2-mc/kind2-java-api/blob/master/src/main/java/StopWatch.java). Follow these steps when using the API:
@@ -85,21 +85,21 @@ An example of how to use the API is provided in [`StopWatch.java`](https://githu
 `Result` contains the following features:
 - `Result` features:
   - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for all components.
-  - `getNodeResult` returns an object of `NodeResult` that summarizes all analyses done by kind2 for a given component.
+  - `getNodeResult` returns an object of `NodeResult` that summarizes all analyses done by Kind 2 for a given component.
 
 - `NodeResult` features:
-  - `getSuggestions` returns an object of `Suggestion` that provides explanations and suggestions based on kind2 analyses for the current component.
+  - `getSuggestions` returns an object of `Suggestion` that provides explanations and suggestions based on Kind 2 analyses for the current component.
   - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for the current component, and all its subcomponents.
 
 - `Suggestion` contains explanations and a suggestion for the associated component. If `N` is the current component, and `M` is possibly a subcomponent of `N`, then the suggestion is one of the following:
-  - `noActionRequired`: no action required because all components of the system satisfy their contracts, and no component of the system was refined.
+  - `noActionRequired`: no action required because all components of the system satisfy their contracts, and no component was refined.
   - `strengthenSubComponentContract`: fix `M`s contract because `N` is correct after refinement, but `M`'s contract is too weak to prove `N`'s contract, but `M`'s definition is strong enough.
   - `completeSpecificationOrRemoveComponent`: Either complete specification of `N`'s contract, or remove component `M`, because component `N` satisfies its current contract and one or more assumptions of `M` are not satisfied by `N`.
   - `makeWeakerOrFixDefinition`: either make assumption `A` weaker, or fix `N`'s definition to satisfy `A`, because component `N` doesn't satisfy its contract after refinement, and assumption `A` of `M` is not satisfied by `N`.
   - `makeAssumptionStrongerOrFixDefinition`: Either make `N`'s assumptions stronger, or fix `N`'s definition to satisfy `N`'s guarantees, because component `N` doesn't satisfy its contract after refinement, and either `N` has no subcomponents, or all its subcomponents satisfy their contract.
   - `fixSubComponentIssues`: fix reported issues for `N`'s subcomponents, because component `N` doesn't satisfy its contract after refinement, and One or more subcomponents of N don't satisfy their contract.
-  - `fixOneModeActive`: define all modes of component `N`, because kind2 found a state that is not covered by any of the modes in `N`'s contract.
-  - `increaseTimeout`: increase the timeout for kind2, because it fails to prove or disprove one of the properties with the previous timeout.
+  - `fixOneModeActive`: define all modes of component `N`, because Kind 2 found a state that is not covered by any of the modes in `N`'s contract.
+  - `increaseTimeout`: increase the timeout for Kind 2, because it fails to prove or disprove one of the properties with the previous timeout.
 
 ## Credits
-This project barrows heavily from [loonworks/jkind](https://github.com/loonwerks/jkind) by Rockwell Collins.
+This project borrows heavily from the [loonworks/jkind](https://github.com/loonwerks/jkind) repo.
