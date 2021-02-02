@@ -76,11 +76,7 @@ public class Result
    */
   private final List<Log> kind2Logs;
   /**
-   * a list of kind2 logs.
-   */
-  private final List<AstInfo> astInfos;
-  /**
-   * a list of kind2 logs.
+   * a list of kind2 AST infos.
    */
   private final List<AstInfo> astInfos;
   /**
@@ -219,12 +215,12 @@ public class Result
         this.kind2Logs.add(log);
       }
 
-      if (kind2Object == Kind2Object.lsp) {
+      if (kind2Object == Object.lsp) {
         AstInfo astInfo = new AstInfo(this, jsonElement);
         this.astInfos.add(astInfo);
       }
 
-      if (kind2Object == Kind2Object.analysisStart)
+      if (kind2Object == Object.analysisStart)
       {
         // define new analysis
         kind2Analysis = new Analysis(jsonElement);

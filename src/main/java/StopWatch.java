@@ -161,7 +161,7 @@ public class StopWatch {
     cbb.guarantee(ExprUtil.implies(
         ExprUtil.and(ExprUtil.not(reset),
             ExprUtil.nodeCall(ExprUtil.id("Since"), reset,
-                ExprUtil.functionCall(ExprUtil.id("evn"),
+                ExprUtil.functionCall(ExprUtil.id("even"),
                     ExprUtil.nodeCall(ExprUtil.id("Count"), toggle)))),
         ExprUtil.nodeCall(ExprUtil.id("Stable"), time)));
 

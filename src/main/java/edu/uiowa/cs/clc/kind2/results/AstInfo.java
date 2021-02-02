@@ -5,7 +5,7 @@
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
 
-package edu.uiowa.kind2.results;
+package edu.uiowa.cs.clc.kind2.results;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -20,7 +20,7 @@ public class AstInfo {
      * Associated kind2Result object
      */
     @Expose(serialize = false)
-    private final Kind2Result kind2Result;
+    private final Result kind2Result;
     /**
      * The original kind2 output for this object in pretty json format.
      */
@@ -54,24 +54,24 @@ public class AstInfo {
      */
     private boolean isHidden;
 
-    public AstInfo(Kind2Result kind2Result, JsonElement jsonElement) {
+    public AstInfo(Result kind2Result, JsonElement jsonElement) {
         this.kind2Result = kind2Result;
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
         json = new GsonBuilder().create().toJson(jsonElement);
-        this.source = jsonObject.get(Kind2Labels.source).getAsString();
-        this.name = jsonObject.get(Kind2Labels.name).getAsString();
-        this.file = jsonObject.get(Kind2Labels.file).getAsString();
-        this.line = jsonObject.get(Kind2Labels.line) == null ? null
-                : jsonObject.get(Kind2Labels.line).getAsString();
-        this.column = jsonObject.get(Kind2Labels.column) == null ? null
-                : jsonObject.get(Kind2Labels.column).getAsString();
+        this.source = jsonObject.get(Labels.source).getAsString();
+        this.name = jsonObject.get(Labels.name).getAsString();
+        this.file = jsonObject.get(Labels.file).getAsString();
+        this.line = jsonObject.get(Labels.line) == null ? null
+                : jsonObject.get(Labels.line).getAsString();
+        this.column = jsonObject.get(Labels.column) == null ? null
+                : jsonObject.get(Labels.column).getAsString();
     }
 
     /**
      * @return the associated kind2 result for this log.
      */
-    public Kind2Result getKind2Result() {
+    public Result getKind2Result() {
         return kind2Result;
     }
 
