@@ -80,6 +80,10 @@ public class Result
    */
   private final List<AstInfo> astInfos;
   /**
+   * a list of kind2 logs.
+   */
+  private final List<AstInfo> astInfos;
+  /**
    * Is this object properly initialized?
    */
   private boolean isInitialized;

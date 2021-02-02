@@ -9,6 +9,8 @@ package edu.uiowa.cs.clc.kind2.results;
 
 import com.google.gson.annotations.Expose;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
