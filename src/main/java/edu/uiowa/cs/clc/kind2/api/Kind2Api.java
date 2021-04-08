@@ -10,6 +10,7 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -206,17 +207,40 @@ public class Kind2Api {
    */
   public Result execute(String program) {
     Result result = new Result();
-    execute(program, result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
+    try {
+      execute(program, result, new IProgressMonitor() {
+        @Override
+        public boolean isCanceled() {
+          return false;
+        }
 
-      @Override
-      public void done() {
-      }
-    });
+        @Override
+        public void done() {
+        }
+      });
+    } catch (Exception e) {
+    }
     return result;
+  }
+
+  public String interpret(URI uri, String main, String json) {
+    List<String> args = new ArrayList<>();
+    args.add(KIND2);
+    args.add("-json");
+    args.add("--lus_main");
+    args.add(main);
+    args.add("--enable");
+    args.add("interpreter");
+    args.add("--interpreter_input_file");
+    args.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
+    args.add(uri.getPath());
+    ProcessBuilder builder = new ProcessBuilder(args);
+    try {
+      String output = new String(builder.start().getInputStream().readAllBytes());
+      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+    } catch (IOException e) {
+      throw new Kind2Exception(e.getMessage());
+    }
   }
 
   /**
@@ -714,6 +738,16 @@ public class Kind2Api {
    */
   public void setInterpreterInputFile(String interpreterInputFile) {
     this.interpreterInputFile = interpreterInputFile;
+  }
+
+  /**
+   * Interpreter input as json string
+   *
+   * @param json interpreter input as json
+   */
+  public void setInterpreterInput(String json) {
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    this.interpreterInputFile = interpreterFile.toURI().getPath();
   }
 
   /**

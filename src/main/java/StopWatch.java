@@ -5,6 +5,8 @@
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import edu.uiowa.cs.clc.kind2.api.Kind2Api;
@@ -19,6 +21,7 @@ import edu.uiowa.cs.clc.kind2.lustre.ModeBuilder;
 import edu.uiowa.cs.clc.kind2.lustre.ProgramBuilder;
 import edu.uiowa.cs.clc.kind2.lustre.TypeUtil;
 import edu.uiowa.cs.clc.kind2.results.Result;
+import edu.uiowa.cs.clc.kind2.api.Module;
 
 /**
  * This is an illustration of how to use the Java API for Kind 2 to implement a StopWatch Lustre
@@ -53,16 +56,22 @@ public class StopWatch {
 
     // Create a Kind2Api object to set options and check the Lustre program
     Kind2Api api = new Kind2Api();
-    api.setArgs(Arrays.asList(new String[] {"-json", "--only_parse", "true", "--lsp", "true"}));
+    //api.setArgs(Arrays.asList(new String[] {"-json", "--enable", "interpreter", "--lsp", "true"}));
+    try {
+      System.out.println(api.interpret(new URI("./Abs.lus"), "Abs", "[]"));
+    } catch (URISyntaxException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     // Call Kind2Api's execute method to run Kind 2 analysis on the lustre program. The results of
     // the analysis are saved in a Kind2Result object
-    Result result = api.execute(pb.build());
+    //Result result = api.execute(pb.build());
 
     // Check if the result object is initialized before printing it.
-    if (result.isInitialized()) {
-      System.out.println(result.getKind2Logs());
-      //System.out.println(result);
-    }
+    //if (result.isInitialized()) {
+    //  System.out.println(result.getKind2Logs());
+    //  //System.out.println(result);
+    //}
   }
 
   /**
