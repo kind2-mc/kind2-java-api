@@ -25,7 +25,6 @@ import edu.uiowa.cs.clc.kind2.lustre.Program;
 public class Kind2Api {
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private static final char EOF = '\u0004';
 
   private List<String> otherOptions;
 

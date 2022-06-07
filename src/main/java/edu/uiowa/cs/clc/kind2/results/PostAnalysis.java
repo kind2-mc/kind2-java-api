@@ -9,7 +9,6 @@ package edu.uiowa.cs.clc.kind2.results;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 import java.util.HashMap;
