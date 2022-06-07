@@ -7,125 +7,45 @@
 
 package edu.uiowa.cs.clc.kind2.results;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-
 /**
- * Kind2 output log.
+ * Kind2 AST Info interface.
  */
-public class AstInfo {
-    /**
-     * Associated kind2Result object
-     */
-    @Expose(serialize = false)
-    private final Result kind2Result;
-    /**
-     * The original kind2 output for this object in pretty json format.
-     */
-    private final String prettyJson;
-    /**
-     * The original kind2 output for this object in json format
-     */
-    private final String json;
-    /**
-     * The name of the Kind 2 module which wrote the log.
-     */
-    private final String source;
-    /**
-     * The component name.
-     */
-    private final String name;
-    /**
-     * Associated file, if any.
-     */
-    private final String file;
-    /**
-     * Associated line in the input file, if any.
-     */
-    private final String line;
-    /**
-     * Associated column in the input file, if any.
-     */
-    private final String column;
-    /**
-     * isHidden determines whether the current log is printed.
-     */
-    private boolean isHidden;
-
-    public AstInfo(Result kind2Result, JsonElement jsonElement) {
-        this.kind2Result = kind2Result;
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
-        prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
-        json = new GsonBuilder().create().toJson(jsonElement);
-        this.source = jsonObject.get(Labels.source).getAsString();
-        this.name = jsonObject.get(Labels.name).getAsString();
-        this.file = jsonObject.get(Labels.file).getAsString();
-        this.line = jsonObject.get(Labels.line) == null ? null
-                : jsonObject.get(Labels.line).getAsString();
-        this.column = jsonObject.get(Labels.column) == null ? null
-                : jsonObject.get(Labels.column).getAsString();
-    }
-
-    /**
-     * @return the associated kind2 result for this log.
-     */
-    public Result getKind2Result() {
-        return kind2Result;
-    }
-
+public interface AstInfo {
     /**
      * @return The original kind2 output for this object in pretty json format.
      */
-    public String getJson() {
-        return prettyJson;
-    }
-
-    /**
-     * @return the associated line in the input file, if any.
-     */
-    public String getLine() {
-        return line;
-    }
-
-    /**
-     * @return The name of the Kind 2 module which wrote the log.
-     */
-    public String getSource() {
-        return source;
-    }
+    public String getJson();
 
     /**
      * @return The component name.
      */
-    public String getName() {
-        return name;
-    }
+    public String getName();
 
     /**
      * @return the uri of the file, if any.
      */
-    public String getFile() {
-        return file;
-    }
+    public String getFile();
 
     /**
-     * @return the associated column in the input file, if any.
+     * @return the associated start line in the input file, if any.
      */
-    public String getColumn() {
-        return column;
-    }
+    public String getStartLine();
+
+    /**
+     * @return the associated start column in the input file, if any.
+     */
+    public String getStartColumn();
+
+    /**
+     * @return the associated end line in the input file, if any.
+     */
+    public String getEndLine();
+
+    /**
+     * @return the associated end column in the input file, if any.
+     */
+    public String getEndColumn();
 
     @Override
-    public String toString() {
-        return json;
-    }
-
-    /**
-     * @return a boolean that determines whether the current log is printed.
-     */
-    public boolean isHidden() {
-        return isHidden;
-    }
+    public String toString();
 }
