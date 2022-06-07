@@ -237,7 +237,19 @@ public class Kind2Api {
     options.add(uri.getPath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
-      String output = new String(builder.start().getInputStream().readAllBytes());
+      String output = "";
+      Process process = builder.start();
+      while (process.isAlive()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        output += new String(bytes);
+        sleep(POLL_INTERVAL);
+      }
+      int available = process.getInputStream().available();
+      byte[] bytes = new byte[available];
+      process.getInputStream().read(bytes);
+      output += new String(bytes);
       return output.substring(output.indexOf("trace") + 9, output.length() - 5);
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
