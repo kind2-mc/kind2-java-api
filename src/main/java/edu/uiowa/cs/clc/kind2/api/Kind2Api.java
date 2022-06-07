@@ -1,7 +1,6 @@
 /*
- * Copyright (c) 2012-2013, Rockwell Collins
- * Copyright (c) 2020, Board of Trustees of the University of Iowa
- * All rights reserved.
+ * Copyright (c) 2012-2013, Rockwell Collins Copyright (c) 2020, Board of Trustees of the University
+ * of Iowa All rights reserved.
  *
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
  */
@@ -10,8 +9,8 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +23,10 @@ import edu.uiowa.cs.clc.kind2.lustre.Program;
  * The primary interface to Kind2.
  */
 public class Kind2Api {
-  public static final String KIND2 = "kind2";
+  public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
+
+  private List<String> otherOptions;
 
   // module smt
   private SolverOption smtSolver;
@@ -90,15 +91,21 @@ public class Kind2Api {
   private List<String> includeDirs;
   private String realPrecision;
   private Boolean logInvs;
+  private Boolean dumpCex;
   private Float timeout;
+  private Boolean oldFrontend;
   private Boolean onlyParse;
+  private Boolean lsp;
   private Set<Module> enabledSet;
   private Set<Module> disabledSet;
   private Boolean modular;
   private Boolean sliceNodes;
   private Boolean checkSubproperties;
+  private LogLevel logLevel;
+  private String lusMain;
 
   public Kind2Api() {
+    otherOptions = new ArrayList<>();
     smtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
@@ -145,6 +152,7 @@ public class Kind2Api {
     includeDirs = new ArrayList<>();
     realPrecision = null;
     logInvs = null;
+    dumpCex = null;
     timeout = null;
     onlyParse = null;
     enabledSet = new HashSet<>();
@@ -152,6 +160,8 @@ public class Kind2Api {
     modular = null;
     sliceNodes = null;
     checkSubproperties = null;
+    logLevel = null;
+    lusMain = null;
   }
 
   DebugLogger debug = new DebugLogger();
@@ -189,8 +199,7 @@ public class Kind2Api {
       }
 
       @Override
-      public void done() {
-      }
+      public void done() {}
     });
     return result;
   }
@@ -200,7 +209,6 @@ public class Kind2Api {
    *
    * @param program Lustre program as text
    * @return result of running kind2 on program
-   * @throws Kind2Exception
    */
   public Result execute(String program) {
     Result result = new Result();
@@ -211,59 +219,76 @@ public class Kind2Api {
       }
 
       @Override
-      public void done() {
-      }
+      public void done() {}
     });
     return result;
+  }
+
+  public String interpret(URI uri, String main, String json) {
+    List<String> options = new ArrayList<>();
+    options.add(KIND2);
+    options.addAll(getOptions());
+    options.add("--lus_main");
+    options.add(main);
+    options.add("--enable");
+    options.add("interpreter");
+    options.add("--interpreter_input_file");
+    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
+    options.add(uri.getPath());
+    ProcessBuilder builder = new ProcessBuilder(options);
+    try {
+      String output = "";
+      Process process = builder.start();
+      while (process.isAlive()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        output += new String(bytes);
+        sleep(POLL_INTERVAL);
+      }
+      int available = process.getInputStream().available();
+      byte[] bytes = new byte[available];
+      process.getInputStream().read(bytes);
+      output += new String(bytes);
+      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+    } catch (IOException e) {
+      throw new Kind2Exception(e.getMessage());
+    }
   }
 
   /**
    * Run Kind on a Lustre program
    *
    * @param program Lustre program as text
-   * @param result  Place to store results as they come in
+   * @param result Place to store results as they come in
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
    */
-  private void execute(String program, Result result, IProgressMonitor monitor) {
-    File lustreFile = null;
+  public void execute(String program, Result result, IProgressMonitor monitor) {
     try {
-      lustreFile = ApiUtil.writeLustreFile(program);
-      execute(lustreFile, result, monitor);
-    } finally {
-      debug.deleteIfUnneeded(lustreFile);
-    }
-  }
-
-  /**
-   * Run Kind2 on a Lustre program
-   *
-   * @param lustreFile File containing Lustre program
-   * @param result     Place to store results as they come in
-   * @param monitor    Used to check for cancellation
-   * @throws Kind2Exception
-   */
-  private void execute(File lustreFile, Result result, IProgressMonitor monitor) {
-    debug.println("Lustre file", lustreFile);
-    try {
-      callKind2(lustreFile, result, monitor);
-    } catch (Kind2Exception e) {
-      throw e;
+      callKind2(program, result, monitor);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
-  private void callKind2(File lustreFile, Result result, IProgressMonitor monitor)
+  private void callKind2(String program, Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
-    ProcessBuilder builder = getKind2ProcessBuilder(lustreFile);
+    ProcessBuilder builder = getKind2ProcessBuilder();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
-    int code = 0;
+    String output = "";
 
     try {
       process = builder.start();
+      process.getOutputStream().write(program.getBytes());
+      process.getOutputStream().flush();
+      process.getOutputStream().close();
       while (!monitor.isCanceled() && process.isAlive()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        output += new String(bytes);
         sleep(POLL_INTERVAL);
       }
     } finally {
@@ -271,260 +296,283 @@ public class Kind2Api {
         int available = process.getInputStream().available();
         byte[] bytes = new byte[available];
         process.getInputStream().read(bytes);
-        result.initialize(new String(bytes));
+        output += new String(bytes);
+        try {
+          result.initialize(output);
+        } catch (RuntimeException e) {
+        }
       }
-
       if (process != null) {
         process.destroy();
-        code = process.waitFor();
       }
-
       monitor.done();
-
-      if (!Arrays.asList(0, 10, 20).contains(code) && !monitor.isCanceled()) {
-        throw new Kind2Exception("Abnormal termination, exit code " + code);
-      }
     }
   }
 
-  private ProcessBuilder getKind2ProcessBuilder(File lustreFile) {
-    List<String> args = new ArrayList<>();
-    args.add(KIND2);
-    args.addAll(getArgs());
-    args.add(lustreFile.toString());
-
-    ProcessBuilder builder = new ProcessBuilder(args);
+  private ProcessBuilder getKind2ProcessBuilder() {
+    List<String> options = new ArrayList<>();
+    options.add(KIND2);
+    options.addAll(getOptions());
+    ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
     return builder;
   }
 
-  List<String> getArgs() {
-    List<String> args = new ArrayList<>();
-    args.add("-json");
-    args.add("-v");
+  /**
+   * Sets additional options to pass to Kind 2 executable.
+   *
+   * @param options the additional options to kind2
+   */
+  public void setOtherOptions(List<String> options) {
+    this.otherOptions = options;
+  }
+
+  public List<String> getOptions() {
+    List<String> options = new ArrayList<>();
+    options.add("-json");
+    if (logLevel != null) {
+      options.add(logLevel.getOption());
+    }
+    if (lusMain != null) {
+      options.add("--lus_main");
+      options.add(lusMain);
+    }
     if (smtSolver != null) {
-      args.add("--smt_solver");
-      args.add(smtSolver.toString());
+      options.add("--smt_solver");
+      options.add(smtSolver.toString());
     }
     if (smtLogic != null) {
-      args.add("--smt_logic");
-      args.add(smtLogic);
+      options.add("--smt_logic");
+      options.add(smtLogic);
     }
     if (checkSatAssume != null) {
-      args.add("--check_sat_assume");
-      args.add(checkSatAssume.toString());
+      options.add("--check_sat_assume");
+      options.add(checkSatAssume.toString());
     }
     if (smtShortNames != null) {
-      args.add("--smt_short_names");
-      args.add(smtShortNames.toString());
+      options.add("--smt_short_names");
+      options.add(smtShortNames.toString());
     }
     if (boolectorBin != null) {
-      args.add("--boolector_bin");
-      args.add(boolectorBin);
+      options.add("--boolector_bin");
+      options.add(boolectorBin);
     }
     if (cvc4Bin != null) {
-      args.add("--cvc4_bin");
-      args.add(cvc4Bin);
+      options.add("--cvc4_bin");
+      options.add(cvc4Bin);
     }
     if (yicesBin != null) {
-      args.add("--yices_bin");
-      args.add(yicesBin);
+      options.add("--yices_bin");
+      options.add(yicesBin);
     }
     if (yices2Bin != null) {
-      args.add("--yices2_bin");
-      args.add(yices2Bin);
+      options.add("--yices2_bin");
+      options.add(yices2Bin);
     }
     if (z3Bin != null) {
-      args.add("--z3_bin");
-      args.add(z3Bin);
+      options.add("--z3_bin");
+      options.add(z3Bin);
     }
     if (smtTrace != null) {
-      args.add("--smt_trace");
-      args.add(smtTrace.toString());
+      options.add("--smt_trace");
+      options.add(smtTrace.toString());
     }
     if (indPrintCex != null) {
-      args.add("--ind_print_cex");
-      args.add(indPrintCex.toString());
+      options.add("--ind_print_cex");
+      options.add(indPrintCex.toString());
     }
     if (ic3Abstr != null) {
-      args.add("--ic3_abstr");
-      args.add(ic3Abstr.toString());
+      options.add("--ic3_abstr");
+      options.add(ic3Abstr.toString());
     }
     if (testgen != null) {
-      args.add("--testgen");
-      args.add(testgen.toString());
+      options.add("--testgen");
+      options.add(testgen.toString());
     }
     if (testgenGraphOnly != null) {
-      args.add("--testgen_graph_only");
-      args.add(testgenGraphOnly.toString());
+      options.add("--testgen_graph_only");
+      options.add(testgenGraphOnly.toString());
     }
     if (testgenLen != null) {
-      args.add("--testgen_len");
-      args.add(testgenLen.toString());
+      options.add("--testgen_len");
+      options.add(testgenLen.toString());
     }
     if (interpreterInputFile != null) {
-      args.add("--interpreter_input_file");
-      args.add(interpreterInputFile.toString());
+      options.add("--interpreter_input_file");
+      options.add(interpreterInputFile.toString());
     }
     if (interpreterSteps != null) {
-      args.add("--interpreter_steps");
-      args.add(interpreterSteps.toString());
+      options.add("--interpreter_steps");
+      options.add(interpreterSteps.toString());
     }
     if (compositional != null) {
-      args.add("--compositional");
-      args.add(checkSubproperties.toString());
+      options.add("--compositional");
+      options.add(compositional.toString());
     }
     if (checkModes != null) {
-      args.add("--check_modes");
-      args.add(checkModes.toString());
+      options.add("--check_modes");
+      options.add(checkModes.toString());
     }
     if (checkImplem != null) {
-      args.add("--check_implem");
-      args.add(checkImplem.toString());
+      options.add("--check_implem");
+      options.add(checkImplem.toString());
     }
     if (refinement != null) {
-      args.add("--refinement");
-      args.add(refinement.toString());
+      options.add("--refinement");
+      options.add(refinement.toString());
     }
     if (ivc != null) {
-      args.add("--ivc");
-      args.add(ivc.toString());
+      options.add("--ivc");
+      options.add(ivc.toString());
     }
     if (!ivcCategories.isEmpty()) {
       for (IVCCategory category : ivcCategories) {
-        args.add("--ivc_category");
-        args.add(category.toString());
+        options.add("--ivc_category");
+        options.add(category.toString());
       }
     }
     if (ivcAll != null) {
-      args.add("--ivc_all");
-      args.add(ivcAll.toString());
+      options.add("--ivc_all");
+      options.add(ivcAll.toString());
     }
     if (ivcApproximate != null) {
-      args.add("--ivc_approximate");
-      args.add(ivcApproximate.toString());
+      options.add("--ivc_approximate");
+      options.add(ivcApproximate.toString());
     }
     if (ivcSmallestFirst != null) {
-      args.add("--ivc_smallest_first");
-      args.add(ivcSmallestFirst.toString());
+      options.add("--ivc_smallest_first");
+      options.add(ivcSmallestFirst.toString());
     }
     if (ivcOnlyMainNode != null) {
-      args.add("--ivc_only_main_node");
-      args.add(ivcOnlyMainNode.toString());
+      options.add("--ivc_only_main_node");
+      options.add(ivcOnlyMainNode.toString());
     }
     if (ivcMustSet != null) {
-      args.add("--ivc_must_set");
-      args.add(ivcMustSet.toString());
+      options.add("--ivc_must_set");
+      options.add(ivcMustSet.toString());
     }
     if (printIVC != null) {
-      args.add("--print_ivc");
-      args.add(printIVC.toString());
+      options.add("--print_ivc");
+      options.add(printIVC.toString());
     }
     if (printIVCComplement != null) {
-      args.add("--print_ivc_complement");
-      args.add(printIVCComplement.toString());
+      options.add("--print_ivc_complement");
+      options.add(printIVCComplement.toString());
     }
     if (minimizeProgram != null) {
-      args.add("--minimize_program");
-      args.add(minimizeProgram.toString());
+      options.add("--minimize_program");
+      options.add(minimizeProgram.toString());
     }
     if (ivcOutputDir != null) {
-      args.add("--ivc_output_dir");
-      args.add(ivcOutputDir.toString());
+      options.add("--ivc_output_dir");
+      options.add(ivcOutputDir.toString());
     }
     if (ivcPrecomputedMCS != null) {
-      args.add("--ivc_precomputed_mcs");
-      args.add(ivcPrecomputedMCS.toString());
+      options.add("--ivc_precomputed_mcs");
+      options.add(ivcPrecomputedMCS.toString());
     }
     if (ivcUCTimeout != null) {
-      args.add("--ivc_uc_timeout");
-      args.add(ivcUCTimeout.toString());
+      options.add("--ivc_uc_timeout");
+      options.add(ivcUCTimeout.toString());
     }
     if (!mcsCategories.isEmpty()) {
       for (MCSCategory category : mcsCategories) {
-        args.add("--mcs_category");
-        args.add(category.toString());
+        options.add("--mcs_category");
+        options.add(category.toString());
       }
     }
     if (mcsOnlyMainNode != null) {
-      args.add("--mcs_only_main_node");
-      args.add(mcsOnlyMainNode.toString());
+      options.add("--mcs_only_main_node");
+      options.add(mcsOnlyMainNode.toString());
     }
     if (mcsAll != null) {
-      args.add("--mcs_all");
-      args.add(mcsAll.toString());
+      options.add("--mcs_all");
+      options.add(mcsAll.toString());
     }
     if (mcsMaxCardinality != null) {
-      args.add("--mcs_max_cardinality");
-      args.add(mcsMaxCardinality.toString());
+      options.add("--mcs_max_cardinality");
+      options.add(mcsMaxCardinality.toString());
     }
     if (printMCS != null) {
-      args.add("--print_mcs");
-      args.add(printMCS.toString());
+      options.add("--print_mcs");
+      options.add(printMCS.toString());
     }
     if (printMCSComplement != null) {
-      args.add("--print_mcs_complement");
-      args.add(printMCSComplement.toString());
+      options.add("--print_mcs_complement");
+      options.add(printMCSComplement.toString());
     }
     if (printMCSCounterexample != null) {
-      args.add("--print_mcs_counterexample");
-      args.add(printMCSCounterexample.toString());
+      options.add("--print_mcs_counterexample");
+      options.add(printMCSCounterexample.toString());
     }
     if (mcsPerProperty != null) {
-      args.add("--mcs_per_property");
-      args.add(mcsPerProperty.toString());
+      options.add("--mcs_per_property");
+      options.add(mcsPerProperty.toString());
     }
     if (outputDir != null) {
-      args.add("--output_dir");
-      args.add(outputDir);
+      options.add("--output_dir");
+      options.add(outputDir);
     }
     if (!includeDirs.isEmpty()) {
       for (String dir : includeDirs) {
-        args.add("--include_dir");
-        args.add(dir);
+        options.add("--include_dir");
+        options.add(dir);
       }
     }
     if (realPrecision != null) {
-      args.add("--real_precision");
-      args.add(realPrecision);
+      options.add("--real_precision");
+      options.add(realPrecision);
     }
     if (logInvs != null) {
-      args.add("--log_invs");
-      args.add(logInvs.toString());
+      options.add("--log_invs");
+      options.add(logInvs.toString());
+    }
+    if (dumpCex != null) {
+      options.add("--dump_cex");
+      options.add(dumpCex.toString());
     }
     if (timeout != null) {
-      args.add("--timeout");
-      args.add(timeout.toString());
+      options.add("--timeout");
+      options.add(timeout.toString());
+    }
+    if (oldFrontend != null) {
+      options.add("--old_frontend");
+      options.add(oldFrontend.toString());
     }
     if (onlyParse != null) {
-      args.add("--only_parse");
-      args.add(onlyParse.toString());
+      options.add("--only_parse");
+      options.add(onlyParse.toString());
+    }
+    if (lsp != null) {
+      options.add("--lsp");
+      options.add(lsp.toString());
     }
     if (!enabledSet.isEmpty()) {
       for (Module module : enabledSet) {
-        args.add("--enable");
-        args.add(module.toString());
+        options.add("--enable");
+        options.add(module.toString());
       }
     }
     if (!disabledSet.isEmpty()) {
       for (Module module : disabledSet) {
-        args.add("--disable");
-        args.add(module.toString());
+        options.add("--disable");
+        options.add(module.toString());
       }
     }
     if (modular != null) {
-      args.add("--modular");
-      args.add(modular.toString());
+      options.add("--modular");
+      options.add(modular.toString());
     }
     if (sliceNodes != null) {
-      args.add("--slice_nodes");
-      args.add(sliceNodes.toString());
+      options.add("--slice_nodes");
+      options.add(sliceNodes.toString());
     }
     if (checkSubproperties != null) {
-      args.add("--check_subproperties");
-      args.add(checkSubproperties.toString());
+      options.add("--check_subproperties");
+      options.add(checkSubproperties.toString());
     }
-    return args;
+    options.addAll(this.otherOptions);
+    return options;
   }
 
   /**
@@ -699,6 +747,16 @@ public class Kind2Api {
    */
   public void setInterpreterInputFile(String interpreterInputFile) {
     this.interpreterInputFile = interpreterInputFile;
+  }
+
+  /**
+   * Interpreter input as json string
+   *
+   * @param json interpreter input as json
+   */
+  public void setInterpreterInput(String json) {
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    this.interpreterInputFile = interpreterFile.toURI().getPath();
   }
 
   /**
@@ -1052,6 +1110,17 @@ public class Kind2Api {
   }
 
   /**
+   * Dump counterexample to a file. Only in plain text output.
+   * <p>
+   * Default: false
+   *
+   * @param dumpCex whether or not to dump counterexample
+   */
+  public void setDumpCex(boolean dumpCex) {
+    this.dumpCex = dumpCex;
+  }
+
+  /**
    * Set a maximum run time for entire execution
    *
    * @param timeout A positive timeout in seconds
@@ -1061,6 +1130,17 @@ public class Kind2Api {
       throw new Kind2Exception("Timeout must be positive");
     }
     this.timeout = timeout;
+  }
+
+  /**
+   * Use the old Lustre front-end.
+   * <p>
+   * Default: true
+   *
+   * @param oldFrontend whether or not to use the old Lustre front-end.
+   */
+  public void setOldFrontend(boolean oldFrontend) {
+    this.oldFrontend = oldFrontend;
   }
 
   /**
@@ -1075,9 +1155,20 @@ public class Kind2Api {
   }
 
   /**
+   * Provide AST info for language-servers.
+   * <p>
+   * Default: false
+   *
+   * @param lsp whether or not to provide AST info.
+   */
+  public void setLsp(boolean lsp) {
+    this.lsp = lsp;
+  }
+
+  /**
    * Enable Kind module, repeat option to enable several modules
    * <p>
-   * Default: [BMC, IND, IND2, IC3, INVGEN, INVGENOS, INVGENINTOS, INVGENREALOS]
+   * Default: [BMC, IND, IND2, IC3, INVGEN, INVGENOS, INVGENINTOS, INVGENMACHOS, INVGENREALOS]
    *
    * @param module the module to enable
    */
@@ -1127,6 +1218,28 @@ public class Kind2Api {
    */
   public void setCheckSubproperties(boolean checkSubproperties) {
     this.checkSubproperties = checkSubproperties;
+  }
+
+  /**
+   * Set the level of logs generated by Kind.
+   * <p>
+   * Default: NOTE
+   *
+   * @param logLevel the log level
+   */
+  public void setLogLevel(LogLevel logLevel) {
+    this.logLevel = logLevel;
+  }
+
+  /**
+   * Set the top node in the Lustre input file.
+   * <p>
+   * Default: "--%MAIN" annotation in source if any, last node otherwise
+   *
+   * @param lusMain the main node
+   */
+  public void setLusMain(String lusMain) {
+    this.lusMain = lusMain;
   }
 
   void sleep(long interval) {

@@ -20,8 +20,15 @@ public class Labels
   public static final String assumptions = "assumptions";
   public static final String name = "name";
   public static final String scope = "scope";
+  public static final String file = "file";
   public static final String line = "line";
+  public static final String kind = "kind";
   public static final String column = "column";
+  public static final String imported = "imported";
+  public static final String startLine = "startLine";
+  public static final String startColumn = "startColumn";
+  public static final String endLine = "endLine";
+  public static final String endColumn = "endColumn";
   public static final String answer = "answer";
   public static final String value = "value";
   public static final String source = "source";

@@ -39,6 +39,7 @@ public class Property
    * Name of the component where the property was analyzed
    */
   private final String scope;
+  private final String file;
   /**
    * Associated line in the input file, if any.
    */
@@ -86,6 +87,8 @@ public class Property
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
     jsonName = jsonObject.get(Labels.name).getAsString();
     name = jsonName.replaceAll("\\[.*?\\]", "").replaceFirst(".*?\\.", "");
+    file =
+        jsonObject.get(Labels.file) == null ? null : jsonObject.get(Labels.file).getAsString();
     qualifiedName = analysis.getNodeName() + "." + getName();
     scope = jsonObject.get(Labels.scope) == null ? "" :
         jsonObject.get(Labels.scope).getAsString();
@@ -158,6 +161,10 @@ public class Property
   public String getScope()
   {
     return scope;
+  }
+
+  public String getFile() {
+    return file;
   }
 
   public String getLine()

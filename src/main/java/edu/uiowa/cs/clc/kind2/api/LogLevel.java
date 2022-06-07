@@ -14,4 +14,26 @@ public enum LogLevel {
   public String toString() {
     return name().toLowerCase();
   }
+
+  public String getOption() {
+    switch (this) {
+      case OFF:
+        return "-qq";
+      case FATAL:
+        return "-q";
+      case ERROR:
+        return "-s";
+      case WARN:
+      case NOTE:
+        return "";
+      case INFO:
+        return "-v";
+      case DEBUG:
+        return "-vv";
+      case TRACE:
+        return "-vvv";
+      default:
+        throw new IllegalArgumentException("Error: Unknown log level.");
+    }
+  }
 }

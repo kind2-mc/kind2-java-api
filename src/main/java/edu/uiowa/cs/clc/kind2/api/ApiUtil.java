@@ -23,6 +23,10 @@ public class ApiUtil {
     return writeTempFile("kind2-api-", ".lus", program);
   }
 
+  public static File writeInterpreterFile(String program) {
+    return writeTempFile("kind2-api-", ".json", program);
+  }
+
   public static File writeTempFile(String fileName, String fileExt, String contents) {
     File file = null;
     try {
