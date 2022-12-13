@@ -35,7 +35,7 @@ public class Kind2Api {
   private Boolean smtShortNames;
   private String boolectorBin;
   private String z3Bin;
-  private String cvc4Bin;
+  private String cvc5Bin;
   private String yicesBin;
   private String yices2Bin;
   private Boolean smtTrace;
@@ -112,7 +112,7 @@ public class Kind2Api {
     smtShortNames = null;
     boolectorBin = null;
     z3Bin = null;
-    cvc4Bin = null;
+    cvc5Bin = null;
     yicesBin = null;
     yices2Bin = null;
     smtTrace = null;
@@ -357,9 +357,9 @@ public class Kind2Api {
       options.add("--boolector_bin");
       options.add(boolectorBin);
     }
-    if (cvc4Bin != null) {
-      options.add("--cvc4_bin");
-      options.add(cvc4Bin);
+    if (cvc5Bin != null) {
+      options.add("--cvc5_bin");
+      options.add(cvc5Bin);
     }
     if (yicesBin != null) {
       options.add("--yices_bin");
@@ -631,14 +631,14 @@ public class Kind2Api {
   }
 
   /**
-   * Executable of CVC4 solver
+   * Executable of cvc5 solver
    * <p>
-   * Default: "cvc4"
+   * Default: "cvc5"
    *
-   * @param cvc4Bin path to CVC4 executable
+   * @param cvc5Bin path to cvc5 executable
    */
-  public void setCvc4Bin(String cvc4Bin) {
-    this.cvc4Bin = cvc4Bin;
+  public void setcvc5Bin(String cvc5Bin) {
+    this.cvc5Bin = cvc5Bin;
   }
 
   /**

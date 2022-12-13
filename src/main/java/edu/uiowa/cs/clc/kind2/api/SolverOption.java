@@ -8,7 +8,7 @@
 package edu.uiowa.cs.clc.kind2.api;
 
 public enum SolverOption {
-  BOOLECTOR, CVC4, YICES, YICES2, Z3;
+  BOOLECTOR, CVC5, YICES, YICES2, Z3;
 
   @Override
   public String toString() {
