@@ -1,5 +1,5 @@
-[![License](https://img.shields.io/github/license/kind2-mc/kind2-java-api)](https://github.com/kind2-mc/kind2-java-api/blob/master/LICENSE)
-[![CI](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/kind2-mc/kind2-java-api/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
+[![License](https://img.shields.io/github/license/kind2-mc/kind2-java-api)](https://github.com/kind2-mc/kind2-java-api/blob/main/LICENSE)
+[![CI](https://github.com/kind2-mc/kind2-java-api/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=main)](https://github.com/kind2-mc/kind2-java-api/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
 [![Maven Central](https://img.shields.io/maven-central/v/edu.uiowa.cs.clc/kind2-java-api.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22edu.uiowa.cs.clc%22%20AND%20a:%22kind2-java-api%22)
 
 # Java API for Kind 2
@@ -72,7 +72,7 @@ To import the API, use the jar file `build/libs/kind2-java-api.jar`.
 Alternatively, you can just copy the package `edu.uiowa.cs.clc.kind2` to your source code.
 
 ## API Usage
-An example of how to use the API is provided in [`StopWatch.java`](https://github.com/kind2-mc/kind2-java-api/blob/master/src/main/java/StopWatch.java). Follow these steps when using the API:
+An example of how to use the API is provided in [`StopWatch.java`](https://github.com/kind2-mc/kind2-java-api/blob/main/src/main/java/StopWatch.java). Follow these steps when using the API:
 1. Install `kind2-java-api` artifact following the steps in the above section.
 2. Import `edu.uiowa.cs.clc.kind2` package in your source code.
 3. Construct a lustre `Program` object using the following utilities:
