@@ -33,7 +33,7 @@ public class Kind2Api {
   private String smtLogic;
   private Boolean checkSatAssume;
   private Boolean smtShortNames;
-  private String boolectorBin;
+  private String bitwuzlaBin;
   private String z3Bin;
   private String cvc5Bin;
   private String yicesBin;
@@ -110,7 +110,7 @@ public class Kind2Api {
     smtLogic = null;
     checkSatAssume = null;
     smtShortNames = null;
-    boolectorBin = null;
+    bitwuzlaBin = null;
     z3Bin = null;
     cvc5Bin = null;
     yicesBin = null;
@@ -353,9 +353,9 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if (boolectorBin != null) {
-      options.add("--boolector_bin");
-      options.add(boolectorBin);
+    if (bitwuzlaBin != null) {
+      options.add("--bitwuzla_bin");
+      options.add(bitwuzlaBin);
     }
     if (cvc5Bin != null) {
       options.add("--cvc5_bin");
@@ -620,14 +620,14 @@ public class Kind2Api {
   }
 
   /**
-   * Executable of Boolector solver
+   * Executable of Bitwuzla solver
    * <p>
-   * Default: "boolector"
+   * Default: "bitwuzla"
    *
-   * @param boolectorBin path to Boolector executable
+   * @param bitwuzlaBin path to Bitwuzla executable
    */
-  public void setBoolectorBin(String boolectorBin) {
-    this.boolectorBin = boolectorBin;
+  public void setBitwuzlaBin(String bitwuzlaBin) {
+    this.bitwuzlaBin = bitwuzlaBin;
   }
 
   /**
