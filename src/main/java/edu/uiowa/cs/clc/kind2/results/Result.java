@@ -373,6 +373,28 @@ public class Result {
   }
 
   /**
+   * @return a list of {@link Property} for all reachable properties including the reachable properties for
+   *         the subcomponents.
+   */
+  public Set<Property> getReachableProperties() {
+    if (root == null) {
+      return new HashSet<>();
+    }
+    return root.getReachableProperties();
+  }
+
+  /**
+   * @return a list of {@link Property} for all unreachable properties including the unreachable properties for
+   *         the subcomponents.
+   */
+  public Set<Property> getUnreachableProperties() {
+    if (root == null) {
+      return new HashSet<>();
+    }
+    return root.getUnreachableProperties();
+  }
+
+  /**
    * @return {@code true} if printing counter examples for falsifiable properties is enabled.
    */
   public static boolean isPrintingCounterExamplesEnabled() {

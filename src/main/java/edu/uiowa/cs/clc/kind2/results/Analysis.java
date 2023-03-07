@@ -172,7 +172,7 @@ public class Analysis
 
   /**
    * This method filters the properties based on the type of the answer.
-   * @param answer can be valid, falsifiable, or unknown.
+   * @param answer can be valid, falsifiable, unknown, reachable, or unreachable.
    * @return the properties with the specified answer in the current analysis.
    */
   private List<Property> filterProperties(Answer answer)
@@ -251,6 +251,22 @@ public class Analysis
   public List<Property> getValidProperties()
   {
     return filterProperties(Answer.valid);
+  }
+
+  /**
+   * @return the reachable properties in the current analysis.
+   */
+  public List<Property> getReachableProperties()
+  {
+    return filterProperties(Answer.reachable);
+  }
+
+  /**
+   * @return the unreachable properties in the current analysis.
+   */
+  public List<Property> getUnreachableProperties()
+  {
+    return filterProperties(Answer.unreachable);
   }
 
   /**

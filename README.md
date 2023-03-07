@@ -84,12 +84,12 @@ An example of how to use the API is provided in [`StopWatch.java`](https://githu
 ## Results
 `Result` contains the following features:
 - `Result` features:
-  - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for all components.
+  - `getValidProperties`, `getReachableProperties`, `getFalsifiedProperties`, `getUnreachableProperties`, and `getUnknownProperties` return properties for all components.
   - `getNodeResult` returns an object of `NodeResult` that summarizes all analyses done by Kind 2 for a given component.
 
 - `NodeResult` features:
   - `getSuggestions` returns an object of `Suggestion` that provides explanations and suggestions based on Kind 2 analyses for the current component.
-  - `getValidProperties`, `getFalsifiedProperties`, and `getUnknownProperties` return properties for the current component, and all its subcomponents.
+  - `getValidProperties`, `getReachableProperties`, `getFalsifiedProperties`, `getUnreachableProperties`, and `getUnknownProperties` return properties for the current component, and all its subcomponents.
 
 - `Suggestion` contains explanations and a suggestion for the associated component. If `N` is the current component, and `M` is possibly a subcomponent of `N`, then the suggestion is one of the following:
   - `noActionRequired`: no action required because all components of the system satisfy their contracts, and no component was refined.
