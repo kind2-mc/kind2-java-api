@@ -128,6 +128,14 @@ public class NodeResult
     Set<Property> unknownProperties = this.getUnknownProperties();
     printProperties(stringBuilder, unknownProperties);
 
+    stringBuilder.append("\nReachable properties:\n");
+    Set<Property> reachableProperties = this.getReachableProperties();
+    printProperties(stringBuilder, reachableProperties);
+
+    stringBuilder.append("\nUnreachable properties:\n");
+    Set<Property> unreachableProperties = this.getUnreachableProperties();
+    printProperties(stringBuilder, unreachableProperties);
+
     return stringBuilder.toString();
   }
 
@@ -425,5 +433,39 @@ public class NodeResult
     unknownProperties.addAll(getLastAnalysis().getUnknownProperties());
 
     return unknownProperties;
+  }
+
+  /**
+   * @return the final list of reachable properties for this component and its subcomponents.
+   */
+  public Set<Property> getReachableProperties()
+  {
+    Set<Property> reachableProperties = new HashSet<>();
+
+    for (NodeResult child : children)
+    {
+      reachableProperties.addAll(child.getReachableProperties());
+    }
+
+    reachableProperties.addAll(getLastAnalysis().getReachableProperties());
+
+    return reachableProperties;
+  }
+
+  /**
+   * @return the final list of unreachable properties for this component and its subcomponents.
+   */
+  public Set<Property> getUnreachableProperties()
+  {
+    Set<Property> unreachableProperties = new HashSet<>();
+
+    for (NodeResult child : children)
+    {
+      unreachableProperties.addAll(child.getUnreachableProperties());
+    }
+
+    unreachableProperties.addAll(getLastAnalysis().getUnreachableProperties());
+
+    return unreachableProperties;
   }
 }

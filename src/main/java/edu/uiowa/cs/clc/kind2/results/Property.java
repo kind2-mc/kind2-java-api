@@ -62,7 +62,7 @@ public class Property
   private final PropertyType source;
   /**
    * The source of the answer, and the result value of the check.
-   * The result can be valid, falsifiable, or unknown
+   * The result can be valid, falsifiable, unknown, reachable, or unreachable
    */
   private final Answer answer;
   /**
@@ -72,6 +72,13 @@ public class Property
    * It also gives the list of contract modes that are active at each step, if any.
    */
   private final CounterExample counterExample;
+  /**
+   * Example trace to the property satisfaction (only available when answer is reachable).
+   * It describes a sequence of values for each stream, and automaton,
+   * that leads the system to the violation of the property.
+   * It also gives the list of contract modes that are active at each step, if any.
+   */
+  private final CounterExample exampleTrace;
   private final Analysis analysis;
   /**
    * The value of k in a k-inductive proof, if any.
@@ -100,6 +107,9 @@ public class Property
     JsonElement counterExampleElement = jsonObject.get(Labels.counterExample);
     counterExample = counterExampleElement == null ? null :
         new CounterExample(this, counterExampleElement);
+    JsonElement exampleTraceElement = jsonObject.get(Labels.exampleTrace);
+    exampleTrace = exampleTraceElement == null ? null :
+        new CounterExample(this, exampleTraceElement);
     trueFor = jsonObject.get(Labels.trueFor) == null ? null :
         jsonObject.get(Labels.trueFor).getAsString();
     JsonElement k = jsonObject.get(Labels.k);
@@ -190,6 +200,11 @@ public class Property
   public CounterExample getCounterExample()
   {
     return counterExample;
+  }
+
+  public CounterExample getExampleTrace()
+  {
+    return exampleTrace;
   }
 
   public String getTrueFor()

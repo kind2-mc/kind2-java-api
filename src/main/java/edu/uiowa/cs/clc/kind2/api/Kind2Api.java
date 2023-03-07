@@ -265,6 +265,7 @@ public class Kind2Api {
    * @throws Kind2Exception
    */
   public void execute(String program, Result result, IProgressMonitor monitor) {
+    
     try {
       callKind2(program, result, monitor);
     } catch (Throwable t) {

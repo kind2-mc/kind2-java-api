@@ -15,7 +15,9 @@ public enum Answer
 {
   valid("valid"),
   falsifiable("falsifiable"),
-  unknown("unknown");
+  unknown("unknown"),
+  reachable("reachable"),
+  unreachable("unreachable");
 
   private final String value;
 
@@ -34,6 +36,10 @@ public enum Answer
         return falsifiable;
       case "unknown":
         return unknown;
+      case "reachable":
+        return reachable;
+      case "unreachable":
+        return unreachable;
       default:
         throw new UnsupportedOperationException("Answer " + answer + " is not defined");
     }
