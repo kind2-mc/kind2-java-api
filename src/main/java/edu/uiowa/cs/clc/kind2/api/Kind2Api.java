@@ -224,6 +224,26 @@ public class Kind2Api {
     return result;
   }
 
+    /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as filename
+   * @return result of running kind2 on program
+   */
+  public Result executeFilename(String program) {
+    Result result = new Result();
+    executeFilename(program, result, new IProgressMonitor() {
+      @Override
+      public boolean isCanceled() {
+        return false;
+      }
+
+      @Override
+      public void done() {}
+    });
+    return result;
+  }
+
   public String interpret(URI uri, String main, String json) {
     List<String> options = new ArrayList<>();
     options.add(KIND2);
@@ -279,7 +299,7 @@ public class Kind2Api {
    * @param result Place to store results as they come in
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
-   */
+   */ 
   public void executeFilename(String filename, Result result, IProgressMonitor monitor) {
     try {
       callKind2(filename, result, monitor, true);
