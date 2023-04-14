@@ -34,7 +34,7 @@ public class Labels
   public static final String source = "source";
   public static final String timeout = "timeout";
   public static final String counterExample = "counterExample";
-  public static final String exampleTrace = "exampleTrace";
+  public static final String exampleTrace = "witness";
   public static final String blockType = "blockType";
   public static final String streams = "streams";
   public static final String type = "type";
