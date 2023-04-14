@@ -36,6 +36,7 @@ public class Kind2Api {
   private String bitwuzlaBin;
   private String z3Bin;
   private String cvc5Bin;
+  private String mathsatBin;
   private String yicesBin;
   private String yices2Bin;
   private Boolean smtTrace;
@@ -113,6 +114,7 @@ public class Kind2Api {
     bitwuzlaBin = null;
     z3Bin = null;
     cvc5Bin = null;
+    mathsatBin = null;
     yicesBin = null;
     yices2Bin = null;
     smtTrace = null;
@@ -360,6 +362,10 @@ public class Kind2Api {
     if (cvc5Bin != null) {
       options.add("--cvc5_bin");
       options.add(cvc5Bin);
+    }
+    if (mathsatBin != null) {
+      options.add("--mathsat_bin");
+      options.add(mathsatBin);
     }
     if (yicesBin != null) {
       options.add("--yices_bin");
@@ -639,6 +645,17 @@ public class Kind2Api {
    */
   public void setcvc5Bin(String cvc5Bin) {
     this.cvc5Bin = cvc5Bin;
+  }
+  
+  /**
+   * Executable of MathSAT solver
+   * <p>
+   * Default: "mathsat"
+   *
+   * @param mathsatBin path to mathsat executable
+   */
+  public void setMathSATBin(String mathsatBin) {
+    this.mathsatBin = mathsatBin;
   }
 
   /**
