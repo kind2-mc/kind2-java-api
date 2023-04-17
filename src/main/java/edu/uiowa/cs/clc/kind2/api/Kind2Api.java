@@ -103,6 +103,7 @@ public class Kind2Api {
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
+  private String fakeFilename;
 
   public Kind2Api() {
     otherOptions = new ArrayList<>();
@@ -227,12 +228,13 @@ public class Kind2Api {
     /**
    * Run Kind on a Lustre program
    *
-   * @param program Lustre program as filename
+   * @param filename Lustre program filename
+   * @param program Lustre program as text
    * @return result of running kind2 on program
    */
-  public Result executeFilename(String program) {
+  public Result executeFilename(String filename, String program) {
     Result result = new Result();
-    executeFilename(program, result, new IProgressMonitor() {
+    executeFilename(filename, program, result, new IProgressMonitor() {
       @Override
       public boolean isCanceled() {
         return false;
@@ -286,7 +288,7 @@ public class Kind2Api {
    */
   public void execute(String program, Result result, IProgressMonitor monitor) {
     try {
-      callKind2(program, result, monitor, false);
+      callKind2(program, result, monitor);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
@@ -296,13 +298,15 @@ public class Kind2Api {
    * Run Kind on a Lustre program
    *
    * @param filename Lustre program filename
+   * @param program Lustre program as text
    * @param result Place to store results as they come in
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
    */ 
-  public void executeFilename(String filename, Result result, IProgressMonitor monitor) {
+  public void executeFilename(String filename, String program, Result result, IProgressMonitor monitor) {
     try {
-      callKind2(filename, result, monitor, true);
+      setFakeFilename(filename);
+      callKind2(program, result, monitor);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
@@ -310,20 +314,18 @@ public class Kind2Api {
 
   // Boolean "filename" should be true iff the first argument refers to the 
   // program's filename rather than the program itself
-  private void callKind2(String program, Result result, IProgressMonitor monitor, Boolean filename)
+  private void callKind2(String program, Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
-    ProcessBuilder builder = filename ? getKind2ProcessBuilder(program) : getKind2ProcessBuilder();
+    ProcessBuilder builder = getKind2ProcessBuilder();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
     String output = "";
 
     try {
       process = builder.start();
-      if (!filename) {
-        process.getOutputStream().write(program.getBytes());
-        process.getOutputStream().flush();
-        process.getOutputStream().close();
-      }
+      process.getOutputStream().write(program.getBytes());
+      process.getOutputStream().flush();
+      process.getOutputStream().close();
       while (!monitor.isCanceled() && process.isAlive()) {
         int available = process.getInputStream().available();
         byte[] bytes = new byte[available];
@@ -353,16 +355,6 @@ public class Kind2Api {
     List<String> options = new ArrayList<>();
     options.add(KIND2);
     options.addAll(getOptions());
-    ProcessBuilder builder = new ProcessBuilder(options);
-    builder.redirectErrorStream(true);
-    return builder;
-  }
-
-  private ProcessBuilder getKind2ProcessBuilder(String filename) {
-    List<String> options = new ArrayList<>();
-    options.add(KIND2);
-    options.addAll(getOptions());
-    options.add(filename);
     ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
     return builder;
@@ -1290,6 +1282,17 @@ public class Kind2Api {
    */
   public void setLusMain(String lusMain) {
     this.lusMain = lusMain;
+  }
+
+   /**
+   * Set the fake filename for error messages.
+   * <p>
+   * Default: stdin
+   *
+   * @param fakeFilename the fake filename
+   */
+  public void setFakeFilename(String fakeFilename) {
+    this.fakeFilename = fakeFilename;
   }
 
   void sleep(long interval) {
