@@ -318,8 +318,6 @@ public class Kind2Api {
     }
   }
 
-  // Boolean "filename" should be true iff the first argument refers to the 
-  // program's filename rather than the program itself
   private void callKind2(String program, Result result, IProgressMonitor monitor)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder();
