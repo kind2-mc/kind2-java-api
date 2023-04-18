@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
 import edu.uiowa.cs.clc.kind2.results.Result;
@@ -228,13 +230,13 @@ public class Kind2Api {
     /**
    * Run Kind on a Lustre program
    *
-   * @param filename Lustre program filename
+   * @param filepath Lustre program filepath
    * @param program Lustre program as text
    * @return result of running kind2 on program
    */
-  public Result executeFilename(String filename, String program) {
+  public Result executeFilename(String filepath, String workingDirectory, String program) {
     Result result = new Result();
-    executeFilename(filename, program, result, new IProgressMonitor() {
+    executeFilename(filepath, workingDirectory, program, result, new IProgressMonitor() {
       @Override
       public boolean isCanceled() {
         return false;
@@ -297,15 +299,19 @@ public class Kind2Api {
     /**
    * Run Kind on a Lustre program
    *
-   * @param filename Lustre program filename
+   * @param filepath Lustre program filepath
    * @param program Lustre program as text
    * @param result Place to store results as they come in
    * @param monitor Used to check for cancellation
    * @throws Kind2Exception
    */ 
-  public void executeFilename(String filename, String program, Result result, IProgressMonitor monitor) {
+  public void executeFilename(String filepath, String workingDirectory, String program, 
+                              Result result, IProgressMonitor monitor) {
     try {
-      setFakeFilename(filename);
+      filepath = Paths.get(URI.create(workingDirectory)).relativize(
+                 Paths.get(URI.create(filepath)))
+                 .toString();
+      setFakeFilename(filepath);
       callKind2(program, result, monitor);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
@@ -612,6 +618,10 @@ public class Kind2Api {
     if (checkSubproperties != null) {
       options.add("--check_subproperties");
       options.add(checkSubproperties.toString());
+    }
+    if (fakeFilename != null) {
+      options.add("--fake_filename");
+      options.add(fakeFilename);
     }
     options.addAll(this.otherOptions);
     return options;
