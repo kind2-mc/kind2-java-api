@@ -104,6 +104,7 @@ public class Kind2Api {
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
+  private String fakeFilepath;
 
   public Kind2Api() {
     otherOptions = new ArrayList<>();
@@ -576,6 +577,10 @@ public class Kind2Api {
     if (checkSubproperties != null) {
       options.add("--check_subproperties");
       options.add(checkSubproperties.toString());
+    }
+    if (fakeFilepath != null) {
+      options.add("--fake_filepath");
+      options.add(fakeFilepath);
     }
     options.addAll(this.otherOptions);
     return options;
@@ -1257,6 +1262,15 @@ public class Kind2Api {
    */
   public void setLusMain(String lusMain) {
     this.lusMain = lusMain;
+  }
+
+   /**
+   * Set the fake filepath for error messages.
+   *
+   * @param fakeFilepath the fake filepath
+   */
+  public void setFakeFilepath(String fakeFilepath) {
+    this.fakeFilepath = fakeFilepath;
   }
 
   void sleep(long interval) {
