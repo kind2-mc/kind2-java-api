@@ -105,7 +105,7 @@ public class Kind2Api {
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
-  private String fakeFilename;
+  private String fakeFilepath;
 
   public Kind2Api() {
     otherOptions = new ArrayList<>();
@@ -227,27 +227,6 @@ public class Kind2Api {
     return result;
   }
 
-    /**
-   * Run Kind on a Lustre program
-   *
-   * @param filepath Lustre program filepath
-   * @param program Lustre program as text
-   * @return result of running kind2 on program
-   */
-  public Result executeFilename(String filepath, String workingDirectory, String program) {
-    Result result = new Result();
-    executeFilename(filepath, workingDirectory, program, result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
-
-      @Override
-      public void done() {}
-    });
-    return result;
-  }
-
   public String interpret(URI uri, String main, String json) {
     List<String> options = new ArrayList<>();
     options.add(KIND2);
@@ -290,28 +269,6 @@ public class Kind2Api {
    */
   public void execute(String program, Result result, IProgressMonitor monitor) {
     try {
-      callKind2(program, result, monitor);
-    } catch (Throwable t) {
-      throw new Kind2Exception(t.getMessage(), t);
-    }
-  }
-
-    /**
-   * Run Kind on a Lustre program
-   *
-   * @param filepath Lustre program filepath
-   * @param program Lustre program as text
-   * @param result Place to store results as they come in
-   * @param monitor Used to check for cancellation
-   * @throws Kind2Exception
-   */ 
-  public void executeFilename(String filepath, String workingDirectory, String program, 
-                              Result result, IProgressMonitor monitor) {
-    try {
-      filepath = Paths.get(URI.create(workingDirectory)).relativize(
-                 Paths.get(URI.create(filepath)))
-                 .toString();
-      setFakeFilename(filepath);
       callKind2(program, result, monitor);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
@@ -617,9 +574,9 @@ public class Kind2Api {
       options.add("--check_subproperties");
       options.add(checkSubproperties.toString());
     }
-    if (fakeFilename != null) {
-      options.add("--fake_filename");
-      options.add(fakeFilename);
+    if (fakeFilepath != null) {
+      options.add("--fake_filepath");
+      options.add(fakeFilepath);
     }
     options.addAll(this.otherOptions);
     return options;
@@ -1293,14 +1250,14 @@ public class Kind2Api {
   }
 
    /**
-   * Set the fake filename for error messages.
+   * Set the fake filepath for error messages.
    * <p>
    * Default: stdin
    *
-   * @param fakeFilename the fake filename
+   * @param fakeFilepath the fake filepath
    */
-  public void setFakeFilename(String fakeFilename) {
-    this.fakeFilename = fakeFilename;
+  public void setFakeFilepath(String fakeFilepath) {
+    this.fakeFilepath = fakeFilepath;
   }
 
   void sleep(long interval) {
