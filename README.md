@@ -15,18 +15,18 @@ Add the following dependency tag to your `pom.xml` file:
 <dependency>
   <groupId>edu.uiowa.cs.clc</groupId>
   <artifactId>kind2-java-api</artifactId>
-  <version>0.3.3</version>
+  <version>0.3.4</version>
 </dependency>
 ```
 
 #### Gradle
 Add the following dependency DSL to your `build.gradle` file:
 ```groovy
-implementation 'edu.uiowa.cs.clc:kind2-java-api:0.3.3'
+implementation 'edu.uiowa.cs.clc:kind2-java-api:0.3.4'
 ```
 
 #### Other build management tools
-Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-java-api/0.3.3/jar) and copy the appropriate code snippet for your build management tool.
+Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-java-api/0.3.4/jar) and copy the appropriate code snippet for your build management tool.
 
 ### Install artifact from Github Packages
 #### Maven
@@ -44,7 +44,7 @@ Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-j
   <dependency>
     <groupId>edu.uiowa.cs.clc</groupId>
     <artifactId>kind2-java-api</artifactId>
-    <version>0.3.3</version>
+    <version>0.3.4</version>
   </dependency>
   ```
 
@@ -59,7 +59,7 @@ Go to [Maven Central](https://search.maven.org/artifact/edu.uiowa.cs.clc/kind2-j
   ```
 3. Add the following dependency DSL to your `build.gradle` file:
   ```groovy
-  implementation 'edu.uiowa.cs.clc:kind2-java-api:0.3.3'
+  implementation 'edu.uiowa.cs.clc:kind2-java-api:0.3.4'
   ```
 
 ### Build from sources
