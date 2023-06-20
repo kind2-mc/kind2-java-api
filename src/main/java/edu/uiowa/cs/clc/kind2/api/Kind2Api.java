@@ -30,6 +30,7 @@ public class Kind2Api {
 
   // module smt
   private SolverOption smtSolver;
+  private QESolverOption qeSmtSolver;
   private String smtLogic;
   private Boolean checkSatAssume;
   private Boolean smtShortNames;
@@ -110,6 +111,7 @@ public class Kind2Api {
   public Kind2Api() {
     otherOptions = new ArrayList<>();
     smtSolver = null;
+    qeSmtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
     smtShortNames = null;
@@ -345,6 +347,10 @@ public class Kind2Api {
     if (smtSolver != null) {
       options.add("--smt_solver");
       options.add(smtSolver.toString());
+    }
+    if (qeSmtSolver != null) {
+      options.add("--smt_qe_solver");
+      options.add(qeSmtSolver.toString());
     }
     if (smtLogic != null) {
       options.add("--smt_logic");
@@ -593,7 +599,7 @@ public class Kind2Api {
   }
 
   /**
-   * Choose an SMT solver
+   * Set the main SMT solver
    * <p>
    * Default: detect
    *
@@ -601,6 +607,17 @@ public class Kind2Api {
    */
   public void setSmtSolver(SolverOption smtSolver) {
     this.smtSolver = smtSolver;
+  }
+
+  /**
+   * Set the SMT solver to use for quantifier elimination
+   * <p>
+   * Default: detect
+   *
+   * @param qeSmtSolver the SMT solver to use
+   */
+  public void setQESmtSolver(QESolverOption qeSmtSolver) {
+    this.qeSmtSolver = qeSmtSolver;
   }
 
   /**
