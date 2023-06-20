@@ -8,7 +8,7 @@
 package edu.uiowa.cs.clc.kind2.api;
 
 public enum SolverOption {
-  BITWUZLA, CVC5, MATHSAT, YICES, YICES2, Z3;
+  BITWUZLA, CVC5, MATHSAT, SMTINTERPOL, YICES, YICES2, Z3;
 
   @Override
   public String toString() {

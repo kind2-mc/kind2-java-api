@@ -37,6 +37,7 @@ public class Kind2Api {
   private String z3Bin;
   private String cvc5Bin;
   private String mathsatBin;
+  private String smtinterpolJar;
   private String yicesBin;
   private String yices2Bin;
   private Boolean smtTrace;
@@ -116,6 +117,7 @@ public class Kind2Api {
     z3Bin = null;
     cvc5Bin = null;
     mathsatBin = null;
+    smtinterpolJar = null;
     yicesBin = null;
     yices2Bin = null;
     smtTrace = null;
@@ -367,6 +369,10 @@ public class Kind2Api {
     if (mathsatBin != null) {
       options.add("--mathsat_bin");
       options.add(mathsatBin);
+    }
+    if (smtinterpolJar != null) {
+      options.add("--smtinterpol_jar");
+      options.add(smtinterpolJar);
     }
     if (yicesBin != null) {
       options.add("--yices_bin");
@@ -661,6 +667,17 @@ public class Kind2Api {
    */
   public void setMathSATBin(String mathsatBin) {
     this.mathsatBin = mathsatBin;
+  }
+
+  /**
+   * JAR of SMTInterpol solver
+   * <p>
+   * Default: "smtinterpol.jar"
+   *
+   * @param smtinterpolJar path to SMTInterpol JAR
+   */
+  public void setSmtInterpolJar(String smtinterpolJar) {
+    this.smtinterpolJar = smtinterpolJar;
   }
 
   /**
