@@ -1317,7 +1317,7 @@ public class Kind2Api {
    *
    * @param checkReach whether or not to check reachability properties
    */
-  public void setReach(boolean checkReach) {
+  public void setCheckReach(boolean checkReach) {
     this.checkReach = checkReach;
   }
 
