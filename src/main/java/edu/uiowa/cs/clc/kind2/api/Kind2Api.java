@@ -1224,7 +1224,7 @@ public class Kind2Api {
   /**
    * Enable Kind module, repeat option to enable several modules
    * <p>
-   * Default: [BMC, IND, IND2, IC3, INVGEN, INVGENOS, INVGENINTOS, INVGENMACHOS, INVGENREALOS]
+   * Default: [BMC, IND, IND2, IC3QE, IC3IA, INVGEN, INVGENOS, INVGENINTOS, INVGENMACHOS, INVGENREALOS]
    *
    * @param module the module to enable
    */
