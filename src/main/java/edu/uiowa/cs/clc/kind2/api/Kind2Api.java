@@ -31,6 +31,7 @@ public class Kind2Api {
   // module smt
   private SolverOption smtSolver;
   private QESolverOption qeSmtSolver;
+  private ITPSolverOption itpSmtSolver;
   private String smtLogic;
   private Boolean checkSatAssume;
   private Boolean smtShortNames;
@@ -38,6 +39,7 @@ public class Kind2Api {
   private String z3Bin;
   private String cvc5Bin;
   private String mathsatBin;
+  private String opensmtBin;
   private String smtinterpolJar;
   private String yicesBin;
   private String yices2Bin;
@@ -112,6 +114,7 @@ public class Kind2Api {
     otherOptions = new ArrayList<>();
     smtSolver = null;
     qeSmtSolver = null;
+    itpSmtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
     smtShortNames = null;
@@ -119,6 +122,7 @@ public class Kind2Api {
     z3Bin = null;
     cvc5Bin = null;
     mathsatBin = null;
+    opensmtBin = null;
     smtinterpolJar = null;
     yicesBin = null;
     yices2Bin = null;
@@ -352,6 +356,10 @@ public class Kind2Api {
       options.add("--smt_qe_solver");
       options.add(qeSmtSolver.toString());
     }
+    if (itpSmtSolver != null) {
+      options.add("--smt_itp_solver");
+      options.add(itpSmtSolver.toString());
+    }
     if (smtLogic != null) {
       options.add("--smt_logic");
       options.add(smtLogic);
@@ -375,6 +383,10 @@ public class Kind2Api {
     if (mathsatBin != null) {
       options.add("--mathsat_bin");
       options.add(mathsatBin);
+    }
+    if (opensmtBin != null) {
+      options.add("--opensmt_bin");
+      options.add(opensmtBin);
     }
     if (smtinterpolJar != null) {
       options.add("--smtinterpol_jar");
@@ -621,6 +633,17 @@ public class Kind2Api {
   }
 
   /**
+   * Set the SMT solver to use for interpolation
+   * <p>
+   * Default: detect
+   *
+   * @param itpSmtSolver the SMT solver to use
+   */
+  public void setITPSmtSolver(ITPSolverOption itpSmtSolver) {
+    this.itpSmtSolver = itpSmtSolver;
+  }
+
+  /**
    * Select logic for SMT solvers (none, detect, ALL, QF_UF, LIA, ...)
    * <p>
    * Default: detect
@@ -684,6 +707,17 @@ public class Kind2Api {
    */
   public void setMathSATBin(String mathsatBin) {
     this.mathsatBin = mathsatBin;
+  }
+
+  /**
+   * Executable of OpenSMT solver
+   * <p>
+   * Default: "opensmt"
+   *
+   * @param opensmtBin path to opensmt executable
+   */
+  public void setOpenSMTBin(String opensmtBin) {
+    this.opensmtBin = opensmtBin;
   }
 
   /**
