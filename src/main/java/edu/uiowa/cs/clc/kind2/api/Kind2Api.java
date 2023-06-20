@@ -51,6 +51,9 @@ public class Kind2Api {
   // module ic3
   private IC3Abstraction ic3Abstr;
 
+  //module ic3ia
+  private Integer ic3iaMax;
+
   // module test
   private Boolean testgen;
   private Boolean testgenGraphOnly;
@@ -129,6 +132,7 @@ public class Kind2Api {
     smtTrace = null;
     indPrintCex = null;
     ic3Abstr = null;
+    ic3iaMax = null;
     testgen = null;
     testgenGraphOnly = null;
     testgenLen = null;
@@ -415,6 +419,10 @@ public class Kind2Api {
     if (ic3Abstr != null) {
       options.add("--ic3_abstr");
       options.add(ic3Abstr.toString());
+    }
+    if (ic3iaMax != null) {
+      options.add("--ic3ia_max");
+      options.add(ic3iaMax.toString());
     }
     if (testgen != null) {
       options.add("--testgen");
@@ -795,6 +803,17 @@ public class Kind2Api {
    */
   public void setIC3Abstr(IC3Abstraction ic3Abstr) {
     this.ic3Abstr = ic3Abstr;
+  }
+
+  /**
+   * Set the maximum number of IC3IA parallel processes
+   * <p>
+   * Default: 2
+   *
+   * @param max the maximum number
+   */
+  public void setIC3IAMax(Integer max) {
+    this.ic3iaMax = max;
   }
 
   /**
