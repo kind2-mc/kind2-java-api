@@ -48,9 +48,6 @@ public class Kind2Api {
   // module ind
   private Boolean indPrintCex;
 
-  // module ic3
-  private IC3Abstraction ic3Abstr;
-
   //module ic3ia
   private Integer ic3iaMax;
 
@@ -131,7 +128,6 @@ public class Kind2Api {
     yices2Bin = null;
     smtTrace = null;
     indPrintCex = null;
-    ic3Abstr = null;
     ic3iaMax = null;
     testgen = null;
     testgenGraphOnly = null;
@@ -415,10 +411,6 @@ public class Kind2Api {
     if (indPrintCex != null) {
       options.add("--ind_print_cex");
       options.add(indPrintCex.toString());
-    }
-    if (ic3Abstr != null) {
-      options.add("--ic3_abstr");
-      options.add(ic3Abstr.toString());
     }
     if (ic3iaMax != null) {
       options.add("--ic3ia_max");
@@ -792,17 +784,6 @@ public class Kind2Api {
    */
   public void setIndPrintCex(boolean indPrintCex) {
     this.indPrintCex = indPrintCex;
-  }
-
-  /**
-   * Choose method of abstraction in IC3
-   * <p>
-   * Default: None
-   *
-   * @param ic3Abstr abstraction method
-   */
-  public void setIC3Abstr(IC3Abstraction ic3Abstr) {
-    this.ic3Abstr = ic3Abstr;
   }
 
   /**
