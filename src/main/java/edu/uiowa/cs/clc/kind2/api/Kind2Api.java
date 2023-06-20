@@ -105,6 +105,8 @@ public class Kind2Api {
   private Set<Module> disabledSet;
   private Boolean modular;
   private Boolean sliceNodes;
+  private Boolean checkReach;
+  private Boolean checkNonvacuity;
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
@@ -170,6 +172,8 @@ public class Kind2Api {
     disabledSet = new HashSet<>();
     modular = null;
     sliceNodes = null;
+    checkReach = null;
+    checkNonvacuity = null;
     checkSubproperties = null;
     logLevel = null;
     lusMain = null;
@@ -597,6 +601,14 @@ public class Kind2Api {
     if (sliceNodes != null) {
       options.add("--slice_nodes");
       options.add(sliceNodes.toString());
+    }
+    if (checkReach != null) {
+      options.add("--check_reach");
+      options.add(checkReach.toString());
+    }
+    if (checkNonvacuity != null) {
+      options.add("--check_nonvacuity");
+      options.add(checkNonvacuity.toString());
     }
     if (checkSubproperties != null) {
       options.add("--check_subproperties");
@@ -1296,6 +1308,29 @@ public class Kind2Api {
    */
   public void setSliceNodes(boolean sliceNodes) {
     this.sliceNodes = sliceNodes;
+  }
+
+  /**
+   * Check reachability properties (including non-vacuity checks)
+   * <p>
+   * Default: true
+   *
+   * @param checkReach whether or not to check reachability properties
+   */
+  public void setReach(boolean checkReach) {
+    this.checkReach = checkReach;
+  }
+
+  /**
+   * Check non-vacuity of contract modes and conditional properties.
+   * Ignored if --check_reach is false
+   * <p>
+   * Default: true
+   *
+   * @param checkNonvacuity whether or not to check non-vacuity
+   */
+  public void setCheckNonvacuity(boolean checkNonvacuity) {
+    this.checkNonvacuity = checkNonvacuity;
   }
 
   /**
