@@ -32,12 +32,17 @@ public class Kind2Api {
 
   // module smt
   private SolverOption smtSolver;
+  private QESolverOption qeSmtSolver;
+  private ITPSolverOption itpSmtSolver;
   private String smtLogic;
   private Boolean checkSatAssume;
   private Boolean smtShortNames;
   private String bitwuzlaBin;
   private String z3Bin;
   private String cvc5Bin;
+  private String mathsatBin;
+  private String opensmtBin;
+  private String smtinterpolJar;
   private String yicesBin;
   private String yices2Bin;
   private Boolean smtTrace;
@@ -45,8 +50,8 @@ public class Kind2Api {
   // module ind
   private Boolean indPrintCex;
 
-  // module ic3
-  private IC3Abstraction ic3Abstr;
+  //module ic3ia
+  private Integer ic3iaMax;
 
   // module test
   private Boolean testgen;
@@ -102,6 +107,8 @@ public class Kind2Api {
   private Set<Module> disabledSet;
   private Boolean modular;
   private Boolean sliceNodes;
+  private Boolean checkReach;
+  private Boolean checkNonvacuity;
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
@@ -110,17 +117,22 @@ public class Kind2Api {
   public Kind2Api() {
     otherOptions = new ArrayList<>();
     smtSolver = null;
+    qeSmtSolver = null;
+    itpSmtSolver = null;
     smtLogic = null;
     checkSatAssume = null;
     smtShortNames = null;
     bitwuzlaBin = null;
     z3Bin = null;
     cvc5Bin = null;
+    mathsatBin = null;
+    opensmtBin = null;
+    smtinterpolJar = null;
     yicesBin = null;
     yices2Bin = null;
     smtTrace = null;
     indPrintCex = null;
-    ic3Abstr = null;
+    ic3iaMax = null;
     testgen = null;
     testgenGraphOnly = null;
     testgenLen = null;
@@ -162,6 +174,8 @@ public class Kind2Api {
     disabledSet = new HashSet<>();
     modular = null;
     sliceNodes = null;
+    checkReach = null;
+    checkNonvacuity = null;
     checkSubproperties = null;
     logLevel = null;
     lusMain = null;
@@ -360,6 +374,14 @@ public class Kind2Api {
       options.add("--smt_solver");
       options.add(smtSolver.toString());
     }
+    if (qeSmtSolver != null) {
+      options.add("--smt_qe_solver");
+      options.add(qeSmtSolver.toString());
+    }
+    if (itpSmtSolver != null) {
+      options.add("--smt_itp_solver");
+      options.add(itpSmtSolver.toString());
+    }
     if (smtLogic != null) {
       options.add("--smt_logic");
       options.add(smtLogic);
@@ -379,6 +401,18 @@ public class Kind2Api {
     if (cvc5Bin != null) {
       options.add("--cvc5_bin");
       options.add(cvc5Bin);
+    }
+    if (mathsatBin != null) {
+      options.add("--mathsat_bin");
+      options.add(mathsatBin);
+    }
+    if (opensmtBin != null) {
+      options.add("--opensmt_bin");
+      options.add(opensmtBin);
+    }
+    if (smtinterpolJar != null) {
+      options.add("--smtinterpol_jar");
+      options.add(smtinterpolJar);
     }
     if (yicesBin != null) {
       options.add("--yices_bin");
@@ -400,9 +434,9 @@ public class Kind2Api {
       options.add("--ind_print_cex");
       options.add(indPrintCex.toString());
     }
-    if (ic3Abstr != null) {
-      options.add("--ic3_abstr");
-      options.add(ic3Abstr.toString());
+    if (ic3iaMax != null) {
+      options.add("--ic3ia_max");
+      options.add(ic3iaMax.toString());
     }
     if (testgen != null) {
       options.add("--testgen");
@@ -586,6 +620,14 @@ public class Kind2Api {
       options.add("--slice_nodes");
       options.add(sliceNodes.toString());
     }
+    if (checkReach != null) {
+      options.add("--check_reach");
+      options.add(checkReach.toString());
+    }
+    if (checkNonvacuity != null) {
+      options.add("--check_nonvacuity");
+      options.add(checkNonvacuity.toString());
+    }
     if (checkSubproperties != null) {
       options.add("--check_subproperties");
       options.add(checkSubproperties.toString());
@@ -599,7 +641,7 @@ public class Kind2Api {
   }
 
   /**
-   * Choose an SMT solver
+   * Set the main SMT solver
    * <p>
    * Default: detect
    *
@@ -607,6 +649,28 @@ public class Kind2Api {
    */
   public void setSmtSolver(SolverOption smtSolver) {
     this.smtSolver = smtSolver;
+  }
+
+  /**
+   * Set the SMT solver to use for quantifier elimination
+   * <p>
+   * Default: detect
+   *
+   * @param qeSmtSolver the SMT solver to use
+   */
+  public void setQESmtSolver(QESolverOption qeSmtSolver) {
+    this.qeSmtSolver = qeSmtSolver;
+  }
+
+  /**
+   * Set the SMT solver to use for interpolation
+   * <p>
+   * Default: detect
+   *
+   * @param itpSmtSolver the SMT solver to use
+   */
+  public void setITPSmtSolver(ITPSolverOption itpSmtSolver) {
+    this.itpSmtSolver = itpSmtSolver;
   }
 
   /**
@@ -662,6 +726,39 @@ public class Kind2Api {
    */
   public void setcvc5Bin(String cvc5Bin) {
     this.cvc5Bin = cvc5Bin;
+  }
+  
+  /**
+   * Executable of MathSAT solver
+   * <p>
+   * Default: "mathsat"
+   *
+   * @param mathsatBin path to mathsat executable
+   */
+  public void setMathSATBin(String mathsatBin) {
+    this.mathsatBin = mathsatBin;
+  }
+
+  /**
+   * Executable of OpenSMT solver
+   * <p>
+   * Default: "opensmt"
+   *
+   * @param opensmtBin path to opensmt executable
+   */
+  public void setOpenSMTBin(String opensmtBin) {
+    this.opensmtBin = opensmtBin;
+  }
+
+  /**
+   * JAR of SMTInterpol solver
+   * <p>
+   * Default: "smtinterpol.jar"
+   *
+   * @param smtinterpolJar path to SMTInterpol JAR
+   */
+  public void setSmtInterpolJar(String smtinterpolJar) {
+    this.smtinterpolJar = smtinterpolJar;
   }
 
   /**
@@ -720,14 +817,14 @@ public class Kind2Api {
   }
 
   /**
-   * Choose method of abstraction in IC3
+   * Set the maximum number of IC3IA parallel processes
    * <p>
-   * Default: None
+   * Default: 2
    *
-   * @param ic3Abstr abstraction method
+   * @param max the maximum number
    */
-  public void setIC3Abstr(IC3Abstraction ic3Abstr) {
-    this.ic3Abstr = ic3Abstr;
+  public void setIC3IAMax(Integer max) {
+    this.ic3iaMax = max;
   }
 
   /**
@@ -1191,7 +1288,7 @@ public class Kind2Api {
   /**
    * Enable Kind module, repeat option to enable several modules
    * <p>
-   * Default: [BMC, IND, IND2, IC3, INVGEN, INVGENOS, INVGENINTOS, INVGENMACHOS, INVGENREALOS]
+   * Default: [BMC, IND, IND2, IC3QE, IC3IA, INVGEN, INVGENOS, INVGENINTOS, INVGENMACHOS, INVGENREALOS]
    *
    * @param module the module to enable
    */
@@ -1232,6 +1329,29 @@ public class Kind2Api {
   }
 
   /**
+   * Check reachability properties (including non-vacuity checks)
+   * <p>
+   * Default: true
+   *
+   * @param checkReach whether or not to check reachability properties
+   */
+  public void setCheckReach(boolean checkReach) {
+    this.checkReach = checkReach;
+  }
+
+  /**
+   * Check non-vacuity of contract modes and conditional properties.
+   * Ignored if --check_reach is false
+   * <p>
+   * Default: true
+   *
+   * @param checkNonvacuity whether or not to check non-vacuity
+   */
+  public void setCheckNonvacuity(boolean checkNonvacuity) {
+    this.checkNonvacuity = checkNonvacuity;
+  }
+
+  /**
    * Check properties of subnodes that are relevant for the analysis of the top node. Only available
    * with monolithic analysis
    * <p>
@@ -1267,8 +1387,6 @@ public class Kind2Api {
 
    /**
    * Set the fake filepath for error messages.
-   * <p>
-   * Default: stdin
    *
    * @param fakeFilepath the fake filepath
    */

@@ -57,7 +57,8 @@ public class Property
    * Guarantee if it comes from the check of a guarantee,
    * Ensure if it comes from a check of a require-ensure clause in a contract mode,
    * OneModeActive if it comes from an exhaustiveness check of the state space covered by the modes of a contract,
-   * and PropAnnot if it comes from the check of a property annotation
+   * PropAnnot if it comes from the check of a property annotation,
+   * NonVacuityCheck if it comes from a non-vacuity check.
    */
   private final PropertyType source;
   /**

@@ -36,7 +36,7 @@ public class Labels
   public static final String counterExample = "counterExample";
   public static final String deadlockingTrace = "deadlockingTrace";
   public static final String context = "context";
-  public static final String exampleTrace = "exampleTrace";
+  public static final String exampleTrace = "witness";
   public static final String blockType = "blockType";
   public static final String streams = "streams";
   public static final String type = "type";
