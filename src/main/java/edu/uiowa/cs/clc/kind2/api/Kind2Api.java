@@ -260,6 +260,22 @@ public class Kind2Api {
   }
 
   /**
+   * Run Kind on a Lustre program with module options
+   *
+   * @param program Lustre program as text
+   * @param result Place to store results as they come in
+   * @param monitor Used to check for cancellation
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Result result, IProgressMonitor monitor, List<Module> modules) {
+    for (Module module: modules) {
+      enable(module);
+    }
+
+    execute(program, result, monitor);
+  }
+
+  /**
    * Run Kind on a Lustre program
    *
    * @param program Lustre program as text

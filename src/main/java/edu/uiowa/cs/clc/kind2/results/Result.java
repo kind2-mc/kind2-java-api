@@ -248,6 +248,23 @@ public class Result {
         }
       }
 
+      if (kind2Object == Object.realizabilityCheck) {
+        if (kind2Analysis != null) {
+          JsonObject jsonObject = jsonElement.getAsJsonObject();
+          String res = jsonObject.get(Labels.result).getAsString();
+          if (res.equals(Labels.realizable)) {
+            kind2Analysis.setRealizabilityCheck(true);
+          } else {
+            kind2Analysis.setRealizabilityCheck(false);
+          }
+          JsonElement deadlockElement = jsonObject.get(Labels.deadlockingTrace);
+          String deadlock = new GsonBuilder().setPrettyPrinting().create().toJson(deadlockElement);
+          kind2Analysis.setDeadlock(deadlock);
+        } else {
+          throw new RuntimeException("Can not parse kind2 json output");
+        }
+      }
+
       if (kind2Object == Object.postAnalysisStart) {
         if (previousAnalysis != null) {
           PostAnalysis postAnalysis = new PostAnalysis(previousAnalysis, jsonElement);

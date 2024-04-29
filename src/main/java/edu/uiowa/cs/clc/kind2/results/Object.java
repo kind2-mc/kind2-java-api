@@ -16,6 +16,8 @@ public enum Object
   log("log"),
   analysisStart("analysisStart"),
   property("property"),
+  realizabilityCheck("realizabilityCheck"),
+  satisfiabilityCheck("satisfiabilityCheck"),
   analysisStop("analysisStop"),
   postAnalysisStart("postAnalysisStart"),
   postAnalysisEnd("postAnalysisEnd"),
@@ -42,6 +44,10 @@ public enum Object
         return analysisStart;
       case "property":
         return property;
+      case "realizabilityCheck":
+        return realizabilityCheck;
+      case "satisfiabilityCheck":
+        return satisfiabilityCheck;
       case "analysisStop":
         return analysisStop;
       case "postAnalysisStart":

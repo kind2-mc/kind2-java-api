@@ -34,6 +34,8 @@ public class Labels
   public static final String source = "source";
   public static final String timeout = "timeout";
   public static final String counterExample = "counterExample";
+  public static final String deadlockingTrace = "deadlockingTrace";
+  public static final String context = "context";
   public static final String exampleTrace = "exampleTrace";
   public static final String blockType = "blockType";
   public static final String streams = "streams";
@@ -57,6 +59,8 @@ public class Labels
   public static final String ivc = "ivc";
   public static final String ivcComplement = "ivc complement";
   public static final String runtime = "runtime";
+  public static final String result = "result";
+  public static final String realizable = "realizable";
   public static final String unit = "unit";
   public static final String nodes = "nodes";
   public static final String elements = "elements";

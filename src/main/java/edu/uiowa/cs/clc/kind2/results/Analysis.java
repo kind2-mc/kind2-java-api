@@ -51,6 +51,18 @@ public class Analysis
    */
   private final Map<String, List<Property>> propertiesMap;
   /**
+   * realizability check in the current analysis.
+   */
+  private boolean realizabilityCheck = false;
+  /**
+   * Deadlocking trace of current analysis
+   */
+  private String deadlock = null;
+  /**
+   * Context of current analysis
+   */
+  private String context = "";
+  /**
    * is the current analysis comes from an exhaustiveness check of the state space covered by the modes of a contract.
    */
   private boolean isModeAnalysis = false;
@@ -68,17 +80,28 @@ public class Analysis
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
 
     this.nodeName = jsonElement.getAsJsonObject().get(Labels.top).getAsString();
-    this.abstractNodes = new ArrayList<>();
-    JsonArray abstractArray = jsonElement.getAsJsonObject().get(Labels.abstractField).getAsJsonArray();
-    for (JsonElement node : abstractArray)
-    {
-      abstractNodes.add(node.getAsString());
+    try {
+      this.context = jsonElement.getAsJsonObject().get(Labels.context).getAsString();
+    } catch (Exception e) {
     }
+    this.abstractNodes = new ArrayList<>();
+    try {
+    JsonArray abstractArray = jsonElement.getAsJsonObject().get(Labels.abstractField).getAsJsonArray();
+      for (JsonElement node : abstractArray)
+      {
+        abstractNodes.add(node.getAsString());
+      }
+    } catch (Exception e) {
+    }
+
     this.concreteNodes = new ArrayList<>();
-    JsonArray concreteArray = jsonElement.getAsJsonObject().get(Labels.concrete).getAsJsonArray();
-    for (JsonElement node : concreteArray)
-    {
-      concreteNodes.add(node.getAsString());
+    try {
+      JsonArray concreteArray = jsonElement.getAsJsonObject().get(Labels.concrete).getAsJsonArray();
+      for (JsonElement node : concreteArray)
+      {
+        concreteNodes.add(node.getAsString());
+      }
+    } catch (Exception e) {
     }
 
     subNodes = new ArrayList<>(abstractNodes);
@@ -86,15 +109,17 @@ public class Analysis
 
     assumptions = new ArrayList<>();
 
+    try {
     JsonArray assumptionInvariants = jsonElement.getAsJsonObject().get(Labels.assumptions).getAsJsonArray();
-    for (JsonElement invariant : assumptionInvariants)
-    {
-      JsonArray invariantArray = invariant.getAsJsonArray();
-      String nodeName = invariantArray.get(0).getAsString();
-      String number = invariantArray.get(1).getAsString();
-      assumptions.add(new Pair<>(nodeName, number));
+      for (JsonElement invariant : assumptionInvariants)
+      {
+        JsonArray invariantArray = invariant.getAsJsonArray();
+        String nodeName = invariantArray.get(0).getAsString();
+        String number = invariantArray.get(1).getAsString();
+        assumptions.add(new Pair<>(nodeName, number));
+      }
+    } catch (Exception e) {
     }
-
     this.propertiesMap = new HashMap<>();
   }
 
@@ -120,6 +145,36 @@ public class Analysis
     {
       isModeAnalysis = true;
     }
+  }
+
+  public void setRealizabilityCheck(boolean val) 
+  {
+    this.realizabilityCheck = val;
+  }
+
+  public Boolean getRealizabilityCheck() 
+  {
+    return this.realizabilityCheck;
+  }
+
+  public void setDeadlock(String val) 
+  {
+    this.deadlock = val;
+  }
+
+  public String getDeadlock() 
+  {
+    return this.deadlock;
+  }
+
+  public void setContext(String val) 
+  {
+    this.context = val;
+  }
+
+  public String getContext() 
+  {
+    return this.context;
   }
 
   /**
