@@ -44,7 +44,7 @@ public enum Object
         return analysisStart;
       case "property":
         return property;
-      case "realizabilityResult":
+      case "realizabilityCheck":
         return realizabilityResult;
       case "satisfiabilityCheck":
         return satisfiabilityCheck;

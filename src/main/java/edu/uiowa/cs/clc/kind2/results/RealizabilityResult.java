@@ -12,9 +12,9 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public enum RealizabilityResult
 {
-  realizable("Realizable"),
-  unrealizable("Unrealizable"),
-  none("None");
+  realizable("realizable"),
+  unrealizable("unrealizable"),
+  none("none");
 
   private final String value;
 
