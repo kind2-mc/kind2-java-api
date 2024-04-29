@@ -51,9 +51,9 @@ public class Analysis
    */
   private final Map<String, List<Property>> propertiesMap;
   /**
-   * realizability check in the current analysis.
+   * realizability result in the current analysis.
    */
-  private boolean realizabilityCheck = false;
+  private RealizabilityResult realizabilityResult = RealizabilityResult.none;
   /**
    * Deadlocking trace of current analysis
    */
@@ -147,14 +147,14 @@ public class Analysis
     }
   }
 
-  public void setRealizabilityCheck(boolean val) 
+  public void setRealizabilityResult(RealizabilityResult val) 
   {
-    this.realizabilityCheck = val;
+    this.realizabilityResult = val;
   }
 
-  public Boolean getRealizabilityCheck() 
+  public RealizabilityResult getRealizabilityResult() 
   {
-    return this.realizabilityCheck;
+    return this.realizabilityResult;
   }
 
   public void setDeadlock(String val) 

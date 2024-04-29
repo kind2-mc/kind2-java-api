@@ -248,14 +248,14 @@ public class Result {
         }
       }
 
-      if (kind2Object == Object.realizabilityCheck) {
+      if (kind2Object == Object.realizabilityResult) {
         if (kind2Analysis != null) {
           JsonObject jsonObject = jsonElement.getAsJsonObject();
           String res = jsonObject.get(Labels.result).getAsString();
           if (res.equals(Labels.realizable)) {
-            kind2Analysis.setRealizabilityCheck(true);
-          } else {
-            kind2Analysis.setRealizabilityCheck(false);
+            kind2Analysis.setRealizabilityResult(RealizabilityResult.realizable);
+          } else if (res.equals(Labels.unrealizable)) {
+            kind2Analysis.setRealizabilityResult(RealizabilityResult.unrealizable);
           }
           JsonElement deadlockElement = jsonObject.get(Labels.deadlockingTrace);
           String deadlock = new GsonBuilder().setPrettyPrinting().create().toJson(deadlockElement);

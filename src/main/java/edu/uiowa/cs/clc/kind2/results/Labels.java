@@ -61,6 +61,7 @@ public class Labels
   public static final String runtime = "runtime";
   public static final String result = "result";
   public static final String realizable = "realizable";
+  public static final String unrealizable = "unrealizable";
   public static final String unit = "unit";
   public static final String nodes = "nodes";
   public static final String elements = "elements";
