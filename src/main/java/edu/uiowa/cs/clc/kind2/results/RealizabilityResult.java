@@ -13,8 +13,7 @@ package edu.uiowa.cs.clc.kind2.results;
 public enum RealizabilityResult
 {
   realizable("realizable"),
-  unrealizable("unrealizable"),
-  none("none");
+  unrealizable("unrealizable");
 
   private final String value;
 
@@ -33,9 +32,6 @@ public enum RealizabilityResult
       case "Unrealizable":
       case "unrealizable":
         return unrealizable;
-      case "None":
-      case "none":
-        return none;
       default:
         throw new UnsupportedOperationException("Realizability result " + realizabilityResult + " is not defined");
     }

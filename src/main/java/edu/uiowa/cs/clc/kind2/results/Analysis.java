@@ -53,7 +53,7 @@ public class Analysis
   /**
    * realizability result in the current analysis.
    */
-  private RealizabilityResult realizabilityResult = RealizabilityResult.none;
+  private RealizabilityResult realizabilityResult = null;
   /**
    * Deadlocking trace of current analysis
    */
@@ -61,7 +61,7 @@ public class Analysis
   /**
    * Context of current analysis
    */
-  private String context = "";
+  private String context = null;
   /**
    * is the current analysis comes from an exhaustiveness check of the state space covered by the modes of a contract.
    */
