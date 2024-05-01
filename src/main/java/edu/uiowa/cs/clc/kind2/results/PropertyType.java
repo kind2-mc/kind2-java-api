@@ -18,7 +18,8 @@ public enum PropertyType
   annotation("PropAnnot"),
   oneModeActive("OneModeActive"),
   generated("Generated"),
-  nonVacuityCheck("NonVacuityCheck");
+  nonVacuityCheck("NonVacuityCheck"),
+  candidate("Candidate");
 
   private final String value;
 
@@ -52,6 +53,11 @@ public enum PropertyType
       case "NonVacuityCheck":
       case "nonVacuityCheck":
         return nonVacuityCheck;
+      case "Candidate":
+      case "candidate":
+      case "Candidate(Generated)":
+      case "candidate(generated)":
+        return candidate;
       default:
         throw new UnsupportedOperationException("Property type " + propertyType + " is not defined");
     }
