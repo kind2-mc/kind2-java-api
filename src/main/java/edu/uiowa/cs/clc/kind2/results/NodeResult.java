@@ -136,6 +136,17 @@ public class NodeResult
     Set<Property> unreachableProperties = this.getUnreachableProperties();
     printProperties(stringBuilder, unreachableProperties);
 
+    RealizabilityResult realizabilityResult = getLastAnalysis().getRealizabilityResult();
+    if (realizabilityResult != null) {
+      if (realizabilityResult.equals(RealizabilityResult.realizable)) {
+        stringBuilder.append("\nRealizability result: \nRealizable\n");
+      } else if (realizabilityResult.equals(RealizabilityResult.unrealizable)) {
+        stringBuilder.append("\nRealizability result: \nUnrealizable\n");
+      } else {
+        stringBuilder.append("\nRealizability result: \nNone\n");
+      }
+    }
+
     return stringBuilder.toString();
   }
 
