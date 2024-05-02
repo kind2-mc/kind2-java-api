@@ -59,7 +59,7 @@ public enum PropertyType
       case "candidate(generated)":
         return candidate;
       default:
-        throw new UnsupportedOperationException("Property type " + propertyType + " is not defined");
+        throw new UnsupportedOperationException("Property type " + propertyType + " is not supported");
     }
   }
 
