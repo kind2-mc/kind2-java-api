@@ -61,6 +61,10 @@ public class Property
    * NonVacuityCheck if it comes from a non-vacuity check.
    */
   private final PropertyType source;
+   /**
+   * True iff the property is a candidate property
+   */
+  private final Boolean isCandidate;
   /**
    * The source of the answer, and the result value of the check.
    * The result can be valid, falsifiable, unknown, reachable, or unreachable
@@ -103,6 +107,11 @@ public class Property
     line = jsonObject.get(Labels.line).getAsString();
     column = jsonObject.get(Labels.column).getAsString();
     source = PropertyType.getPropertyType(jsonObject.get(Labels.source).getAsString());
+    if (jsonObject.has(Labels.isCandidate)) {
+      isCandidate = jsonObject.get(Labels.isCandidate).getAsBoolean();
+    } else {
+      isCandidate = null;
+    }
     JsonElement answerJsonObject = jsonObject.get(Labels.answer);
     answer = Answer.getAnswer(answerJsonObject.getAsJsonObject().get(Labels.value).getAsString());
     JsonElement counterExampleElement = jsonObject.get(Labels.counterExample);
@@ -196,6 +205,11 @@ public class Property
   public PropertyType getSource()
   {
     return source;
+  }
+
+  public Boolean getIsCandidate()
+  {
+    return isCandidate;
   }
 
   public CounterExample getCounterExample()

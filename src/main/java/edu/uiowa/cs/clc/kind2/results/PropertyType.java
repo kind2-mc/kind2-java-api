@@ -53,7 +53,7 @@ public enum PropertyType
       case "nonVacuityCheck":
         return nonVacuityCheck;
       default:
-        throw new UnsupportedOperationException("Property type " + propertyType + " is not defined");
+        throw new UnsupportedOperationException("Property type " + propertyType + " is not supported");
     }
   }
 
