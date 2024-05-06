@@ -32,6 +32,7 @@ public class Labels
   public static final String answer = "answer";
   public static final String value = "value";
   public static final String source = "source";
+  public static final String isCandidate = "isCandidate";
   public static final String timeout = "timeout";
   public static final String counterExample = "counterExample";
   public static final String deadlockingTrace = "deadlockingTrace";

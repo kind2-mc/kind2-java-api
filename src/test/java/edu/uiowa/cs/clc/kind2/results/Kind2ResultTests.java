@@ -33,18 +33,17 @@ public class Kind2ResultTests
   @Test
   void candidateProps()
   {
-    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v2.1.0-226-g2e70bac'},{'objectType' : 'kind2Options','enabled' :[  ],'timeout' : 0.000000,'bmcMax' : 0,'compositional' : false,'modular' : false},{'objectType' : 'analysisStart','top' : 'N','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l5c4]','source' : 'PropAnnot','file' : './examples/bug.lus','line' : 5,'column' : 4,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.060},'k' : 0,'answer' : {'source' : 'ic3qe', 'value' : 'falsifiable'},'counterExample' :[  {    'blockType' : 'node',    'name' : 'N',    'streams' :    [      {        'name' : 'x',        'type' : 'subrange',        'typeInfo' :        {          'min' : 0,          'max' : 5        },        'class' : 'input',        'instantValues' :        [          [0, 5]        ]      },      {        'name' : 'y',        'type' : 'int',        'class' : 'output',        'instantValues' :        [          [0, 6]        ]      }    ]  }]},{'objectType' : 'property','name' : '((1 <= y) and (y <= 6))','source' : 'Candidate(Generated)','file' : './examples/bug.lus','line' : 1,'column' : 44,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.060},'answer' : {'source' : 'ic3qe', 'value' : 'valid'}},{'objectType' : 'analysisStop'}]";System.out.println("got here");
-    String result = 
+    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v2.1.0-226-g2e70bac'},{'objectType' : 'kind2Options','enabled' :[  ],'timeout' : 0.000000,'bmcMax' : 0,'compositional' : false,'modular' : false},{'objectType' : 'analysisStart','top' : 'N','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l5c4]','source' : 'PropAnnot','file' : './examples/bug.lus','line' : 5,'column' : 4,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.060},'k' : 0,'answer' : {'source' : 'ic3qe', 'value' : 'falsifiable'},'counterExample' :[  {    'blockType' : 'node',    'name' : 'N',    'streams' :    [      {        'name' : 'x',        'type' : 'subrange',        'typeInfo' :        {          'min' : 0,          'max' : 5        },        'class' : 'input',        'instantValues' :        [          [0, 5]        ]      },      {        'name' : 'y',        'type' : 'int',        'class' : 'output',        'instantValues' :        [          [0, 6]        ]      }    ]  }]},{'objectType' : 'property','name' : '((1 <= y) and (y <= 6))','source' : 'Generated','isCandidate': true,'file' : './examples/bug.lus','line' : 1,'column' : 44,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.060},'answer' : {'source' : 'ic3qe', 'value' : 'valid'}},{'objectType' : 'analysisStop'}]";System.out.println("got here");
+    Boolean result = 
     Result.analyzeJsonResult(json)
       .getRoot()
       .getAnalyses()
       .get(0)
       .getProperties()
       .get(1)
-      .getSource()
-      .toString();
+      .getIsCandidate();
     
-    assertEquals(result, "Candidate");
+    assert(result);
   }
 
 
