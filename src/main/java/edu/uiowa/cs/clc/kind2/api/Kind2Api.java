@@ -288,6 +288,40 @@ public class Kind2Api {
     }
   }
 
+  public String interpret(String program, String main, String json) {
+    List<String> options = new ArrayList<>();
+    options.add(KIND2);
+    options.addAll(getOptions());
+    options.add("--lus_main");
+    options.add(main);
+    options.add("--enable");
+    options.add("interpreter");
+    options.add("--interpreter_input_file");
+    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
+    ProcessBuilder builder = new ProcessBuilder(options);
+    try {
+      String output = "";
+      Process process = builder.start();
+      process.getOutputStream().write(program.getBytes());
+      process.getOutputStream().flush();
+      process.getOutputStream().close();
+      while (process.isAlive()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        output += new String(bytes);
+        sleep(POLL_INTERVAL);
+      }
+      int available = process.getInputStream().available();
+      byte[] bytes = new byte[available];
+      process.getInputStream().read(bytes);
+      output += new String(bytes);
+      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+    } catch (IOException e) {
+      throw new Kind2Exception(e.getMessage());
+    }
+  }
+
   /**
    * Run Kind on a Lustre program
    *
