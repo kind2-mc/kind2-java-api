@@ -110,6 +110,7 @@ public class Kind2Api {
   private Boolean checkSubproperties;
   private LogLevel logLevel;
   private String lusMain;
+  private String lusMainType;
   private String fakeFilepath;
 
   public Kind2Api() {
@@ -177,6 +178,7 @@ public class Kind2Api {
     checkSubproperties = null;
     logLevel = null;
     lusMain = null;
+    lusMainType = null;
   }
 
   DebugLogger debug = new DebugLogger();
@@ -402,6 +404,10 @@ public class Kind2Api {
     if (lusMain != null) {
       options.add("--lus_main");
       options.add(lusMain);
+    }
+    if (lusMainType != null) {
+      options.add("--lus_main_type");
+      options.add(lusMainType);
     }
     if (smtSolver != null) {
       options.add("--smt_solver");
@@ -1416,6 +1422,17 @@ public class Kind2Api {
    */
   public void setLusMain(String lusMain) {
     this.lusMain = lusMain;
+  }
+
+  /**
+   * Set the top type declaration in the Lustre input file.
+   * <p>
+   * Default: "--%MAIN" annotation in source if any, last node otherwise
+   *
+   * @param lusMainType the main node
+   */
+  public void setLusMainType(String lusMainType) {
+    this.lusMainType = lusMainType;
   }
 
    /**
