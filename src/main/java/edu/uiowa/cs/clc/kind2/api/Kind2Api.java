@@ -98,7 +98,6 @@ public class Kind2Api {
   private Boolean logInvs;
   private Boolean dumpCex;
   private Float timeout;
-  private Boolean oldFrontend;
   private Boolean onlyParse;
   private Boolean lsp;
   private Set<Module> enabledSet;
@@ -626,10 +625,6 @@ public class Kind2Api {
     if (timeout != null) {
       options.add("--timeout");
       options.add(timeout.toString());
-    }
-    if (oldFrontend != null) {
-      options.add("--old_frontend");
-      options.add(oldFrontend.toString());
     }
     if (onlyParse != null) {
       options.add("--only_parse");
@@ -1289,17 +1284,6 @@ public class Kind2Api {
       throw new Kind2Exception("Timeout must be positive");
     }
     this.timeout = timeout;
-  }
-
-  /**
-   * Use the old Lustre front-end.
-   * <p>
-   * Default: true
-   *
-   * @param oldFrontend whether or not to use the old Lustre front-end.
-   */
-  public void setOldFrontend(boolean oldFrontend) {
-    this.oldFrontend = oldFrontend;
   }
 
   /**
