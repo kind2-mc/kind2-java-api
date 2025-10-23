@@ -2,7 +2,7 @@ plugins {
   id 'com.palantir.git-version' version '0.12.3'
   id 'java-library'
   id 'maven-publish'
-  id 'signing'
+  id 'org.jreleaser' version '1.20.0'
 }
 
 group = 'edu.uiowa.cs.clc'
@@ -44,9 +44,9 @@ publishing {
         }
         developers {
           developer {
-            id = 'abdmohamed'
-            name = 'Abdalrhman Mohamed'
-            email = 'abdalrhman-mohamed@uiowa.edu'
+            id = 'daniel-larraz'
+            name = 'Daniel Larraz'
+            email = 'daniel-larraz@uiowa.edu'
           }
         }
         scm {
@@ -60,28 +60,33 @@ publishing {
 
   repositories {
     maven {
-      name = "OSSRH"
-      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-      credentials {
-        username = System.getenv("MAVEN_USERNAME")
-        password = System.getenv("MAVEN_PASSWORD")
-      }
-    }
-    maven {
-      name = "GitHubPackages"
-      url = "https://maven.pkg.github.com/kind2-mc/kind2-java-api"
-      credentials {
-        username = System.getenv("GITHUB_ACTOR")
-        password = System.getenv("GITHUB_TOKEN")
-      }
+        url = layout.buildDirectory.dir('staging-deploy')
     }
   }
 }
 
-signing {
-  required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
-  def signingKey = findProperty("signingKey")
-  def signingPassword = findProperty("signingPassword")
-  useInMemoryPgpKeys(signingKey, signingPassword)
-  sign publishing.publications.maven
+jreleaser {
+    signing {
+        active = 'ALWAYS'
+        armored = true
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+            github {
+                packages {
+                    active = 'ALWAYS'
+                    url = 'https://maven.pkg.github.com/kind2-mc/kind2-java-api'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+        }
+    }
 }
+
