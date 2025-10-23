@@ -21,10 +21,10 @@ jobs:
       - name: Publish to the Maven Central Repository
         run: |
           chmod +x gradlew
-          ./gradlew jreleaserConfig
-          ./gradlew clean
-          ./gradlew publish
-          ./gradlew jreleaserDeploy
+          gradle jreleaserConfig
+          gradle clean
+          gradle publish
+          gradle jreleaserDeploy
         env:
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.JRELEASER_MAVENCENTRAL_USERNAME }}
           JRELEASER_MAVENCENTRAL_TOKEN: ${{ secrets.JRELEASER_MAVENCENTRAL_TOKEN }}
