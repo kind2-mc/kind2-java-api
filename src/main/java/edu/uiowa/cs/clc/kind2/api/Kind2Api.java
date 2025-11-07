@@ -345,7 +345,6 @@ public class Kind2Api {
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
     String output = "";
-    boolean exceptionThrown = false;
 
     try {
       process = builder.start();
@@ -359,30 +358,20 @@ public class Kind2Api {
         output += new String(bytes);
         sleep(POLL_INTERVAL);
       }
-    } catch (Throwable t) {
-      exceptionThrown = true;
-      throw t;
-    } finally {
-      try {
-        if (!monitor.isCanceled()) {
-          int available = process.getInputStream().available();
-          byte[] bytes = new byte[available];
-          process.getInputStream().read(bytes);
-          output += new String(bytes);
-          try {
-            result.initialize(output);
-          } catch (Throwable t) {
-            if (!exceptionThrown) {
-              throw t;
-            }
-          }
-        }
-      } finally {
-        if (process != null) {
-          process.destroy();
-        }
-        monitor.done();
+      if (!monitor.isCanceled()) {
+        int available = process.getInputStream().available();
+        byte[] bytes = new byte[available];
+        process.getInputStream().read(bytes);
+        output += new String(bytes);
+        result.initialize(output);
       }
+    } catch (IOException | IllegalStateException e) {
+      throw e;
+    } finally {
+      if (process != null) {
+        process.destroy();
+      }
+      monitor.done();
     }
   }
 

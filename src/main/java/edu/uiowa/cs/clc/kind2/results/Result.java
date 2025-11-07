@@ -297,7 +297,11 @@ public class Result {
     // build the node tree
     this.buildTree();
     // analyze the result
-    this.analyze();
+    try {
+      this.analyze();
+    } catch (RuntimeException e) {
+      // Do nothing, just leave info in result
+    }
     isInitialized = true;
   }
 
