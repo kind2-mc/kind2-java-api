@@ -131,25 +131,6 @@ public class Result {
     root.analyze();
   }
 
-  /**
-   * throw a {@link RuntimeException} if at least one of kind2 logs is error, fatal, or off.
-   */
-  private void throwKind2Errors() {
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder
-        .append("An error has occurred during kind2 analysis. Please check the following logs:\n");
-    boolean someError = false;
-    for (Log log : kind2Logs) {
-      if (log.getLevel() == LogLevel.error || log.getLevel() == LogLevel.fatal
-          || log.getLevel() == LogLevel.off) {
-        stringBuilder.append(log + "\n");
-        someError = true;
-      }
-    }
-    if (someError) {
-      throw new RuntimeException(stringBuilder.toString());
-    }
-  }
 
   @Override
   public String toString() {
