@@ -365,8 +365,6 @@ public class Kind2Api {
         output += new String(bytes);
         result.initialize(output);
       }
-    } catch (IOException | IllegalStateException e) {
-      throw e;
     } finally {
       if (process != null) {
         process.destroy();

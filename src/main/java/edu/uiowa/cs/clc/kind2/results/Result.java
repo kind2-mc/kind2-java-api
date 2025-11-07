@@ -126,7 +126,6 @@ public class Result {
     if (root == null) {
       // if the root object is null at this point, then we couldn't parse the json output properly.
       // It makes sense to throw kind2 errors found in the log objects.
-      throwKind2Errors();
       return;
     }
     root.analyze();
@@ -297,11 +296,7 @@ public class Result {
     // build the node tree
     this.buildTree();
     // analyze the result
-    try {
-      this.analyze();
-    } catch (RuntimeException e) {
-      // Do nothing, just leave info in result
-    }
+    this.analyze();
     isInitialized = true;
   }
 
