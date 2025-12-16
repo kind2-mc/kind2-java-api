@@ -34,9 +34,12 @@ abstract public class Type
       case "int16":
       case "int32":
       case "int64":
+      case "subrange":
         return new Int();
       case "real":
         return new Real();
+      case "array":
+        return new Array(new Bool());
       default:
       {
         if (type.matches("subrange \\[.*?\\] of int"))
