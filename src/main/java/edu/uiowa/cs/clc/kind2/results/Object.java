@@ -23,7 +23,8 @@ public enum Object
   postAnalysisEnd("postAnalysisEnd"),
   modelElementSet("modelElementSet"),
   progress("progress"),
-  lsp("lsp");
+  lsp("lsp"),
+  modelSetEnumeration("modelSetEnumeration");
 
   private final String value;
 
@@ -60,6 +61,8 @@ public enum Object
         return progress;
       case "lsp":
         return lsp;
+      case "modelSetEnumeration":
+        return modelSetEnumeration;
       default:
         throw new UnsupportedOperationException("Value " + kind2Object + " is not defined");
     }
