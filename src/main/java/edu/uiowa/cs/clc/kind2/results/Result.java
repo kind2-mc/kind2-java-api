@@ -161,7 +161,7 @@ public class Result {
     Analysis kind2Analysis = null;
     // for post analysis
     Analysis previousAnalysis = null;
-
+    boolean emptyAnalysis = false;
     for (JsonElement jsonElement : jsonArray) {
       String objectType = jsonElement.getAsJsonObject().get(Labels.objectType).getAsString();
       Object kind2Object = Object.getKind2Object(objectType);
@@ -250,7 +250,8 @@ public class Result {
           PostAnalysis postAnalysis = new PostAnalysis(previousAnalysis, jsonElement);
           previousAnalysis.setPostAnalysis(postAnalysis);
         } else {
-          throw new RuntimeException("Can not parse kind2 json output");
+          // This can occur sometimes with no previous analysis when the node had no properties to check.
+          emptyAnalysis = true;
         }
       }
 
@@ -258,6 +259,8 @@ public class Result {
         if (previousAnalysis != null && previousAnalysis.getPostAnalysis() != null) {
           // finish the post analysis
           previousAnalysis = null;
+        } else if (emptyAnalysis){
+          //Do nothing, had a no-analysis postAnalysisStart beforehand.
         } else {
           throw new RuntimeException("Failed to analyze kind2 json output");
         }
@@ -269,7 +272,8 @@ public class Result {
           ModelElementSet elementSet = new ModelElementSet(postAnalysis, jsonElement);
           postAnalysis.addModelElementSet(elementSet);
         } else {
-          throw new RuntimeException("Can not parse kind2 json output");
+          // This branch gets hit sometimes when we have empty (nonexistent) analyses of nodes with 
+          // no properties to check, causing missing analyses before postAnalyses, as well as this object.
         }
       }
     }
