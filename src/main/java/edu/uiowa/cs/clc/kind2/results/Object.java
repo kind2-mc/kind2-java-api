@@ -24,8 +24,8 @@ public enum Object
   modelElementSet("modelElementSet"),
   progress("progress"),
   lsp("lsp"),
-  modelSetEnumeration("modelSetEnumeration");
-
+  modelSetEnumeration("modelSetEnumeration"),
+  noModelElementSet("noModelElementSet");
   private final String value;
 
   private Object(String value)
@@ -63,6 +63,8 @@ public enum Object
         return lsp;
       case "modelSetEnumeration":
         return modelSetEnumeration;
+      case "noModelElementSet":
+        return noModelElementSet;
       default:
         throw new UnsupportedOperationException("Value " + kind2Object + " is not defined");
     }
