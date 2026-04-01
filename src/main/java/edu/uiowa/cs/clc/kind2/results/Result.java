@@ -186,6 +186,7 @@ public class Result {
             astInfo = new TypeDeclInfo(jsonElement);
             break;
           case "constDecl":
+          case "paramDecl":
             astInfo = new ConstDeclInfo(jsonElement);
             break;
           case "node":
