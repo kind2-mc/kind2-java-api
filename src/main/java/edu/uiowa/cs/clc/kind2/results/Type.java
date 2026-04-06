@@ -7,6 +7,8 @@
 
 package edu.uiowa.cs.clc.kind2.results;
 
+import com.google.gson.JsonElement;
+
 /**
  * An abstract class for all kind2 types.
  */
@@ -60,6 +62,62 @@ abstract public class Type
 
         // the type is enum
         return new Enum(type);
+      }
+    }
+  }
+  private static Type makeNestedArray(String baseType, int numDims){
+    if (numDims == 0){
+      return getType(baseType);
+    } else {
+      return new Array(makeNestedArray(baseType, numDims-1));
+    }
+  }
+  
+
+  public static Type getType(JsonElement typeInfo)
+  {
+    String typeString = typeInfo.getAsJsonObject().get(Labels.type).getAsString();
+    switch (typeString)
+    {
+      case "bool":
+        return new Bool();
+      case "int":
+      case "uint8":
+      case "uint16":
+      case "uint32":
+      case "uint64":
+      case "int8":
+      case "int16":
+      case "int32":
+      case "int64":
+      case "subrange":
+        return new Int();
+      case "real":
+        return new Real();
+      case "array":
+        String baseType =  typeInfo.getAsJsonObject().get(Labels.typeInfo).getAsJsonObject().get(Labels.baseType).getAsString();
+        int numIndicies = typeInfo.getAsJsonObject().get(Labels.typeInfo).getAsJsonObject().get("sizes").getAsJsonArray().size();
+        return makeNestedArray(baseType, numIndicies);
+      default:
+      {
+        if (typeString.matches("subrange \\[.*?\\] of int"))
+        {
+          String [] range = typeString.replaceAll("subrange \\[", "")
+                                .replaceAll("\\] of int", "").split(",");
+          int min = Integer.parseInt(range[0]);
+          int max = Integer.parseInt(range[0]);
+          return new SubRange(min, max);
+        }
+
+        if (typeString.startsWith("array of"))
+        {
+          String elementTypeName = typeString.replaceFirst("array of", "").trim();
+          Type elementType = getType(elementTypeName);
+          return new Array(elementType);
+        }
+
+        // the type is enum
+        return new Enum(typeString);
       }
     }
   }
