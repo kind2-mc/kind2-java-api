@@ -110,6 +110,7 @@ public class Kind2Api {
   private LogLevel logLevel;
   private String lusMain;
   private String lusMainType;
+  private String lusMainConst;
   private String fakeFilepath;
 
   public Kind2Api() {
@@ -178,6 +179,7 @@ public class Kind2Api {
     logLevel = null;
     lusMain = null;
     lusMainType = null;
+    lusMainConst = null;
   }
 
   DebugLogger debug = new DebugLogger();
@@ -417,6 +419,10 @@ public class Kind2Api {
     if (lusMainType != null) {
       options.add("--lus_main_type");
       options.add(lusMainType);
+    }
+    if (lusMainConst != null) {
+      options.add("--lus_main_const");
+      options.add(lusMainConst);
     }
     if (smtSolver != null) {
       options.add("--smt_solver");
@@ -1419,14 +1425,25 @@ public class Kind2Api {
   }
 
   /**
-   * Set the top type declaration in the Lustre input file.
+   * Designate a type declaration in the Lustre input file as the main 
+   * model element for the analysis
    * <p>
-   * Default: "--%MAIN" annotation in source if any, last node otherwise
    *
-   * @param lusMainType the main node
+   * @param lusMainType the main type
    */
   public void setLusMainType(String lusMainType) {
     this.lusMainType = lusMainType;
+  }
+
+  /**
+   * Designate a constant declaration in the Lustre input file as the main 
+   * model element for the analysis   
+   * <p>
+   *
+   * @param lusMainConst the main constant
+   */
+  public void setLusMainConst(String lusMainConst) {
+    this.lusMainConst = lusMainConst;
   }
 
    /**
