@@ -1425,9 +1425,9 @@ public class Kind2Api {
   }
 
   /**
-   * Set the top type declaration in the Lustre input file.
+   * Designate a type declaration in the Lustre input file as the main 
+   * model element for the analysis
    * <p>
-   * Default: "--%MAIN" annotation in source if any, last node otherwise
    *
    * @param lusMainType the main type
    */
@@ -1436,9 +1436,9 @@ public class Kind2Api {
   }
 
   /**
-   * Set the top type declaration in the Lustre input file.
+   * Designate a constant declaration in the Lustre input file as the main 
+   * model element for the analysis   
    * <p>
-   * Default: "--%MAIN" annotation in source if any, last node otherwise
    *
    * @param lusMainConst the main constant
    */
