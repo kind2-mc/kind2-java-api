@@ -6,6 +6,7 @@
  */
 
 package edu.uiowa.cs.clc.kind2.results;
+import edu.uiowa.cs.clc.kind2.Kind2Exception;
 
 import com.google.gson.JsonElement;
 
@@ -23,47 +24,7 @@ abstract public class Type
 
   public static Type getType(String type)
   {
-    switch (type)
-    {
-      case "bool":
-        return new Bool();
-      case "int":
-      case "uint8":
-      case "uint16":
-      case "uint32":
-      case "uint64":
-      case "int8":
-      case "int16":
-      case "int32":
-      case "int64":
-      case "subrange":
-        return new Int();
-      case "real":
-        return new Real();
-      case "array":
-        return new Array(new Bool());
-      default:
-      {
-        if (type.matches("subrange \\[.*?\\] of int"))
-        {
-          String [] range = type.replaceAll("subrange \\[", "")
-                                .replaceAll("\\] of int", "").split(",");
-          int min = Integer.parseInt(range[0]);
-          int max = Integer.parseInt(range[0]);
-          return new SubRange(min, max);
-        }
-
-        if (type.startsWith("array of"))
-        {
-          String elementTypeName = type.replaceFirst("array of", "").trim();
-          Type elementType = getType(elementTypeName);
-          return new Array(elementType);
-        }
-
-        // the type is enum
-        return new Enum(type);
-      }
-    }
+    return getType(type, null);
   }
   private static Type makeNestedArray(String baseType, int numDims){
     if (numDims == 0){
@@ -74,9 +35,8 @@ abstract public class Type
   }
   
 
-  public static Type getType(JsonElement typeInfo)
+  public static Type getType(String typeString, JsonElement typeInfo)
   {
-    String typeString = typeInfo.getAsJsonObject().get(Labels.type).getAsString();
     switch (typeString)
     {
       case "bool":
@@ -95,8 +55,9 @@ abstract public class Type
       case "real":
         return new Real();
       case "array":
-        String baseType =  typeInfo.getAsJsonObject().get(Labels.typeInfo).getAsJsonObject().get(Labels.baseType).getAsString();
-        int numIndicies = typeInfo.getAsJsonObject().get(Labels.typeInfo).getAsJsonObject().get("sizes").getAsJsonArray().size();
+        if (typeInfo == null) throw new Kind2Exception("Array with no type info found");
+        String baseType =  typeInfo.getAsJsonObject().get(Labels.baseType).getAsString();
+        int numIndicies = typeInfo.getAsJsonObject().get("sizes").getAsJsonArray().size();
         return makeNestedArray(baseType, numIndicies);
       default:
       {
