@@ -41,6 +41,8 @@ public class Labels
   public static final String blockType = "blockType";
   public static final String streams = "streams";
   public static final String type = "type";
+  public static final String typeInfo = "typeInfo";
+  public static final String baseType = "baseType";
   public static final String classField = "class";
   public static final String instantValues = "instantValues";
   public static final String subNodes = "subnodes";

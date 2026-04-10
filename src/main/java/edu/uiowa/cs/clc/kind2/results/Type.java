@@ -6,6 +6,9 @@
  */
 
 package edu.uiowa.cs.clc.kind2.results;
+import edu.uiowa.cs.clc.kind2.Kind2Exception;
+
+import com.google.gson.JsonElement;
 
 /**
  * An abstract class for all kind2 types.
@@ -21,7 +24,20 @@ abstract public class Type
 
   public static Type getType(String type)
   {
-    switch (type)
+    return getType(type, null);
+  }
+  private static Type makeNestedArray(String baseType, int numDims){
+    if (numDims == 0){
+      return getType(baseType);
+    } else {
+      return new Array(makeNestedArray(baseType, numDims-1));
+    }
+  }
+  
+
+  public static Type getType(String typeString, JsonElement typeInfo)
+  {
+    switch (typeString)
     {
       case "bool":
         return new Bool();
@@ -39,27 +55,30 @@ abstract public class Type
       case "real":
         return new Real();
       case "array":
-        return new Array(new Bool());
+        if (typeInfo == null) throw new Kind2Exception("Array with no type info found");
+        String baseType =  typeInfo.getAsJsonObject().get(Labels.baseType).getAsString();
+        int numIndicies = typeInfo.getAsJsonObject().get("sizes").getAsJsonArray().size();
+        return makeNestedArray(baseType, numIndicies);
       default:
       {
-        if (type.matches("subrange \\[.*?\\] of int"))
+        if (typeString.matches("subrange \\[.*?\\] of int"))
         {
-          String [] range = type.replaceAll("subrange \\[", "")
+          String [] range = typeString.replaceAll("subrange \\[", "")
                                 .replaceAll("\\] of int", "").split(",");
           int min = Integer.parseInt(range[0]);
           int max = Integer.parseInt(range[0]);
           return new SubRange(min, max);
         }
 
-        if (type.startsWith("array of"))
+        if (typeString.startsWith("array of"))
         {
-          String elementTypeName = type.replaceFirst("array of", "").trim();
+          String elementTypeName = typeString.replaceFirst("array of", "").trim();
           Type elementType = getType(elementTypeName);
           return new Array(elementType);
         }
 
         // the type is enum
-        return new Enum(type);
+        return new Enum(typeString);
       }
     }
   }

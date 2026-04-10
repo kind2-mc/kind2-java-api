@@ -48,7 +48,8 @@ public class Stream
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
     name = jsonElement.getAsJsonObject().get(Labels.name).getAsString();
     String typeString = jsonElement.getAsJsonObject().get(Labels.type).getAsString();
-    kind2Type = Type.getType(typeString);
+    JsonElement typeInfo = jsonElement.getAsJsonObject().get(Labels.typeInfo);
+    kind2Type = Type.getType(typeString, typeInfo);
     streamClass = jsonElement.getAsJsonObject().get(Labels.classField).getAsString();
 
     this.stepValues = new ArrayList<>();
