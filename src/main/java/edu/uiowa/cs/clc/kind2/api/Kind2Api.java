@@ -9,11 +9,16 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonStreamParser;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
 import edu.uiowa.cs.clc.kind2.results.Result;
@@ -346,33 +351,29 @@ public class Kind2Api {
     ProcessBuilder builder = getKind2ProcessBuilder();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
-    String output = "";
     boolean exceptionThrown = false;
-
+    JsonStreamParser jsp;
     try {
       process = builder.start();
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      while (!monitor.isCanceled() && process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      jsp = new JsonStreamParser(new InputStreamReader(process.getInputStream()));
+      while (!monitor.isCanceled() && jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          debug.println("Parsing JSON element: " + jele.toString());
+          result.initializeInc(jele);
+          debug.println(result.getResultMap().toString());
       }
+      debug.println("Exited loop because of isCanceled:" + !monitor.isCanceled() + " ; processIsAlive: " + process.isAlive() + "jspHasNext:" + jsp.hasNext());
     } catch (Throwable t) {
       exceptionThrown = true;
       throw t;
     } finally {
       try {
         if (!monitor.isCanceled()) {
-          int available = process.getInputStream().available();
-          byte[] bytes = new byte[available];
-          process.getInputStream().read(bytes);
-          output += new String(bytes);
           try {
-            result.initialize(output);
+            result.closeInitialization();
           } catch (Throwable t) {
             if (!exceptionThrown) {
               throw t;
@@ -408,7 +409,7 @@ public class Kind2Api {
 
   public List<String> getOptions() {
     List<String> options = new ArrayList<>();
-    options.add("-json");
+    options.add("-ijson");
     if (logLevel != null) {
       options.add(logLevel.getOption());
     }
