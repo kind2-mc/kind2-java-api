@@ -193,7 +193,7 @@ public class Kind2Api {
    * Put the KindApi into debug mode where it saves all output
    */
   public void setApiDebug() {
-    debug = new DebugLogger("-api-debug-");
+    debug = new DebugLogger("c-api-debug-");
   }
 
   /**
@@ -339,14 +339,26 @@ public class Kind2Api {
    * @throws Kind2Exception
    */
   public void execute(String program, Result result, IProgressMonitor monitor) {
+    this.execute(program, result, monitor, (ResultListener)null);
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @param result Place to store results as they come in
+   * @param monitor Used to check for cancellation
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Result result, IProgressMonitor monitor, ResultListener listener) {
     try {
-      callKind2(program, result, monitor);
+      callKind2(program, result, monitor, listener);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
-  private void callKind2(String program, Result result, IProgressMonitor monitor)
+  private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
@@ -363,6 +375,9 @@ public class Kind2Api {
           JsonElement jele = jsp.next();
           debug.println("Parsing JSON element: " + jele.toString());
           result.initializeInc(jele);
+          if(listener != null){
+            listener.onUpdate(result);
+          }
           debug.println(result.getResultMap().toString());
       }
       debug.println("Exited loop because of isCanceled:" + !monitor.isCanceled() + " ; processIsAlive: " + process.isAlive() + "jspHasNext:" + jsp.hasNext());

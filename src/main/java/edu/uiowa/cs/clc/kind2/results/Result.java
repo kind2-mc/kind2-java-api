@@ -293,8 +293,9 @@ public class Result {
   public void initializeInc(JsonElement jsonElement) {
     if (/*init condition */ this.json == null){
       this.json = new JsonArray();
-      
     }
+    this.json.add(jsonElement); 
+
       JsonObject jsonObject;
       String objectType = jsonElement.getAsJsonObject().get(Labels.objectType).getAsString();
       Object kind2Object = Object.getKind2Object(objectType);
