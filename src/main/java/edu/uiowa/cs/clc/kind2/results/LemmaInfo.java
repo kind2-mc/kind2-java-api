@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Board of Trustees of the University of Iowa
+ * Copyright (c) 2026, Board of Trustees of the University of Iowa
  * All rights reserved.
  *
  * Licensed under the BSD 3-Clause License. See LICENSE in the project root for license information.
@@ -28,10 +28,6 @@ public class LemmaInfo implements AstInfo {
      */
     private final String name;
     /**
-     * Is this lemma imported?
-     */
-    private final boolean imported;
-    /**
      * Associated file, if any.
      */
     private final String file;
@@ -57,7 +53,6 @@ public class LemmaInfo implements AstInfo {
         prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
         json = new GsonBuilder().create().toJson(jsonElement);
         this.name = jsonObject.get(Labels.name).getAsString();
-        this.imported = jsonObject.get(Labels.imported).getAsBoolean();
         this.file = jsonObject.get(Labels.file) == null ? null
                 : jsonObject.get(Labels.file).getAsString();
         this.startLine = jsonObject.get(Labels.startLine) == null ? null
@@ -82,13 +77,6 @@ public class LemmaInfo implements AstInfo {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * @return whether or not this lemma is imported.
-     */
-    public boolean isImported() {
-        return imported;
     }
 
     /**
