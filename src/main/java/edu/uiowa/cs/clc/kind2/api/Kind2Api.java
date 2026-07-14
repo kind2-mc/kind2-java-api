@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,8 +20,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
-import edu.uiowa.cs.clc.kind2.results.Result;
 import edu.uiowa.cs.clc.kind2.lustre.Program;
+import edu.uiowa.cs.clc.kind2.results.Result;
 
 /**
  * The primary interface to Kind2.
@@ -193,7 +192,7 @@ public class Kind2Api {
    * Put the KindApi into debug mode where it saves all output
    */
   public void setApiDebug() {
-    debug = new DebugLogger("c-api-debug-");
+    debug = new DebugLogger("-api-debug-");
   }
 
   /**
