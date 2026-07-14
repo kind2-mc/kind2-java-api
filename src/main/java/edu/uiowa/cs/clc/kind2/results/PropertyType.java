@@ -18,7 +18,8 @@ public enum PropertyType
   annotation("PropAnnot"),
   oneModeActive("OneModeActive"),
   generated("Generated"),
-  nonVacuityCheck("NonVacuityCheck");
+  nonVacuityCheck("NonVacuityCheck"),
+  termination("Termination");
 
   private final String value;
 
@@ -52,6 +53,9 @@ public enum PropertyType
       case "NonVacuityCheck":
       case "nonVacuityCheck":
         return nonVacuityCheck;
+      case "Termination":
+      case "termination":
+        return termination;
       default:
         throw new UnsupportedOperationException("Property type " + propertyType + " is not supported");
     }
