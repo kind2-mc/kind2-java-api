@@ -294,10 +294,10 @@ public class Result {
     isInitialized = true;
   }
 
-  Analysis kind2Analysis = null;
-  // for post analysis
-  Analysis previousAnalysis = null;
-  boolean emptyAnalysis = false;
+private Analysis kind2Analysis = null;
+// for post analysis
+private Analysis previousAnalysis = null;
+private boolean emptyAnalysis = false;
   public void initializeInc(JsonElement jsonElement) {
     if (/*init condition */ this.json == null){
       this.json = new JsonArray();
