@@ -488,7 +488,7 @@ private boolean emptyAnalysis = false;
    * @return Kind2 json output.
    */
   public String getJson() {
-    return json.toString();
+    return json == null ? null : json.toString();
   }
 
   /**
