@@ -308,23 +308,20 @@ public class Kind2Api {
     options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
-      String output = "";
       Process process = builder.start();
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      while (process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream());
+      JsonStreamParser jsp = new JsonStreamParser(reader);
+      String trace = "";
+      while (jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+              trace = jele.getAsJsonObject().get("trace").toString();
+          }
       }
-      int available = process.getInputStream().available();
-      byte[] bytes = new byte[available];
-      process.getInputStream().read(bytes);
-      output += new String(bytes);
-      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+      return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
     }
