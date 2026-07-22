@@ -339,6 +339,9 @@ private boolean emptyAnalysis = false;
           case "contract":
             astInfo = new ContractInfo(jsonElement);
             break;
+          case "lemma":
+            astInfo = new LemmaInfo(jsonElement);
+            break;
           default:
             throw new RuntimeException("Failed to analyze kind2 json output");
         }
