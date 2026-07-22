@@ -442,7 +442,7 @@ private boolean emptyAnalysis = false;
   public void closeInitialization(){
     
     // build the node tree
-    // this.buildTree();
+    this.buildTree();
     // analyze the result
     this.analyze();
     
