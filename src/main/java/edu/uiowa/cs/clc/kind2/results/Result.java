@@ -351,12 +351,12 @@ private boolean emptyAnalysis = false;
       case analysisStart:
         // define new analysis
         kind2Analysis = new Analysis(jsonElement);
-        this.put(kind2Analysis.getNodeName(), kind2Analysis);
       break;
 
       case analysisStop:
         if (kind2Analysis != null) {
           // finish the analysis
+          this.put(kind2Analysis.getNodeName(), kind2Analysis);
           NodeResult nodeResult = resultMap.get(kind2Analysis.getNodeName());
           for (Analysis analysis : nodeResult.getAnalyses()) {
             List<String> subNodes = analysis.getSubNodes();
