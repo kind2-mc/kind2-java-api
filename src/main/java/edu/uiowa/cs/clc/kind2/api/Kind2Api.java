@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonStreamParser;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
@@ -369,8 +370,22 @@ public class Kind2Api {
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      jsp = new JsonStreamParser(new InputStreamReader(process.getInputStream()));
-      while (!monitor.isCanceled() && jsp.hasNext()) {
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream());
+      jsp = new JsonStreamParser(reader);
+      // The following assignment is required because variables used in lambdas must be final or effectively final.
+      final Process processForMonitor = process;
+      Thread monitorThread = new Thread(() -> {
+        while (!monitor.isCanceled() && processForMonitor.isAlive()) {
+          sleep(POLL_INTERVAL);
+        }
+        if (monitor.isCanceled() && processForMonitor.isAlive()) {
+          debug.println("Monitor canceled, destroying Kind2 process");
+          processForMonitor.destroy();
+          try { reader.close(); } catch (IOException e) { /* ignore */ }
+        }
+      });
+      monitorThread.start();
+      while (jsp.hasNext()) {
           JsonElement jele = jsp.next();
           debug.println("Parsing JSON element: " + jele.toString());
           result.initializeInc(jele);
@@ -379,7 +394,8 @@ public class Kind2Api {
           }
           debug.println(result.getResultMap().toString());
       }
-      debug.println("Exited loop because of isCanceled:" + !monitor.isCanceled() + " ; processIsAlive: " + process.isAlive() + "jspHasNext:" + jsp.hasNext());
+    } catch (JsonIOException e) {
+      // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
     } catch (Throwable t) {
       exceptionThrown = true;
       throw t;
