@@ -277,20 +277,17 @@ public class Kind2Api {
     options.add(uri.getPath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
-      String output = "";
       Process process = builder.start();
-      while (process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+      JsonStreamParser jsp = new JsonStreamParser(reader);
+      String trace = "";
+      while (jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+              trace = jele.getAsJsonObject().get("trace").toString();
+          }
       }
-      int available = process.getInputStream().available();
-      byte[] bytes = new byte[available];
-      process.getInputStream().read(bytes);
-      output += new String(bytes);
-      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+      return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
     }
@@ -312,7 +309,7 @@ public class Kind2Api {
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream());
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
       JsonStreamParser jsp = new JsonStreamParser(reader);
       String trace = "";
       while (jsp.hasNext()) {
@@ -367,7 +364,7 @@ public class Kind2Api {
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream());
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
       jsp = new JsonStreamParser(reader);
       // The following assignment is required because variables used in lambdas must be final or effectively final.
       final Process processForMonitor = process;
