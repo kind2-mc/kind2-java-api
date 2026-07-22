@@ -8,18 +8,22 @@
 
 package edu.uiowa.cs.clc.kind2.results;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class Kind2ResultTests
 {
@@ -260,6 +264,37 @@ public class Kind2ResultTests
     assertEquals(LogLevel.info, log.getLevel());
     assertEquals("parse", log.getSource());
     assertEquals("kind2 v1.1.0-482-gd69f383a", log.getValue());
+  }
+
+  @Test
+  void initializeIncMatchesInitialize()
+  {
+    String json = "["
+        + "{\"objectType\":\"kind2Options\",\"enabled\":[],\"timeout\":0.0,\"bmcMax\":0,\"compositional\":false,\"modular\":false},"
+        + "{\"objectType\":\"log\",\"level\":\"info\",\"source\":\"parse\",\"value\":\"kind2 v2.0.0\"},"
+        + "{\"objectType\":\"lsp\",\"kind\":\"node\",\"name\":\"Main\",\"imported\":false},"
+        + "{\"objectType\":\"analysisStart\",\"top\":\"Sub\",\"concrete\":[],\"abstract\":[],\"assumptions\":[]},"
+        + "{\"objectType\":\"analysisStop\"},"
+        + "{\"objectType\":\"analysisStart\",\"top\":\"Main\",\"concrete\":[\"Sub\"],\"abstract\":[],\"assumptions\":[]},"
+        + "{\"objectType\":\"analysisStop\"}"
+        + "]";
+
+    Result expected = Result.analyzeJsonResult(json);
+
+    Result incremental = new Result();
+    JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
+    for (JsonElement element : jsonArray)
+    {
+      incremental.initializeInc(element);
+    }
+    incremental.closeInitialization();
+
+    assertEquals(JsonParser.parseString(expected.getJson()), JsonParser.parseString(incremental.getJson()));
+    assertEquals(expected.getResultMap().keySet(), incremental.getResultMap().keySet());
+    assertEquals(expected.getKind2Logs().size(), incremental.getKind2Logs().size());
+    assertEquals(expected.getAstInfos().size(), incremental.getAstInfos().size());
+    assertTrue(incremental.getNodeResult("Main").getChildren().contains(incremental.getNodeResult("Sub")));
+    assertEquals(expected.getNodeResult("Main").getChildren().size(), incremental.getNodeResult("Main").getChildren().size());
   }
 
   @Test
