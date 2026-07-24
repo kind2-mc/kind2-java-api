@@ -298,7 +298,7 @@ private Analysis kind2Analysis = null;
 // for post analysis
 private Analysis previousAnalysis = null;
 private boolean emptyAnalysis = false;
-  public void initializeInc(JsonElement jsonElement) {
+  public void addJsonElement(JsonElement jsonElement) {
     if (/*init condition */ this.json == null){
       this.json = new JsonArray();
     }
@@ -439,7 +439,7 @@ private boolean emptyAnalysis = false;
 
   }
 
-  public void closeInitialization(){
+  public void finish(){
     
     // build the node tree
     this.buildTree();

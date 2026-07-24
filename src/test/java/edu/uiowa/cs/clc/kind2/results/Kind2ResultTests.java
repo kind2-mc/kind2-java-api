@@ -285,10 +285,9 @@ public class Kind2ResultTests
     JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
     for (JsonElement element : jsonArray)
     {
-      incremental.initializeInc(element);
+      incremental.addJsonElement(element);
     }
-    incremental.closeInitialization();
-
+    incremental.finish();
     assertEquals(JsonParser.parseString(expected.getJson()), JsonParser.parseString(incremental.getJson()));
     assertEquals(expected.getResultMap().keySet(), incremental.getResultMap().keySet());
     assertEquals(expected.getKind2Logs().size(), incremental.getKind2Logs().size());

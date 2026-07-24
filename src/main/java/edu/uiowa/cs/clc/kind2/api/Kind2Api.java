@@ -382,7 +382,7 @@ public class Kind2Api {
       while (jsp.hasNext()) {
           JsonElement jele = jsp.next();
           debug.println("Parsing JSON element: " + jele.toString());
-          result.initializeInc(jele);
+          result.addJsonElement(jele);
           if(listener != null){
             listener.onUpdate(result);
           }
@@ -397,7 +397,7 @@ public class Kind2Api {
       try {
         if (!monitor.isCanceled()) {
           try {
-            result.closeInitialization();
+            result.finish();
           } catch (Throwable t) {
             if (!exceptionThrown) {
               throw t;
