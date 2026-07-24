@@ -7,15 +7,20 @@
 
 package edu.uiowa.cs.clc.kind2.results;
 
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The class is the top one in Kind2 explanations. An instance of this class is generated from kind2
@@ -70,7 +75,7 @@ public class Result {
   /**
    * Kind2 json output.
    */
-  private String json;
+  private JsonArray json;
   /**
    * a list of kind2 logs.
    */
@@ -157,7 +162,7 @@ public class Result {
 
   public void initialize(String json) {
     JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
-    this.json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonArray);
+    this.json = jsonArray;
     Analysis kind2Analysis = null;
     // for post analysis
     Analysis previousAnalysis = null;
@@ -289,6 +294,162 @@ public class Result {
     isInitialized = true;
   }
 
+private Analysis kind2Analysis = null;
+// for post analysis
+private Analysis previousAnalysis = null;
+private boolean emptyAnalysis = false;
+  public void addJsonElement(JsonElement jsonElement) {
+    if (/*init condition */ this.json == null){
+      this.json = new JsonArray();
+    }
+    this.json.add(jsonElement); 
+
+      JsonObject jsonObject;
+      String objectType = jsonElement.getAsJsonObject().get(Labels.objectType).getAsString();
+      Object kind2Object = Object.getKind2Object(objectType);
+      switch (kind2Object){
+      case kind2Options:
+        Options options = new Options(jsonElement);
+        this.options = options;
+        break;
+      case log:
+        Log log = new Log(this, jsonElement);
+        this.kind2Logs.add(log);
+        break;
+      
+
+      case lsp:
+        jsonObject = jsonElement.getAsJsonObject();
+        String kind = jsonObject.get(Labels.kind).getAsString();
+        AstInfo astInfo;
+        switch (kind) {
+          case "typeDecl":
+            astInfo = new TypeDeclInfo(jsonElement);
+            break;
+          case "constDecl":
+          case "paramDecl":
+            astInfo = new ConstDeclInfo(jsonElement);
+            break;
+          case "node":
+            astInfo = new NodeInfo(jsonElement);
+            break;
+          case "function":
+            astInfo = new FunctionInfo(jsonElement);
+            break;
+          case "contract":
+            astInfo = new ContractInfo(jsonElement);
+            break;
+          case "lemma":
+            astInfo = new LemmaInfo(jsonElement);
+            break;
+          default:
+            throw new RuntimeException("Failed to analyze kind2 json output");
+        }
+        this.astInfos.add(astInfo);
+        break;
+
+      case analysisStart:
+        // define new analysis
+        kind2Analysis = new Analysis(jsonElement);
+      break;
+
+      case analysisStop:
+        if (kind2Analysis != null) {
+          // finish the analysis
+          this.put(kind2Analysis.getNodeName(), kind2Analysis);
+          NodeResult nodeResult = resultMap.get(kind2Analysis.getNodeName());
+          for (Analysis analysis : nodeResult.getAnalyses()) {
+            List<String> subNodes = analysis.getSubNodes();
+            for (String node : subNodes) {
+              if (resultMap.containsKey(node)) {
+                nodeResult.addChild(resultMap.get(node));
+              }
+            }
+          }
+
+
+
+
+
+          previousAnalysis = kind2Analysis;
+          kind2Analysis = null;
+        } else {
+          throw new RuntimeException("Failed to analyze kind2 json output");
+        }
+        break;
+
+      case property:
+        if (kind2Analysis != null) {
+          Property property = new Property(kind2Analysis, jsonElement);
+          kind2Analysis.addProperty(property);
+        } else {
+          throw new RuntimeException("Can not parse kind2 json output");
+        }
+        break;
+
+      case realizabilityResult:
+        if (kind2Analysis != null) {
+          jsonObject = jsonElement.getAsJsonObject();
+          String res = jsonObject.get(Labels.result).getAsString();
+          if (res.equals(Labels.realizable)) {
+            kind2Analysis.setRealizabilityResult(RealizabilityResult.realizable);
+          } else if (res.equals(Labels.unrealizable)) {
+            kind2Analysis.setRealizabilityResult(RealizabilityResult.unrealizable);
+          }
+          JsonElement deadlockElement = jsonObject.get(Labels.deadlockingTrace);
+          String deadlock = new GsonBuilder().setPrettyPrinting().create().toJson(deadlockElement);
+          kind2Analysis.setDeadlock(deadlock);
+        } else {
+          throw new RuntimeException("Can not parse kind2 json output");
+        }
+        break;
+
+      case postAnalysisStart:
+        if (previousAnalysis != null) {
+          PostAnalysis postAnalysis = new PostAnalysis(previousAnalysis, jsonElement);
+          previousAnalysis.setPostAnalysis(postAnalysis);
+        } else {
+          // This can occur sometimes with no previous analysis when the node had no properties to check.
+          emptyAnalysis = true;
+        }
+        break;
+
+      case postAnalysisEnd:
+        if (previousAnalysis != null && previousAnalysis.getPostAnalysis() != null) {
+          // finish the post analysis
+          previousAnalysis = null;
+        } else if (emptyAnalysis){
+          //Do nothing, had a no-analysis postAnalysisStart beforehand.
+        } else {
+          throw new RuntimeException("Failed to analyze kind2 json output");
+        }
+        break;
+
+      case modelElementSet:
+        if (previousAnalysis != null && previousAnalysis.getPostAnalysis() != null) {
+          PostAnalysis postAnalysis = previousAnalysis.getPostAnalysis();
+          ModelElementSet elementSet = new ModelElementSet(postAnalysis, jsonElement);
+          postAnalysis.addModelElementSet(elementSet);
+        } else {
+          // This branch gets hit sometimes when we have empty (nonexistent) analyses of nodes with 
+          // no properties to check, causing missing analyses before postAnalyses, as well as this object.
+        }
+      break;
+  }
+
+  }
+
+  public void finish(){
+    
+    // build the node tree
+    this.buildTree();
+    // analyze the result
+    this.analyze();
+    
+    isInitialized = true;
+  }
+
+
   /**
    * construct a tree of subcomponents.
    */
@@ -330,7 +491,7 @@ public class Result {
    * @return Kind2 json output.
    */
   public String getJson() {
-    return json;
+    return json == null ? null : json.toString();
   }
 
   /**

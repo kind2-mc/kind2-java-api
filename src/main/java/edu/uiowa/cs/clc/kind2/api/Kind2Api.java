@@ -9,15 +9,20 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonStreamParser;
+
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
-import edu.uiowa.cs.clc.kind2.results.Result;
 import edu.uiowa.cs.clc.kind2.lustre.Program;
+import edu.uiowa.cs.clc.kind2.results.Result;
 
 /**
  * The primary interface to Kind2.
@@ -272,20 +277,17 @@ public class Kind2Api {
     options.add(uri.getPath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
-      String output = "";
       Process process = builder.start();
-      while (process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+      JsonStreamParser jsp = new JsonStreamParser(reader);
+      String trace = "";
+      while (jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+              trace = jele.getAsJsonObject().get("trace").toString();
+          }
       }
-      int available = process.getInputStream().available();
-      byte[] bytes = new byte[available];
-      process.getInputStream().read(bytes);
-      output += new String(bytes);
-      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+      return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
     }
@@ -303,23 +305,20 @@ public class Kind2Api {
     options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
-      String output = "";
       Process process = builder.start();
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      while (process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+      JsonStreamParser jsp = new JsonStreamParser(reader);
+      String trace = "";
+      while (jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+              trace = jele.getAsJsonObject().get("trace").toString();
+          }
       }
-      int available = process.getInputStream().available();
-      byte[] bytes = new byte[available];
-      process.getInputStream().read(bytes);
-      output += new String(bytes);
-      return output.substring(output.indexOf("trace") + 9, output.length() - 5);
+      return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
     }
@@ -334,45 +333,71 @@ public class Kind2Api {
    * @throws Kind2Exception
    */
   public void execute(String program, Result result, IProgressMonitor monitor) {
+    this.execute(program, result, monitor, (ResultListener)null);
+  }
+
+  /**
+   * Run Kind on a Lustre program
+   *
+   * @param program Lustre program as text
+   * @param result Place to store results as they come in
+   * @param monitor Used to check for cancellation
+   * @throws Kind2Exception
+   */
+  public void execute(String program, Result result, IProgressMonitor monitor, ResultListener listener) {
     try {
-      callKind2(program, result, monitor);
+      callKind2(program, result, monitor, listener);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
-  private void callKind2(String program, Result result, IProgressMonitor monitor)
+  private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
-    String output = "";
     boolean exceptionThrown = false;
-
+    JsonStreamParser jsp;
     try {
       process = builder.start();
       process.getOutputStream().write(program.getBytes());
       process.getOutputStream().flush();
       process.getOutputStream().close();
-      while (!monitor.isCanceled() && process.isAlive()) {
-        int available = process.getInputStream().available();
-        byte[] bytes = new byte[available];
-        process.getInputStream().read(bytes);
-        output += new String(bytes);
-        sleep(POLL_INTERVAL);
+      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+      jsp = new JsonStreamParser(reader);
+      // The following assignment is required because variables used in lambdas must be final or effectively final.
+      final Process processForMonitor = process;
+      Thread monitorThread = new Thread(() -> {
+        while (!monitor.isCanceled() && processForMonitor.isAlive()) {
+          sleep(POLL_INTERVAL);
+        }
+        if (monitor.isCanceled() && processForMonitor.isAlive()) {
+          debug.println("Monitor canceled, destroying Kind2 process");
+          processForMonitor.destroy();
+          try { reader.close(); } catch (IOException e) { /* ignore */ }
+        }
+      });
+      monitorThread.start();
+      while (jsp.hasNext()) {
+          JsonElement jele = jsp.next();
+          debug.println("Parsing JSON element: " + jele.toString());
+          result.addJsonElement(jele);
+          if(listener != null){
+            listener.onUpdate(result);
+          }
+          debug.println(result.getResultMap().toString());
       }
+    } catch (JsonIOException e) {
+      // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
     } catch (Throwable t) {
       exceptionThrown = true;
       throw t;
     } finally {
       try {
         if (!monitor.isCanceled()) {
-          int available = process.getInputStream().available();
-          byte[] bytes = new byte[available];
-          process.getInputStream().read(bytes);
-          output += new String(bytes);
           try {
-            result.initialize(output);
+            result.finish();
           } catch (Throwable t) {
             if (!exceptionThrown) {
               throw t;
@@ -408,7 +433,7 @@ public class Kind2Api {
 
   public List<String> getOptions() {
     List<String> options = new ArrayList<>();
-    options.add("-json");
+    options.add("-ijson");
     if (logLevel != null) {
       options.add(logLevel.getOption());
     }
