@@ -8,19 +8,43 @@
 
 package edu.uiowa.cs.clc.kind2;
 
+/**
+ * Simple runtime assertions used to validate arguments.
+ */
 public class Assert {
+  private Assert() {
+  }
+
+  /**
+   * Asserts that the given object is not null.
+   *
+   * @param o the object to check
+   * @throws IllegalArgumentException if {@code o} is null
+   */
   public static void isNotNull(Object o) {
     if (o == null) {
       throw new Kind2Exception("Object unexpectedly null");
     }
   }
 
+  /**
+   * Asserts that the given condition holds.
+   *
+   * @param b the condition to check
+   * @throws IllegalArgumentException if {@code b} is false
+   */
   public static void isTrue(boolean b) {
     if (!b) {
       throw new Kind2Exception("Assertion failed");
     }
   }
 
+  /**
+   * Asserts that the given condition does not hold.
+   *
+   * @param b the condition to check
+   * @throws IllegalArgumentException if {@code b} is true
+   */
   public static void isFalse(boolean b) {
     if (b) {
       throw new Kind2Exception("Assertion failed");

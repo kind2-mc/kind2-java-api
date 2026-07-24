@@ -18,6 +18,9 @@ import java.util.Map;
  * A utility class for constructing Lustre expressions.
  */
 public class ExprUtil {
+  private ExprUtil() {
+  }
+
 
   /* Binary Expressions */
 
@@ -398,7 +401,13 @@ public class ExprUtil {
     return new ComponentCallExpr(name.id, Arrays.asList(args));
   }
 
+  /**
+   * The Lustre {@code true} literal.
+   */
   public static final Expr TRUE = new BoolExpr(true);
+  /**
+   * The Lustre {@code false} literal.
+   */
   public static final Expr FALSE = new BoolExpr(false);
 
   /* Cast Expressions */

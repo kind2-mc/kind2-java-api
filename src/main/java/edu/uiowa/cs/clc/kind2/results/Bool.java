@@ -12,6 +12,9 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public class Bool extends Type
 {
+  /**
+   * Constructs the boolean type.
+   */
   public Bool()
   {
     super("bool");

@@ -13,10 +13,25 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public enum Answer
 {
+  /**
+   * The property holds in all reachable states.
+   */
   valid("valid"),
+  /**
+   * The property is violated by some reachable state.
+   */
   falsifiable("falsifiable"),
+  /**
+   * Kind 2 could neither prove nor falsify the property.
+   */
   unknown("unknown"),
+  /**
+   * The state described by the property is reachable.
+   */
   reachable("reachable"),
+  /**
+   * The state described by the property is not reachable.
+   */
   unreachable("unreachable");
 
   private final String value;
@@ -26,6 +41,13 @@ public enum Answer
     this.value = value;
   }
 
+  /**
+   * Returns the answer denoted by the given Kind 2 answer name.
+   *
+   * @param answer the Kind 2 answer name
+   * @return the corresponding answer
+   * @throws UnsupportedOperationException if the name is not recognised
+   */
   public static Answer getAnswer(String answer)
   {
     switch (answer)

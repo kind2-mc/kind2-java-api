@@ -14,6 +14,9 @@ import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A single variable of a component, together with its values along a trace.
+ */
 public class Stream
 {
   /**
@@ -42,6 +45,12 @@ public class Stream
    */
   private final SubNode kind2SubNode;
 
+  /**
+   * Constructs a stream from one Kind 2 stream object.
+   *
+   * @param kind2SubNode the trace block this stream belongs to
+   * @param jsonElement the Kind 2 json object describing the stream
+   */
   public Stream(SubNode kind2SubNode, JsonElement jsonElement)
   {
     this.kind2SubNode = kind2SubNode;
@@ -64,6 +73,8 @@ public class Stream
   }
 
   /**
+    * Returns the associated kind2 result for this stream.
+    *
     * @return the associated kind2 result for this stream.
    */
   public Result getKind2Result()
@@ -72,6 +83,8 @@ public class Stream
   }
 
   /**
+   * Returns the name of the variable for this stream.
+   *
    * @return the name of the variable for this stream.
    */
   public String getName()
@@ -80,6 +93,9 @@ public class Stream
   }
 
   /**
+   * Returns the type of the variable:  bool, int, uint8, uint16, uint32, uint64, int8, int16,
+   * int32, int64. real, subrange, enum, or array.
+   *
    * @return The type of the variable:  bool, int, uint8, uint16, uint32, uint64, int8, int16, int32, int64. real,
    * subrange, enum, or array.
    */
@@ -89,6 +105,8 @@ public class Stream
   }
 
   /**
+   * Returns the variable class: input, output, or local.
+   *
    * @return the variable class: input, output, or local.
    */
   public String getStreamClass()
@@ -97,6 +115,8 @@ public class Stream
   }
 
   /**
+   * Returns the sequence of values for this stream.
+   *
    * @return The sequence of values for this stream.
    */
   public List<StepValue> getStepValues()
@@ -105,6 +125,8 @@ public class Stream
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object.
    */
   public String getJson()

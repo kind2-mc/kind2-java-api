@@ -21,6 +21,12 @@ public class SubRange extends Type
    */
   private final int max;
 
+  /**
+   * Constructs a subrange type with the given bounds.
+   *
+   * @param min the lower bound
+   * @param max the upper bound
+   */
   public SubRange(int min, int max)
   {
     super("subrange");
@@ -29,6 +35,8 @@ public class SubRange extends Type
   }
 
   /**
+   * Returns the min value of the subrange.
+   *
    * @return the min value of the subrange.
    */
   public int getMin()
@@ -37,6 +45,8 @@ public class SubRange extends Type
   }
 
   /**
+   * Returns the maximum value of the subrange.
+   *
    * @return the maximum value of the subrange.
    */
   public int getMax()

@@ -12,6 +12,9 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public class Int extends Type
 {
+  /**
+   * Constructs the integer type.
+   */
   public Int()
   {
     super("int");

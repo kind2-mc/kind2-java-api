@@ -7,8 +7,30 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The solvers Kind 2 can use to compute interpolants.
+ */
 public enum ITPSolverOption {
-  CVC5QE, MATHSAT, OPENSMT, SMTINTERPOL, Z3QE;
+  /**
+   * The cvc5 solver using quantifier elimination.
+   */
+  CVC5QE,
+  /**
+   * The MathSAT solver.
+   */
+  MATHSAT,
+  /**
+   * The OpenSMT solver.
+   */
+  OPENSMT,
+  /**
+   * The SMTInterpol solver.
+   */
+  SMTINTERPOL,
+  /**
+   * The Z3 solver using quantifier elimination.
+   */
+  Z3QE;
 
   @Override
   public String toString() {

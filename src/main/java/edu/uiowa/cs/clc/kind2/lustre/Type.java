@@ -7,5 +7,8 @@
 
 package edu.uiowa.cs.clc.kind2.lustre;
 
+/**
+ * The base interface for all Lustre types.
+ */
 public interface Type {
 }

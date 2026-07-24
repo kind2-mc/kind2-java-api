@@ -68,6 +68,8 @@ public class Suggestion
   }
 
   /**
+   * Returns the associated kind2 result.
+   *
    * @return the associated kind2 result.
    */
   public Result getKind2Result()
@@ -76,6 +78,8 @@ public class Suggestion
   }
 
   /**
+   * Returns the type of the current suggestion.
+   *
    * @return The type of the current suggestion.
    */
   public SuggestionType getSuggestionType()
@@ -98,6 +102,13 @@ public class Suggestion
     return stringBuilder.toString();
   }
 
+  /**
+   * Builds the suggestion to raise the timeout for a component with undecided properties.
+   *
+   * @param nodeResult the component the suggestion applies to
+   * @param unknownProperties the properties Kind 2 could not decide
+   * @return the suggestion
+   */
   public static Suggestion increaseTimeout(NodeResult nodeResult, List<Property> unknownProperties)
   {
     Suggestion suggestion = new Suggestion(nodeResult, SuggestionType.increaseTimeout);
@@ -151,6 +162,12 @@ public class Suggestion
     return suggestion;
   }
 
+  /**
+   * Builds the suggestion to strengthen a subcomponent's contract.
+   *
+   * @param nodeResult the component the suggestion applies to
+   * @return the suggestion
+   */
   public static Suggestion strengthenSubComponentContract(NodeResult nodeResult)
   {
     // suggestion 2
@@ -192,6 +209,14 @@ public class Suggestion
     return suggestion;
   }
 
+  /**
+   * Builds the suggestion to complete the component's contract or remove a subcomponent.
+   *
+   * @param nodeResult the component the suggestion applies to
+   * @param assumptions the subcomponent assumptions the component fails to satisfy
+   * @param isNodeContractSatisfied whether the component satisfies its own contract
+   * @return the suggestion
+   */
   public static Suggestion completeSpecificationOrRemoveSubNodes(NodeResult nodeResult,
                                                                       List<Property> assumptions,
                                                                       boolean isNodeContractSatisfied)
@@ -250,6 +275,13 @@ public class Suggestion
     return suggestion;
   }
 
+  /**
+   * Builds the suggestion to weaken an assumption or fix the component's definition.
+   *
+   * @param nodeResult the component the suggestion applies to
+   * @param assumptions the assumptions the component fails to satisfy
+   * @return the suggestion
+   */
   public static Suggestion makeWeakerOrFixDefinition(NodeResult nodeResult, List<Property> assumptions)
   {
     // suggestion 4
@@ -365,6 +397,13 @@ public class Suggestion
     return suggestion;
   }
 
+  /**
+   * Builds the suggestion to cover every state with a contract mode.
+   *
+   * @param nodeResult the component the suggestion applies to
+   * @param modeAnalysis the analysis in which the one-mode-active check failed
+   * @return the suggestion
+   */
   public static Suggestion fixOneModeActive(NodeResult nodeResult,
                                                  Analysis modeAnalysis)
   {

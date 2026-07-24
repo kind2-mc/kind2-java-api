@@ -7,8 +7,30 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The categories of model elements that may appear in an inductive validity core.
+ */
 public enum IVCCategory {
-  NODECALLS, CONTRACTS, EQUATIONS, ASSERTIONS, ANNOTATIONS;
+  /**
+   * Calls to other components.
+   */
+  NODECALLS,
+  /**
+   * Contract items such as assumptions and guarantees.
+   */
+  CONTRACTS,
+  /**
+   * Equations defining variables.
+   */
+  EQUATIONS,
+  /**
+   * Assertions stated in the component.
+   */
+  ASSERTIONS,
+  /**
+   * Annotations such as the main annotation.
+   */
+  ANNOTATIONS;
 
   @Override
   public String toString() {

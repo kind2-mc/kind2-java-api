@@ -13,9 +13,21 @@ import java.util.List;
 import java.util.Map.Entry;
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
 
+/**
+ * Renders a Lustre AST back into Lustre source text.
+ * <p>
+ * Each {@code visit} method appends the syntax for one kind of AST node to an
+ * internal buffer; call {@link #toString()} to retrieve the accumulated text.
+ */
 public class PrettyPrintVisitor {
   private StringBuilder sb = new StringBuilder();
   private String main;
+
+  /**
+   * Constructs a visitor with an empty output buffer.
+   */
+  public PrettyPrintVisitor() {
+  }
 
   public String toString() {
     return sb.toString();
@@ -31,6 +43,12 @@ public class PrettyPrintVisitor {
     write(separator);
   }
 
+  /**
+   * Append the Lustre syntax for the given AST node to this visitor's output.
+   *
+   * @param a the AST node to print
+   * @throws edu.uiowa.cs.clc.kind2.Kind2Exception if the node is of an unknown kind
+   */
   public void ast(Ast a) {
     if (a instanceof Type) {
       writeType((Type) a);
@@ -65,6 +83,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given parameter to this visitor's output.
+   *
+   * @param param the parameter to print
+   */
   public void visit(Parameter param) {
     if (param.isConst) {
       write("const ");
@@ -74,6 +97,11 @@ public class PrettyPrintVisitor {
     write(param.type);
   }
 
+  /**
+   * Append the Lustre syntax for the given program to this visitor's output.
+   *
+   * @param program the program to print
+   */
   public void visit(Program program) {
     main = program.main;
 
@@ -154,6 +182,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given property to this visitor's output.
+   *
+   * @param property the property to print
+   */
   public void visit(Property property) {
     write(" --%PROPERTY ");
     if (property.name != null) {
@@ -165,6 +198,11 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given type definition to this visitor's output.
+   *
+   * @param typeDef the type definition to print
+   */
   public void visit(TypeDef typeDef) {
     write("type ");
     write(typeDef.id);
@@ -217,6 +255,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given constant declaration to this visitor's output.
+   *
+   * @param constant the constant declaration to print
+   */
   public void visit(Constant constant) {
     write("const ");
     write(constant.id);
@@ -231,6 +274,11 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given contract to this visitor's output.
+   *
+   * @param contract the contract to print
+   */
   public void visit(Contract contract) {
     write("contract ");
     write(contract.id);
@@ -250,6 +298,11 @@ public class PrettyPrintVisitor {
     write("tel");
   }
 
+  /**
+   * Append the Lustre syntax for the given contract body to this visitor's output.
+   *
+   * @param contractBody the contract body to print
+   */
   public void visit(ContractBody contractBody) {
     for (ContractItem item : contractBody.items) {
       write("  ");
@@ -276,6 +329,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given contract import to this visitor's output.
+   *
+   * @param contractImport the contract import to print
+   */
   public void visit(ContractImport contractImport) {
     write("import ");
     write(contractImport.id);
@@ -303,6 +361,11 @@ public class PrettyPrintVisitor {
     write(");");
   }
 
+  /**
+   * Append the Lustre syntax for the given imported component to this visitor's output.
+   *
+   * @param importedComponent the imported component to print
+   */
   public void visit(ImportedComponent importedComponent) {
     write(importedComponent.id);
     write(" (");
@@ -325,6 +388,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given component to this visitor's output.
+   *
+   * @param component the component to print
+   */
   public void visit(Component component) {
     visit((ImportedComponent) component);
 
@@ -386,6 +454,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given variable declaration to this visitor's output.
+   *
+   * @param varDecl the variable declaration to print
+   */
   public void visit(VarDecl varDecl) {
     Type type = varDecl.type;
     if (type instanceof ArrayType) {
@@ -408,6 +481,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given equation to this visitor's output.
+   *
+   * @param equation the equation to print
+   */
   public void visit(Equation equation) {
     if (equation.lhs.isEmpty()) {
       write("()");
@@ -478,6 +556,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given array access expression to this visitor's output.
+   *
+   * @param e the array access expression to print
+   */
   public void visit(ArrayAccessExpr e) {
     write("(");
     expr(e.array);
@@ -487,6 +570,11 @@ public class PrettyPrintVisitor {
     write("]");
   }
 
+  /**
+   * Append the Lustre syntax for the given array expression to this visitor's output.
+   *
+   * @param e the array expression to print
+   */
   public void visit(ArrayExpr e) {
     Iterator<Expr> iterator = e.elements.iterator();
     write("[");
@@ -498,6 +586,11 @@ public class PrettyPrintVisitor {
     write("]");
   }
 
+  /**
+   * Append the Lustre syntax for the given assumption to this visitor's output.
+   *
+   * @param assumption the assumption to print
+   */
   public void visit(Assume assumption) {
     if (assumption.weak) {
       write("weakly ");
@@ -512,6 +605,11 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given binary expression to this visitor's output.
+   *
+   * @param e the binary expression to print
+   */
   public void visit(BinaryExpr e) {
     write("(");
     expr(e.left);
@@ -524,10 +622,20 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
+  /**
+   * Append the Lustre syntax for the given boolean literal to this visitor's output.
+   *
+   * @param e the boolean literal to print
+   */
   public void visit(BoolExpr e) {
     write(Boolean.toString(e.value));
   }
 
+  /**
+   * Append the Lustre syntax for the given cast expression to this visitor's output.
+   *
+   * @param e the cast expression to print
+   */
   public void visit(CastExpr e) {
     write(getCastFunction(e.type));
     write(" (");
@@ -543,6 +651,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given condact expression to this visitor's output.
+   *
+   * @param e the condact expression to print
+   */
   public void visit(CondactExpr e) {
     write("condact(");
     expr(e.clock);
@@ -555,6 +668,11 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
+  /**
+   * Append the Lustre syntax for the given guarantee to this visitor's output.
+   *
+   * @param guarantee the guarantee to print
+   */
   public void visit(Guarantee guarantee) {
     if (guarantee.weak) {
       write("weakly ");
@@ -569,6 +687,11 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given require clause to this visitor's output.
+   *
+   * @param require the require clause to print
+   */
   public void visit(Require require) {
     write("    require ");
     if (require.name != null) {
@@ -580,6 +703,11 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given ensure clause to this visitor's output.
+   *
+   * @param ensure the ensure clause to print
+   */
   public void visit(Ensure ensure) {
     write("    ensure ");
     if (ensure.name != null) {
@@ -591,10 +719,20 @@ public class PrettyPrintVisitor {
     write(";");
   }
 
+  /**
+   * Append the Lustre syntax for the given identifier expression to this visitor's output.
+   *
+   * @param e the identifier expression to print
+   */
   public void visit(IdExpr e) {
     write(e.id);
   }
 
+  /**
+   * Append the Lustre syntax for the given if-then-else expression to this visitor's output.
+   *
+   * @param e the if-then-else expression to print
+   */
   public void visit(IfThenElseExpr e) {
     write("if ");
     write("(");
@@ -610,10 +748,20 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
+  /**
+   * Append the Lustre syntax for the given integer literal to this visitor's output.
+   *
+   * @param e the integer literal to print
+   */
   public void visit(IntExpr e) {
     write(e.value);
   }
 
+  /**
+   * Append the Lustre syntax for the given list expression to this visitor's output.
+   *
+   * @param e the list expression to print
+   */
   public void visit(ListExpr e) {
     write('(');
     Iterator<Expr> it = e.list.iterator();
@@ -627,6 +775,11 @@ public class PrettyPrintVisitor {
     write(')');
   }
 
+  /**
+   * Append the Lustre syntax for the given mode to this visitor's output.
+   *
+   * @param mode the mode to print
+   */
   public void visit(Mode mode) {
     write("mode ");
     write(mode.id);
@@ -643,6 +796,11 @@ public class PrettyPrintVisitor {
     write("  );");
   }
 
+  /**
+   * Append the Lustre syntax for the given mode reference expression to this visitor's output.
+   *
+   * @param e the mode reference expression to print
+   */
   public void visit(ModeRefExpr e) {
     for (String s : e.path) {
       write("::");
@@ -650,6 +808,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given component call expression to this visitor's output.
+   *
+   * @param e the component call expression to print
+   */
   public void visit(ComponentCallExpr e) {
     write(e.node);
     write("(");
@@ -664,6 +827,11 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
+  /**
+   * Append the Lustre syntax for the given real literal to this visitor's output.
+   *
+   * @param e the real literal to print
+   */
   public void visit(RealExpr e) {
     String str = e.value.toPlainString();
     write(str);
@@ -672,6 +840,11 @@ public class PrettyPrintVisitor {
     }
   }
 
+  /**
+   * Append the Lustre syntax for the given record access expression to this visitor's output.
+   *
+   * @param e the record access expression to print
+   */
   public void visit(RecordAccessExpr e) {
     write("(");
     expr(e.record);
@@ -680,6 +853,11 @@ public class PrettyPrintVisitor {
     write(e.field);
   }
 
+  /**
+   * Append the Lustre syntax for the given record expression to this visitor's output.
+   *
+   * @param e the record expression to print
+   */
   public void visit(RecordExpr e) {
     write(e.id);
     write(" {");
@@ -696,6 +874,11 @@ public class PrettyPrintVisitor {
     write("}");
   }
 
+  /**
+   * Append the Lustre syntax for the given tuple expression to this visitor's output.
+   *
+   * @param e the tuple expression to print
+   */
   public void visit(TupleExpr e) {
     Iterator<Expr> iterator = e.elements.iterator();
     write("[");
@@ -707,6 +890,11 @@ public class PrettyPrintVisitor {
     write("]");
   }
 
+  /**
+   * Append the Lustre syntax for the given unary expression to this visitor's output.
+   *
+   * @param e the unary expression to print
+   */
   public void visit(UnaryExpr e) {
     write(e.op);
     if (e.op != UnaryOp.NEGATIVE) {
@@ -717,6 +905,11 @@ public class PrettyPrintVisitor {
     write(")");
   }
 
+  /**
+   * Append the Lustre syntax for the given variable definition to this visitor's output.
+   *
+   * @param varDef the variable definition to print
+   */
   public void visit(VarDef varDef) {
     write("var ");
     visit(varDef.varDecl);

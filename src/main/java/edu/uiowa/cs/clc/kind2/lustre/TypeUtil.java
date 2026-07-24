@@ -8,18 +8,54 @@ import java.util.Map;
  * A utility class for constructing Lustre types.
  */
 public class TypeUtil {
+  private TypeUtil() {
+  }
+
+  /**
+   * The Lustre {@code bool} type.
+   */
   public static final NamedType BOOL = new NamedType("bool");
+  /**
+   * The Lustre unbounded {@code int} type.
+   */
   public static final NamedType INT = new NamedType("int");
+  /**
+   * The Lustre {@code real} type.
+   */
   public static final NamedType REAL = new NamedType("real");
 
+  /**
+   * The Lustre 8-bit signed machine integer type.
+   */
   public static final NamedType INT8 = new NamedType("int8");
+  /**
+   * The Lustre 16-bit signed machine integer type.
+   */
   public static final NamedType INT16 = new NamedType("int16");
+  /**
+   * The Lustre 32-bit signed machine integer type.
+   */
   public static final NamedType INT32 = new NamedType("int32");
+  /**
+   * The Lustre 64-bit signed machine integer type.
+   */
   public static final NamedType INT64 = new NamedType("int64");
 
+  /**
+   * The Lustre 8-bit unsigned machine integer type.
+   */
   public static final NamedType UINT8 = new NamedType("uint8");
+  /**
+   * The Lustre 16-bit unsigned machine integer type.
+   */
   public static final NamedType UINT16 = new NamedType("uint16");
+  /**
+   * The Lustre 32-bit unsigned machine integer type.
+   */
   public static final NamedType UINT32 = new NamedType("uint32");
+  /**
+   * The Lustre 64-bit unsigned machine integer type.
+   */
   public static final NamedType UINT64 = new NamedType("uint64");
 
   /**
@@ -38,7 +74,7 @@ public class TypeUtil {
   /**
    * Construct an enum type
    * <p>
-   * Lustre: <code>enum {{@code <values[0]>, <values[1]>, ...}}</code>
+   * Lustre: {@code enum {<values[0]>, <values[1]>, ...}}
    *
    * @param values a list values for the enumerated type
    * @return the enum type
@@ -62,7 +98,7 @@ public class TypeUtil {
   /**
    * Construct a record type
    * <p>
-   * Lustre: <code>struct {{@code <fields[0].key> : <fields[0].value>, ...}}</code>
+   * Lustre: {@code struct {<fields[0].key> : <fields[0].value>, ...}}
    *
    * @param fields a mapping from field names to their types
    * @return the record type

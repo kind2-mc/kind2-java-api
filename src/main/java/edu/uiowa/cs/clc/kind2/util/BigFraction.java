@@ -20,7 +20,13 @@ import edu.uiowa.cs.clc.kind2.Kind2Exception;
  * and <code>denominator</code> is always positive
  */
 public class BigFraction implements Comparable<BigFraction> {
+  /**
+   * The fraction equal to zero.
+   */
   public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
+  /**
+   * The fraction equal to one.
+   */
   public static final BigFraction ONE = new BigFraction(BigInteger.ONE);
 
   // The numerator and denominator are always stored in reduced form with the
@@ -28,6 +34,13 @@ public class BigFraction implements Comparable<BigFraction> {
   final private BigInteger num;
   final private BigInteger denom;
 
+  /**
+   * Constructs the fraction {@code num / denom}, reduced to lowest terms.
+   *
+   * @param num the numerator
+   * @param denom the denominator
+   * @throws ArithmeticException if {@code denom} is zero
+   */
   public BigFraction(BigInteger num, BigInteger denom) {
     if (num == null || denom == null) {
       throw new NullPointerException();
@@ -46,10 +59,21 @@ public class BigFraction implements Comparable<BigFraction> {
     }
   }
 
+  /**
+   * Constructs the fraction {@code num / 1}.
+   *
+   * @param num the numerator
+   */
   public BigFraction(BigInteger num) {
     this(num, BigInteger.ONE);
   }
 
+  /**
+   * Converts a decimal value to an exact fraction.
+   *
+   * @param value the decimal value to convert
+   * @return the equivalent fraction
+   */
   public static BigFraction valueOf(BigDecimal value) {
     if (value.scale() >= 0) {
       return new BigFraction(value.unscaledValue(), BigInteger.valueOf(10).pow(value.scale()));
@@ -59,56 +83,131 @@ public class BigFraction implements Comparable<BigFraction> {
     }
   }
 
+  /**
+   * Returns the numerator of this fraction.
+   *
+   * @return the numerator of this fraction
+   */
   public BigInteger getNumerator() {
     return num;
   }
 
+  /**
+   * Returns the denominator of this fraction.
+   *
+   * @return the denominator of this fraction
+   */
   public BigInteger getDenominator() {
     return denom;
   }
 
+  /**
+   * Adds another fraction to this one.
+   *
+   * @param val the fraction to add
+   * @return the sum
+   */
   public BigFraction add(BigFraction val) {
     return new BigFraction(num.multiply(val.denom).add(val.num.multiply(denom)),
         denom.multiply(val.denom));
   }
 
+  /**
+   * Adds an integer to this fraction.
+   *
+   * @param val the integer to add
+   * @return the sum
+   */
   public BigFraction add(BigInteger val) {
     return add(new BigFraction(val));
   }
 
+  /**
+   * Subtracts another fraction from this one.
+   *
+   * @param val the fraction to subtract
+   * @return the difference
+   */
   public BigFraction subtract(BigFraction val) {
     return new BigFraction(num.multiply(val.denom).subtract(val.num.multiply(denom)),
         denom.multiply(val.denom));
   }
 
+  /**
+   * Subtracts an integer from this fraction.
+   *
+   * @param val the integer to subtract
+   * @return the difference
+   */
   public BigFraction subtract(BigInteger val) {
     return subtract(new BigFraction(val));
   }
 
+  /**
+   * Multiplies this fraction by another.
+   *
+   * @param val the fraction to multiply by
+   * @return the product
+   */
   public BigFraction multiply(BigFraction val) {
     return new BigFraction(num.multiply(val.num), denom.multiply(val.denom));
   }
 
+  /**
+   * Multiplies this fraction by an integer.
+   *
+   * @param val the integer to multiply by
+   * @return the product
+   */
   public BigFraction multiply(BigInteger val) {
     return multiply(new BigFraction(val));
   }
 
+  /**
+   * Divides this fraction by another.
+   *
+   * @param val the fraction to divide by
+   * @return the quotient
+   * @throws ArithmeticException if {@code val} is zero
+   */
   public BigFraction divide(BigFraction val) {
     return new BigFraction(num.multiply(val.denom), denom.multiply(val.num));
   }
 
+  /**
+   * Divides this fraction by an integer.
+   *
+   * @param val the integer to divide by
+   * @return the quotient
+   * @throws ArithmeticException if {@code val} is zero
+   */
   public BigFraction divide(BigInteger val) {
     return divide(new BigFraction(val));
   }
 
+  /**
+   * Negates this fraction.
+   *
+   * @return this fraction with its sign flipped
+   */
   public BigFraction negate() {
     return new BigFraction(num.negate(), denom);
   }
 
+  /**
+   * Returns the sign of this fraction.
+   *
+   * @return {@code -1}, {@code 0}, or {@code 1} as this fraction is negative, zero, or positive
+   */
   public int signum() {
     return num.signum();
   }
 
+  /**
+   * Converts this fraction to a double, which may lose precision.
+   *
+   * @return the closest double to this fraction
+   */
   public double doubleValue() {
     double result = num.doubleValue() / denom.doubleValue();
     if (Double.isFinite(result)) {
@@ -120,6 +219,11 @@ public class BigFraction implements Comparable<BigFraction> {
     }
   }
 
+  /**
+   * Rounds this fraction towards negative infinity.
+   *
+   * @return the largest integer that is not greater than this fraction
+   */
   public BigInteger floor() {
     BigInteger divAndRem[] = num.divideAndRemainder(denom);
     if (num.signum() >= 0 || divAndRem[1].equals(BigInteger.ZERO)) {
@@ -129,12 +233,25 @@ public class BigFraction implements Comparable<BigFraction> {
     }
   }
 
+  /**
+   * Converts this fraction to a decimal with the given number of fractional digits.
+   *
+   * @param scale the number of digits after the decimal point
+   * @return this fraction as a decimal
+   */
   public BigDecimal toBigDecimal(int scale) {
     BigDecimal decNum = new BigDecimal(num).setScale(scale);
     BigDecimal decDenom = new BigDecimal(denom);
     return decNum.divide(decDenom, RoundingMode.DOWN);
   }
 
+  /**
+   * Formats this fraction as a decimal with trailing zeros removed.
+   *
+   * @param scale the number of digits after the decimal point before truncation
+   * @param suffix appended to the result when the decimal is not exact
+   * @return the formatted value
+   */
   public String toTruncatedDecimal(int scale, String suffix) {
     if (scale <= 0) {
       throw new Kind2Exception("Scale must be positive");

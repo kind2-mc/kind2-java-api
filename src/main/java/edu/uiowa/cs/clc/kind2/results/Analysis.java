@@ -75,6 +75,11 @@ public class Analysis
    */
   private PostAnalysis postAnalysis;
 
+  /**
+   * Constructs an analysis from one Kind 2 analysisStart object.
+   *
+   * @param jsonElement the Kind 2 json object describing the analysis
+   */
   public Analysis(JsonElement jsonElement)
   {
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
@@ -126,7 +131,7 @@ public class Analysis
   /**
    * Add the passed property to the list of properties in the current analysis.
    * If the property has type one mode active, then the current analysis is for one mode active.
-   * @param property
+   * @param property the property to add to this analysis
    */
   public void addProperty(Property property)
   {
@@ -147,37 +152,69 @@ public class Analysis
     }
   }
 
+  /**
+   * Sets the realizability result of this analysis.
+   *
+   * @param val the realizability result
+   */
   public void setRealizabilityResult(RealizabilityResult val) 
   {
     this.realizabilityResult = val;
   }
 
+  /**
+   * Returns the realizability result of this analysis, if any.
+   *
+   * @return the realizability result of this analysis, if any
+   */
   public RealizabilityResult getRealizabilityResult() 
   {
     return this.realizabilityResult;
   }
 
+  /**
+   * Sets the deadlocking trace reported for an unrealizable contract.
+   *
+   * @param val the deadlocking trace
+   */
   public void setDeadlock(String val) 
   {
     this.deadlock = val;
   }
 
+  /**
+   * Returns the deadlocking trace reported for an unrealizable contract, if any.
+   *
+   * @return the deadlocking trace reported for an unrealizable contract, if any
+   */
   public String getDeadlock() 
   {
     return this.deadlock;
   }
 
+  /**
+   * Sets the context this analysis was performed in.
+   *
+   * @param val the context
+   */
   public void setContext(String val) 
   {
     this.context = val;
   }
 
+  /**
+   * Returns the context this analysis was performed in.
+   *
+   * @return the context this analysis was performed in
+   */
   public String getContext() 
   {
     return this.context;
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object
    */
   public String getJson()
@@ -186,6 +223,8 @@ public class Analysis
   }
 
   /**
+   * Returns the name of the current top-level component.
+   *
    * @return name of the current top-level component.
    */
   public String getNodeName()
@@ -194,6 +233,8 @@ public class Analysis
   }
 
   /**
+   * Returns the names of the subcomponents whose contract is used in the analysis.
+   *
    * @return names of the subcomponents whose contract is used in the analysis.
    */
   public List<String> getAbstractNodes()
@@ -202,6 +243,8 @@ public class Analysis
   }
 
   /**
+   * Returns the names of the subcomponents whose implementation is used in the analysis.
+   *
    * @return Names of the subcomponents whose implementation is used in the analysis.
    */
   public List<String> getConcreteNodes()
@@ -210,6 +253,9 @@ public class Analysis
   }
 
   /**
+   * Returns the properties of the current analysis. Since the same property can appear many
+   * times, this method returns only the output of the last property attempted by kind2.
+   *
    * @return the properties of the current analysis. Since the same property can appear many times,
    * this method returns only the output of the last property attempted by kind2.
    */
@@ -236,6 +282,8 @@ public class Analysis
   }
 
   /**
+   * Returns the falsified properties in the current analysis.
+   *
    * @return the falsified properties in the current analysis.
    */
   public List<Property> getFalsifiedProperties()
@@ -243,6 +291,8 @@ public class Analysis
     return filterProperties(Answer.falsifiable);
   }
   /**
+   * Returns the unknown properties in the current analysis.
+   *
    * @return the unknown properties in the current analysis.
    */
   public List<Property> getUnknownProperties()
@@ -251,6 +301,8 @@ public class Analysis
   }
 
   /**
+   * Returns the names of the subcomponents of the current node.
+   *
    * @return names of the subcomponents of the current node
    */
   public List<String> getSubNodes()
@@ -259,6 +311,9 @@ public class Analysis
   }
 
   /**
+   * Returns whether the current analysis comes from an exhaustiveness check of the state space.
+   * covered by the modes of a contract.
+   *
    * @return is the current analysis comes from an exhaustiveness check of the state space covered by the modes of a
    * contract.
    */
@@ -278,6 +333,8 @@ public class Analysis
   }
 
   /**
+   * Returns the associated node result for this analysis.
+   *
    * @return the associated node result for this analysis.
    */
   public NodeResult getNodeResult()
@@ -286,6 +343,8 @@ public class Analysis
   }
 
   /**
+   * Returns the associated kind2 result for this analysis.
+   *
    * @return The associated kind2 result for this analysis.
    */
   public Result getKind2Result()
@@ -301,6 +360,8 @@ public class Analysis
   }
 
   /**
+   * Returns the valid properties in the current analysis.
+   *
    * @return the valid properties in the current analysis.
    */
   public List<Property> getValidProperties()
@@ -309,6 +370,8 @@ public class Analysis
   }
 
   /**
+   * Returns the reachable properties in the current analysis.
+   *
    * @return the reachable properties in the current analysis.
    */
   public List<Property> getReachableProperties()
@@ -317,6 +380,8 @@ public class Analysis
   }
 
   /**
+   * Returns the unreachable properties in the current analysis.
+   *
    * @return the unreachable properties in the current analysis.
    */
   public List<Property> getUnreachableProperties()
@@ -325,6 +390,11 @@ public class Analysis
   }
 
   /**
+   * Returns a map between json property name and kind2 attempt to prove this property in the
+   * current analysis. A map is used because the same property name can appear on the json output
+   * with different k values. An example is ControlSpec[l117c12].R1: Until the access code is
+   * first set, the door cannot be unlocked[1] in file files/S1.json.
+   *
    * @return a map between json property name and kind2 attempt to prove this property in the current analysis.
    * A map is used because the same property name can appear on the json output with different k values.
    * An example is ControlSpec[l117c12].R1: Until the access code is first set, the door cannot be unlocked[1]
@@ -336,6 +406,8 @@ public class Analysis
   }
 
   /**
+   * Returns the last result Kind 2 reached for the named property in this analysis.
+   *
    * @param jsonName kind2 name for this property (which includes the line number and column number).
    * @return the output of the last property attempted by kind2 in this analysis with the given name.
    */
@@ -346,6 +418,8 @@ public class Analysis
   }
 
   /**
+   * Returns the post analysis performed after the current analysis.
+   *
    * @return The post analysis performed after the current analysis.
    */
   public PostAnalysis getPostAnalysis()

@@ -14,6 +14,13 @@ import com.google.gson.JsonElement;
  */
 public class SubRangeValue extends IntValue
 {
+  /**
+   * Constructs a subrange value from one Kind 2 stream value.
+   *
+   * @param kind2StepValue the step this value belongs to
+   * @param kind2Type the type of the value
+   * @param jsonElement the Kind 2 json element holding the value
+   */
   public SubRangeValue(StepValue kind2StepValue, Type kind2Type, JsonElement jsonElement)
   {
     super(kind2StepValue, kind2Type, jsonElement);

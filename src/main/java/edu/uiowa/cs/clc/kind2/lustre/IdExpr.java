@@ -9,6 +9,9 @@ package edu.uiowa.cs.clc.kind2.lustre;
 
 import edu.uiowa.cs.clc.kind2.Assert;
 
+/**
+ * A Lustre expression referring to a variable or constant by name.
+ */
 public class IdExpr extends Expr {
   final String id;
 

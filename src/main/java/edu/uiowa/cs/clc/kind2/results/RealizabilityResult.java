@@ -12,7 +12,13 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public enum RealizabilityResult
 {
+  /**
+   * The contract admits an implementation.
+   */
   realizable("realizable"),
+  /**
+   * The contract admits no implementation.
+   */
   unrealizable("unrealizable");
 
   private final String value;
@@ -22,6 +28,13 @@ public enum RealizabilityResult
     this.value = value;
   }
 
+  /**
+   * Returns the realizability result denoted by the given Kind 2 result name.
+   *
+   * @param realizabilityResult the Kind 2 result name
+   * @return the corresponding result
+   * @throws UnsupportedOperationException if the name is not recognised
+   */
   public static RealizabilityResult getRealizabilityResult(String realizabilityResult)
   {
     switch (realizabilityResult)

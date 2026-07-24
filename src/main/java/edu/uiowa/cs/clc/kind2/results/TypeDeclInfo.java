@@ -48,6 +48,11 @@ public class TypeDeclInfo implements AstInfo {
      */
     private final String endColumn;
 
+    /**
+     * Constructs type declaration information from one Kind 2 source location object.
+     *
+     * @param jsonElement the Kind 2 json object describing the declaration
+     */
     public TypeDeclInfo(JsonElement jsonElement) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);

@@ -16,12 +16,24 @@ public class BoolValue extends Value
 {
   private final boolean value;
 
+  /**
+   * Constructs a boolean value from one Kind 2 stream value.
+   *
+   * @param kind2StepValue the step this value belongs to
+   * @param kind2Type the type of the value
+   * @param jsonElement the Kind 2 json element holding the value
+   */
   public BoolValue(StepValue kind2StepValue, Type kind2Type, JsonElement jsonElement)
   {
     super(kind2StepValue, kind2Type, jsonElement);
     value = Boolean.parseBoolean(jsonElement.getAsString());
   }
 
+  /**
+   * Returns the boolean value.
+   *
+   * @return the boolean value
+   */
   public boolean getValue()
   {
     return value;

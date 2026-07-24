@@ -12,6 +12,11 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public class Enum extends Type
 {
+  /**
+   * Constructs an enumeration type with the given name.
+   *
+   * @param name the name of the enumeration type
+   */
   public Enum(String name)
   {
     super(name);

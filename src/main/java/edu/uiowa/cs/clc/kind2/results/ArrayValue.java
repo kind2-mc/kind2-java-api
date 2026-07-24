@@ -18,12 +18,25 @@ public class ArrayValue extends Value
 {
   private final List<Value> values;
 
+  /**
+   * Constructs an array value from one Kind 2 stream value.
+   *
+   * @param kind2StepValue the step this value belongs to
+   * @param kind2Type the type of the value
+   * @param jsonElement the Kind 2 json element holding the value
+   * @param values the elements of the array
+   */
   public ArrayValue(StepValue kind2StepValue, Type kind2Type, JsonElement jsonElement, List<Value> values)
   {
     super(kind2StepValue, kind2Type, jsonElement);
     this.values = values;
   }
 
+  /**
+   * Returns the elements of this array.
+   *
+   * @return the elements of this array
+   */
   public List<Value> getValues()
   {
     return values;

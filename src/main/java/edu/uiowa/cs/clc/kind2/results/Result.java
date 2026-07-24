@@ -117,6 +117,8 @@ public class Result {
   }
 
   /**
+   * Returns the analyses Kind 2 performed on the named component.
+   *
    * @param nodeName the name of the node
    * @return {@link NodeResult} which contains the analyses performed by kind2 on the given node.
    */
@@ -160,6 +162,11 @@ public class Result {
     return kind2Result;
   }
 
+  /**
+   * Populates this result from a complete Kind 2 json output string.
+   *
+   * @param json the Kind 2 json output
+   */
   public void initialize(String json) {
     JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
     this.json = jsonArray;
@@ -298,6 +305,11 @@ private Analysis kind2Analysis = null;
 // for post analysis
 private Analysis previousAnalysis = null;
 private boolean emptyAnalysis = false;
+  /**
+   * Adds one Kind 2 output object to this result, for reading output incrementally.
+   *
+   * @param jsonElement the Kind 2 json object to add
+   */
   public void addJsonElement(JsonElement jsonElement) {
     if (/*init condition */ this.json == null){
       this.json = new JsonArray();
@@ -443,6 +455,9 @@ private boolean emptyAnalysis = false;
 
   }
 
+  /**
+   * Builds the component tree and analyses the result, after the last output object has been added.
+   */
   public void finish(){
     
     // build the node tree
@@ -478,6 +493,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns the wallclock timeout used for all the analyses.
+   *
    * @return The wallclock timeout used for all the analyses
    */
   public double getTimeout() {
@@ -485,6 +502,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns the options used by the kind2 process.
+   *
    * @return options used by kind2 process.
    */
   public Options getOptions() {
@@ -492,6 +511,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns the Kind2 json output.
+   *
    * @return Kind2 json output.
    */
   public String getJson() {
@@ -499,17 +520,27 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns {@link NodeResult} for the top component in kind2 output.
+   *
    * @return {@link NodeResult} for the top component in kind2 output.
    */
   public NodeResult getRoot() {
     return root;
   }
 
+  /**
+   * Returns the results of the analysed components, keyed by component name.
+   *
+   * @return the results of the analysed components, keyed by component name
+   */
   public Map<String, NodeResult> getResultMap() {
     return resultMap;
   }
 
   /**
+   * Returns a list of {@link Property} for all falsified properties including the falsified
+   * properties for the subcomponents.
+   *
    * @return a list of {@link Property} for all falsified properties including the falsified
    *         properties for the subcomponents.
    */
@@ -521,6 +552,9 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Property} for all valid properties including the valid properties
+   * for the subcomponents.
+   *
    * @return a list of {@link Property} for all valid properties including the valid properties for
    *         the subcomponents.
    */
@@ -532,6 +566,9 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Property} for all unknown properties including the unknown
+   * properties for the subcomponents.
+   *
    * @return a list of {@link Property} for all unknown properties including the unknown properties
    *         for the subcomponents.
    */
@@ -543,6 +580,9 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Property} for all reachable properties including the reachable
+   * properties for the subcomponents.
+   *
    * @return a list of {@link Property} for all reachable properties including the reachable properties for
    *         the subcomponents.
    */
@@ -554,6 +594,9 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Property} for all unreachable properties including the unreachable
+   * properties for the subcomponents.
+   *
    * @return a list of {@link Property} for all unreachable properties including the unreachable properties for
    *         the subcomponents.
    */
@@ -565,6 +608,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns {@code true} if printing counter examples for falsifiable properties is enabled.
+   *
    * @return {@code true} if printing counter examples for falsifiable properties is enabled.
    */
   public static boolean isPrintingCounterExamplesEnabled() {
@@ -574,13 +619,16 @@ private boolean emptyAnalysis = false;
   /**
    * Sets the value of printingCounterExamplesEnabled
    *
-   * @param value
+   * @param value whether to print counter examples for falsified properties
    */
   public static void setPrintingCounterExamplesEnabled(boolean value) {
     Result.printingCounterExamplesEnabled = value;
   }
 
   /**
+   * Returns a boolean that determines whether to print the last counter examples for unknown
+   * properties.
+   *
    * @return a boolean that determines whether to print the last counter examples for unknown
    *         properties
    */
@@ -591,13 +639,15 @@ private boolean emptyAnalysis = false;
   /**
    * Sets the value of printingUnknownCounterExamplesEnabled
    *
-   * @param value
+   * @param value whether to print the last counter examples for unknown properties
    */
   public static void setPrintingUnknownCounterExamplesEnabled(boolean value) {
     Result.printingUnknownCounterExamplesEnabled = value;
   }
 
   /**
+   * Returns a boolean that determines whether line numbers are printed.
+   *
    * @return a boolean that determines whether line numbers are printed
    */
   public static boolean isPrintingLineNumbersEnabled() {
@@ -607,7 +657,7 @@ private boolean emptyAnalysis = false;
   /**
    * set the value of printingLineNumbersEnabled
    *
-   * @param value
+   * @param value whether to print line numbers
    */
   public static void setPrintingLineNumbersEnabled(boolean value) {
     Result.printingLineNumbersEnabled = value;
@@ -616,22 +666,24 @@ private boolean emptyAnalysis = false;
   /**
    * Set the opening symbols for printing lustre names
    *
-   * @param symbols
+   * @param symbols the symbols to print before a lustre name
    */
   public static void setOpeningSymbols(String symbols) {
     Result.openingSymbols = symbols;
   }
 
   /**
-   * Set the opening symbols for printing lustre names
+   * Set the closing symbols for printing lustre names
    *
-   * @param symbols
+   * @param symbols the symbols to print after a lustre name
    */
   public static void setClosingSymbols(String symbols) {
     Result.closingSymbols = symbols;
   }
 
   /**
+   * Returns the precision for printing real numbers.
+   *
    * @return returns the precision for printing real numbers
    */
   public static int getRealPrecision() {
@@ -640,12 +692,16 @@ private boolean emptyAnalysis = false;
 
   /**
    * Set the precision for printing real numbers
+   *
+   * @param realPrecision the number of digits to print after the decimal point
    */
   public static void setRealPrecision(int realPrecision) {
     Result.realPrecision = realPrecision;
   }
 
   /**
+   * Returns the rounding mode for real numbers.
+   *
    * @return the rounding mode for real numbers
    */
   public static RoundingMode getRealRoundingMode() {
@@ -663,6 +719,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns the opening symbols for printing lustre names.
+   *
    * @return the opening symbols for printing lustre names
    */
   public static String getOpeningSymbols() {
@@ -670,6 +728,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns the closing symbols for printing lustre names.
+   *
    * @return the closing symbols for printing lustre names
    */
   public static String getClosingSymbols() {
@@ -677,6 +737,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Log} excluding hidden logs.
+   *
    * @return a list of {@link Log} excluding hidden logs.
    */
   public List<Log> getKind2Logs() {
@@ -684,6 +746,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link AstInfo}.
+   *
    * @return a list of {@link AstInfo}.
    */
   public List<AstInfo> getAstInfos() {
@@ -691,6 +755,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns a list of {@link Log} for all kind2 logs.
+   *
    * @return a list of {@link Log} for all kind2 logs.
    */
   public List<Log> getAllKind2Logs() {
@@ -698,6 +764,8 @@ private boolean emptyAnalysis = false;
   }
 
   /**
+   * Returns whether or not this object is properly initialized.
+   *
    * @return whether or not this object is properly initialized.
    */
   public boolean isInitialized() {

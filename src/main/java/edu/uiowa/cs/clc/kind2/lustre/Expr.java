@@ -7,5 +7,13 @@
 
 package edu.uiowa.cs.clc.kind2.lustre;
 
+/**
+ * The base class for all Lustre expressions.
+ */
 public abstract class Expr extends Ast {
+  /**
+   * Constructs an expression.
+   */
+  protected Expr() {
+  }
 }

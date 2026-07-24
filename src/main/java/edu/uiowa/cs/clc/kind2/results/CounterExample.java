@@ -32,6 +32,12 @@ public class CounterExample
    */
   private final Property property;
 
+  /**
+   * Constructs a counterexample from one Kind 2 counterexample object.
+   *
+   * @param property the property this counterexample refutes
+   * @param jsonElement the Kind 2 json element describing the trace
+   */
   public CounterExample(Property property, JsonElement jsonElement)
   {
     this.property = property;
@@ -40,6 +46,8 @@ public class CounterExample
   }
 
   /**
+   * Returns the streams for the top node in this counter example.
+   *
    * @return the streams for the top node in this counter example.
    */
   public SubNode getTopNode()
@@ -48,6 +56,8 @@ public class CounterExample
   }
 
   /**
+   * Returns the associated kind2 result for this counter example.
+   *
    * @return the associated kind2 result for this counter example.
    */
   public Result getKind2Result()
@@ -64,6 +74,8 @@ public class CounterExample
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object.
    */
   public String getJson()
@@ -72,6 +84,8 @@ public class CounterExample
   }
 
   /**
+   * Returns the associated property for this counter example.
+   *
    * @return the associated property for this counter example.
    */
   public Property getProperty()

@@ -48,6 +48,11 @@ public class ConstDeclInfo implements AstInfo {
      */
     private final String endColumn;
 
+    /**
+     * Constructs constant declaration information from one Kind 2 source location object.
+     *
+     * @param jsonElement the Kind 2 json object describing the declaration
+     */
     public ConstDeclInfo(JsonElement jsonElement) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);

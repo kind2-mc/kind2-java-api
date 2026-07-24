@@ -14,10 +14,21 @@ package edu.uiowa.cs.clc.kind2;
 public class Kind2Exception extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Constructs an exception with the given message.
+   *
+   * @param message the detail message
+   */
   public Kind2Exception(String message) {
     super(message);
   }
 
+  /**
+   * Constructs an exception with the given message and cause.
+   *
+   * @param message the detail message
+   * @param t the underlying cause
+   */
   public Kind2Exception(String message, Throwable t) {
     super(message, t);
   }

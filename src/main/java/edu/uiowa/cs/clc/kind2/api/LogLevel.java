@@ -7,14 +7,54 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The verbosity levels Kind 2 can run at.
+ */
 public enum LogLevel {
-  OFF, FATAL, ERROR, WARN, NOTE, INFO, DEBUG, TRACE;
+  /**
+   * Disables all messages.
+   */
+  OFF,
+  /**
+   * Only fatal errors.
+   */
+  FATAL,
+  /**
+   * Errors and above.
+   */
+  ERROR,
+  /**
+   * Warnings and above.
+   */
+  WARN,
+  /**
+   * Notes and above.
+   */
+  NOTE,
+  /**
+   * Informational messages and above.
+   */
+  INFO,
+  /**
+   * Debug messages and above.
+   */
+  DEBUG,
+  /**
+   * All messages, including traces.
+   */
+  TRACE;
 
   @Override
   public String toString() {
     return name().toLowerCase();
   }
 
+  /**
+   * Returns the Kind 2 command line flag selecting this level.
+   *
+   * @return the command line flag
+   * @throws IllegalArgumentException if the level is not recognised
+   */
   public String getOption() {
     switch (this) {
       case OFF:

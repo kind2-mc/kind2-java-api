@@ -33,6 +33,12 @@ public class StepValue
    */
   private final Stream stream;
 
+  /**
+   * Constructs one instant of a stream from its Kind 2 json value.
+   *
+   * @param stream the stream this value belongs to
+   * @param jsonElement the Kind 2 json element holding the instant and its value
+   */
   public StepValue(Stream stream, JsonElement jsonElement)
   {
     this.stream = stream;
@@ -42,6 +48,8 @@ public class StepValue
   }
 
   /**
+   * Returns the type of the current value.
+   *
    * @return the type of the current value
    */
   public Type getKind2Type()
@@ -50,6 +58,8 @@ public class StepValue
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object.
    */
   public String getJson()
@@ -58,6 +68,8 @@ public class StepValue
   }
 
   /**
+   * Returns the value at the specified time.
+   *
    * @return The value at the specified time.
    */
   public Value getKind2Value()
@@ -66,6 +78,8 @@ public class StepValue
   }
 
   /**
+   * Returns the step index in the stream sequence.
+   *
    * @return the step index in the stream sequence.
    */
   public int getTime()
@@ -74,6 +88,8 @@ public class StepValue
   }
 
   /**
+   * Returns the associated stream for this object.
+   *
    * @return the associated stream for this object.
    */
   public Stream getStream()
@@ -82,6 +98,8 @@ public class StepValue
   }
 
   /**
+   * Returns the associated kind2 result for this object.
+   *
    * @return the associated kind2 result for this object.
    */
   public Result getKind2Result()
@@ -90,6 +108,9 @@ public class StepValue
   }
 
   /**
+   * Returns the value of this object. To get the original json value, use {@link
+   * StepValue#getJson()}.
+   *
    * @return the value of this object.
    * To get the original json value, use {@link StepValue#getJson()}
    */

@@ -25,6 +25,9 @@ import edu.uiowa.cs.clc.kind2.results.Result;
  * Program.
  */
 public class StopWatch {
+  private StopWatch() {
+  }
+
   /**
    * Run the main function to print the generated Lustre program and results of calling Kind 2.
    *

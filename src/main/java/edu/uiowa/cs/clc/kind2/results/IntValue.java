@@ -18,12 +18,24 @@ public class IntValue extends Value
 {
   private final BigInteger value;
 
+  /**
+   * Constructs a integer value from one Kind 2 stream value.
+   *
+   * @param kind2StepValue the step this value belongs to
+   * @param kind2Type the type of the value
+   * @param jsonElement the Kind 2 json element holding the value
+   */
   public IntValue(StepValue kind2StepValue, Type kind2Type, JsonElement jsonElement)
   {
     super(kind2StepValue, kind2Type, jsonElement);
     value = new BigInteger(jsonElement.getAsString());
   }
 
+  /**
+   * Returns the integer value.
+   *
+   * @return the integer value
+   */
   public BigInteger getValue()
   {
     return value;

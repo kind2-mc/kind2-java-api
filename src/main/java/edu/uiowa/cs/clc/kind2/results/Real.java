@@ -12,6 +12,9 @@ package edu.uiowa.cs.clc.kind2.results;
  */
 public class Real extends Type
 {
+  /**
+   * Constructs the real type.
+   */
   public Real()
   {
     super("real");

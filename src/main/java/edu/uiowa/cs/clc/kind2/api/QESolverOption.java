@@ -7,8 +7,18 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The solvers Kind 2 can use for quantifier elimination.
+ */
 public enum QESolverOption {
-  CVC5, Z3;
+  /**
+   * The cvc5 solver.
+   */
+  CVC5,
+  /**
+   * The Z3 solver.
+   */
+  Z3;
 
   @Override
   public String toString() {

@@ -10,7 +10,21 @@ package edu.uiowa.cs.clc.kind2.util;
 import java.math.BigInteger;
 import java.util.Comparator;
 
+/**
+ * Orders strings so that embedded runs of digits compare numerically.
+ * <p>
+ * This puts {@code x2} before {@code x10}, unlike plain lexicographic ordering.
+ */
 public class StringNaturalOrdering implements Comparator<String> {
+  /**
+   * Constructs the comparator.
+   */
+  public StringNaturalOrdering() {
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int compare(String s1, String s2) {
     int n1 = s1.length();

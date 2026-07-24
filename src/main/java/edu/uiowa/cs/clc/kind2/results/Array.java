@@ -14,12 +14,22 @@ public class Array extends Type
 {
   private final Type elementType;
 
+  /**
+   * Constructs an array type with the given element type.
+   *
+   * @param elementType the type of the array's elements
+   */
   public Array(Type elementType)
   {
     super("array of " + elementType.toString());
     this.elementType = elementType;
   }
 
+  /**
+   * Returns the type of the array's elements.
+   *
+   * @return the type of the array's elements
+   */
   public Type getElementType()
   {
     return elementType;

@@ -7,8 +7,38 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The SMT solvers Kind 2 can use as its main solver.
+ */
 public enum SolverOption {
-  BITWUZLA, CVC5, MATHSAT, SMTINTERPOL, YICES, YICES2, Z3;
+  /**
+   * The Bitwuzla SMT solver.
+   */
+  BITWUZLA,
+  /**
+   * The cvc5 SMT solver.
+   */
+  CVC5,
+  /**
+   * The MathSAT SMT solver.
+   */
+  MATHSAT,
+  /**
+   * The SMTInterpol SMT solver.
+   */
+  SMTINTERPOL,
+  /**
+   * The Yices 1 SMT solver.
+   */
+  YICES,
+  /**
+   * The Yices 2 SMT solver.
+   */
+  YICES2,
+  /**
+   * The Z3 SMT solver.
+   */
+  Z3;
 
   @Override
   public String toString() {

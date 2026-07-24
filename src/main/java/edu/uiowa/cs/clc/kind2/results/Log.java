@@ -54,6 +54,12 @@ public class Log
    */
   private boolean isHidden;
 
+  /**
+   * Constructs a log message from one Kind 2 log object.
+   *
+   * @param kind2Result the result this log belongs to
+   * @param jsonElement the Kind 2 json object describing the message
+   */
   public Log(Result kind2Result, JsonElement jsonElement)
   {
     this.kind2Result = kind2Result;
@@ -79,6 +85,9 @@ public class Log
   }
 
   /**
+   * Returns a level that gives a rough guide of the importance of the message. Can be off,
+   * fatal, error, warn, note, info, debug, or trace.
+   *
    * @return A level that gives a rough guide of the importance of the message.
    * Can be off, fatal, error, warn, note, info, debug, or trace.
    */
@@ -88,6 +97,8 @@ public class Log
   }
 
   /**
+   * Returns the name of the Kind 2 module which wrote the log.
+   *
    * @return The name of the Kind 2 module which wrote the log.
    */
   public String getSource()
@@ -96,6 +107,8 @@ public class Log
   }
 
   /**
+   * Returns the log message.
+   *
    * @return The log message.
    */
   public String getValue()
@@ -104,6 +117,8 @@ public class Log
   }
 
   /**
+   * Returns the associated kind2 result for this log.
+   *
    * @return the associated kind2 result for this log.
    */
   public Result getKind2Result()
@@ -112,6 +127,8 @@ public class Log
   }
 
   /**
+   * Returns the original kind2 output for this object in pretty json format.
+   *
    * @return The original kind2 output for this object in pretty json format.
    */
   public String getJson()
@@ -120,6 +137,8 @@ public class Log
   }
 
   /**
+   * Returns the associated line in the input file, if any.
+   *
    * @return the associated line in the input file, if any.
    */
   public String getLine()
@@ -128,6 +147,8 @@ public class Log
   }
 
   /**
+   * Returns the associated column in the input file, if any.
+   *
    * @return the associated column in the input file, if any.
    */
   public String getColumn()
@@ -142,6 +163,8 @@ public class Log
   }
 
   /**
+   * Returns a boolean that determines whether the current log is printed.
+   *
    * @return  a boolean that determines whether the current log is printed.
    */
   public boolean isHidden()

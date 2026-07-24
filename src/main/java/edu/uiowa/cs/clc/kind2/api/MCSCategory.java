@@ -7,8 +7,30 @@
 
 package edu.uiowa.cs.clc.kind2.api;
 
+/**
+ * The categories of model elements that may appear in a minimal cut set.
+ */
 public enum MCSCategory {
-    NODE_CALLS, CONTRACTS, EQUATIONS, ASSERTIONS, ANNOTATIONS;
+    /**
+     * Calls to other components.
+     */
+    NODE_CALLS,
+    /**
+     * Contract items such as assumptions and guarantees.
+     */
+    CONTRACTS,
+    /**
+     * Equations defining variables.
+     */
+    EQUATIONS,
+    /**
+     * Assertions stated in the component.
+     */
+    ASSERTIONS,
+    /**
+     * Annotations such as the main annotation.
+     */
+    ANNOTATIONS;
 
     @Override
     public String toString() {

@@ -52,6 +52,11 @@ public class NodeInfo implements AstInfo {
      */
     private final String endColumn;
 
+    /**
+     * Constructs node declaration information from one Kind 2 source location object.
+     *
+     * @param jsonElement the Kind 2 json object describing the declaration
+     */
     public NodeInfo(JsonElement jsonElement) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         prettyJson = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
@@ -85,6 +90,8 @@ public class NodeInfo implements AstInfo {
     }
 
     /**
+     * Returns whether or not this node is imported.
+     *
      * @return whether or not this node is imported.
      */
     public boolean isImported() {

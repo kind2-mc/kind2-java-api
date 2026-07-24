@@ -44,6 +44,12 @@ public class SubNode
    */
   private final CounterExample counterExample;
 
+  /**
+   * Constructs a trace block from one Kind 2 trace object.
+   *
+   * @param counterExample the trace this block belongs to
+   * @param jsonElement the Kind 2 json object describing the block
+   */
   public SubNode(CounterExample counterExample, JsonElement jsonElement)
   {
     this.counterExample = counterExample;
@@ -98,6 +104,8 @@ public class SubNode
   }
 
   /**
+   * Returns the name of the current component.
+   *
    * @return the name of the current component.
    */
   public String getName()
@@ -106,6 +114,8 @@ public class SubNode
   }
 
   /**
+   * Returns the associated kind2 result.
+   *
    * @return the associated kind2 result.
    */
   public Result getKind2Result()
@@ -114,6 +124,8 @@ public class SubNode
   }
 
   /**
+   * Returns the streams for this component.
+   *
    * @return the streams for this component.
    */
   public List<Stream> getStreams()
@@ -122,6 +134,8 @@ public class SubNode
   }
 
   /**
+   * Returns the streams of the subcomponents.
+   *
    * @return the streams of the subcomponents
    */
   public List<SubNode> getSubNodes()
@@ -130,6 +144,8 @@ public class SubNode
   }
 
   /**
+   * Returns the type of the current component.
+   *
    * @return the type of the current component
    */
   public String getBlockType()
@@ -144,6 +160,8 @@ public class SubNode
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object.
    */
   public String getJson()

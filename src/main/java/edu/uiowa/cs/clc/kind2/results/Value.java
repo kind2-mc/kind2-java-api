@@ -32,21 +32,44 @@ abstract public class Value
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
   }
 
+  /**
+   * Returns the type of this value.
+   *
+   * @return the type of this value
+   */
   public Type getKind2Type()
   {
     return kind2Type;
   }
 
+  /**
+   * Returns the step this value belongs to.
+   *
+   * @return the step this value belongs to
+   */
   public StepValue getKind2StepValue()
   {
     return kind2StepValue;
   }
 
+  /**
+   * Returns the associated kind2 result.
+   *
+   * @return the associated kind2 result
+   */
   public Result getKind2Result()
   {
     return kind2StepValue.getKind2Result();
   }
 
+  /**
+   * Constructs the value of the appropriate subclass for the given type.
+   *
+   * @param kind2StepValue the step this value belongs to
+   * @param kind2Type the type of the value
+   * @param jsonElement the Kind 2 json element holding the value
+   * @return the parsed value
+   */
   public static Value getKind2Value(StepValue kind2StepValue, Type kind2Type, JsonElement jsonElement)
   {
     if (kind2Type instanceof Int)
@@ -90,6 +113,11 @@ abstract public class Value
     throw new UnsupportedOperationException(kind2Type.toString());
   }
 
+  /**
+   * Returns the Kind2 json output for this object.
+   *
+   * @return the Kind2 json output for this object
+   */
   public String getJson()
   {
     return json;

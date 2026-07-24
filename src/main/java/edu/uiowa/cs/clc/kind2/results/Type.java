@@ -15,13 +15,27 @@ import com.google.gson.JsonElement;
  */
 abstract public class Type
 {
+  /**
+   * The name of this type.
+   */
   public final String name;
 
+  /**
+   * Constructs a type with the given name.
+   *
+   * @param name the name of the type
+   */
   public Type(String name)
   {
     this.name = name;
   }
 
+  /**
+   * Returns the type denoted by the given Kind 2 type name.
+   *
+   * @param type the Kind 2 type name
+   * @return the corresponding type
+   */
   public static Type getType(String type)
   {
     return getType(type, null);
@@ -35,6 +49,13 @@ abstract public class Type
   }
   
 
+  /**
+   * Returns the type denoted by the given Kind 2 type name and structured type information.
+   *
+   * @param typeString the Kind 2 type name
+   * @param typeInfo the structured type information, used for array and subrange types
+   * @return the corresponding type
+   */
   public static Type getType(String typeString, JsonElement typeInfo)
   {
     switch (typeString)

@@ -45,6 +45,11 @@ public class Options
    */
   private final boolean modular;
 
+  /**
+   * Constructs the options from one Kind 2 kind2Options object.
+   *
+   * @param jsonElement the Kind 2 json object describing the options
+   */
   public Options(JsonElement jsonElement)
   {
     JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -69,6 +74,8 @@ public class Options
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return Kind2 json output for this object
    */
   public String getJson()
@@ -77,6 +84,8 @@ public class Options
   }
 
   /**
+   * Returns the list of Kind 2 module names that are enabled.
+   *
    * @return list of Kind 2 module names that are enabled
    */
   public List<String> getEnabledModules()
@@ -85,6 +94,8 @@ public class Options
   }
 
   /**
+   * Returns the wallclock timeout used for all the analyses.
+   *
    * @return the wallclock timeout used for all the analyses.
    */
   public double getTimeout()
@@ -93,6 +104,8 @@ public class Options
   }
 
   /**
+   * Returns the maximal number of iterations for BMC and K-induction.
+   *
    * @return maximal number of iterations for BMC and K-induction.
    */
   public int getBmcMax()
@@ -101,6 +114,8 @@ public class Options
   }
 
   /**
+   * Returns whether compositional analysis is enabled or not.
+   *
    * @return whether compositional analysis is enabled or not.
    */
   public boolean isCompositional()
@@ -109,6 +124,8 @@ public class Options
   }
 
   /**
+   * Returns whether modular analysis is enabled or not.
+   *
    * @return whether modular analysis is enabled or not.
    */
   public boolean isModular()

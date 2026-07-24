@@ -51,6 +51,12 @@ public class NodeResult
    */
   private final Result kind2Result;
 
+  /**
+   * Constructs an empty result for the named component.
+   *
+   * @param kind2Result the result this component result belongs to
+   * @param name the name of the component
+   */
   public NodeResult(Result kind2Result, String name)
   {
     this.kind2Result = kind2Result;
@@ -59,7 +65,7 @@ public class NodeResult
 
   /**
    * Add an analysis for this component.
-   * @param analysis
+   * @param analysis the analysis to add to this component
    */
   public void addAnalysis(Analysis analysis)
   {
@@ -68,6 +74,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the list of suggestions for this component.
+   *
    * @return the list of suggestions for this component.
    */
   public List<Suggestion> getSuggestions()
@@ -76,6 +84,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the name of the component.
+   *
    * @return the name of the component.
    */
   public String getName()
@@ -104,6 +114,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the summary of the verification. Unlike toString() this does not print suggestions.
+   *
    * @return the summary of the verification. Unlike toString() this does not print suggestions.
    */
   public String printVerificationSummary()
@@ -174,6 +186,8 @@ public class NodeResult
   }
 
   /**
+   * Returns a list of analyses done by kind2 for the current component.
+   *
    * @return a list of analyses done by kind2 for the current component.
    */
   public List<Analysis> getAnalyses()
@@ -182,6 +196,8 @@ public class NodeResult
   }
 
  /**
+   * Returns the list of node results for the subcomponents.
+   *
    * @return the list of node results for the subcomponents.
    */
   public Set<NodeResult> getChildren()
@@ -190,6 +206,9 @@ public class NodeResult
   }
 
   /**
+   * Returns the last analysis done by kind2 for this component. The last analysis contains the
+   * final result.
+   *
    * @return the last analysis done by kind2 for this component.
    * The last analysis contains the final result.
    */
@@ -210,6 +229,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the list of components that call this component.
+   *
    * @return the list of components that call this component.
    */
   public List<NodeResult> getParents()
@@ -374,6 +395,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the associated kind2 result.
+   *
    * @return the associated kind2 result.
    */
   public Result getKind2Result()
@@ -382,6 +405,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the final list of falsified properties for this component and its subcomponents.
+   *
    * @return the final list of falsified properties for this component and its subcomponents.
    */
   public Set<Property> getFalsifiedProperties()
@@ -405,6 +430,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the final list of valid properties for this component and its subcomponents.
+   *
    * @return the final list of valid properties for this component and its subcomponents.
    */
   public Set<Property> getValidProperties()
@@ -424,6 +451,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the final list of unknown properties for this component and its subcomponents.
+   *
    * @return the final list of unknown properties for this component and its subcomponents.
    */
   public Set<Property> getUnknownProperties()
@@ -441,6 +470,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the final list of reachable properties for this component and its subcomponents.
+   *
    * @return the final list of reachable properties for this component and its subcomponents.
    */
   public Set<Property> getReachableProperties()
@@ -458,6 +489,8 @@ public class NodeResult
   }
 
   /**
+   * Returns the final list of unreachable properties for this component and its subcomponents.
+   *
    * @return the final list of unreachable properties for this component and its subcomponents.
    */
   public Set<Property> getUnreachableProperties()

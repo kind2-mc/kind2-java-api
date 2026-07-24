@@ -15,6 +15,9 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A set of model elements computed by a Kind 2 post-analysis.
+ */
 public class ModelElementSet
 {
   /**
@@ -51,6 +54,12 @@ public class ModelElementSet
    */
   private PostAnalysis postAnalysis;
 
+  /**
+   * Constructs a model element set from one Kind 2 modelElementSet object.
+   *
+   * @param analysis the post-analysis that produced this set
+   * @param jsonElement the Kind 2 json object describing the set
+   */
   public ModelElementSet(PostAnalysis analysis, JsonElement jsonElement)
   {
     this.postAnalysis = analysis;
@@ -72,6 +81,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the Kind2 json output for this object.
+   *
    * @return
    *    Kind2 json output for this object
    */
@@ -80,12 +91,19 @@ public class ModelElementSet
     return json;
   }
 
+  /**
+   * Returns the raw Kind 2 json element for this object.
+   *
+   * @return the raw Kind 2 json element for this object
+   */
   public JsonElement getJsonElement()
   {
     return jsonElement;
   }
 
   /**
+   * Returns the class of the core.
+   *
    * @return the class of the core
    */
   public String getClassField()
@@ -94,6 +112,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the size of the core.
+   *
    * @return the size of the core
    */
   public int getSize()
@@ -102,6 +122,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the time unit of runtime value.
+   *
    * @return the time unit of runtime value
    */
   public String getRuntimeUnit()
@@ -110,6 +132,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the runtime value.
+   *
    * @return the runtime value
    */
   public double getRuntimeValue()
@@ -118,6 +142,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the list of nodes with at least one model element in the core.
+   *
    * @return the list of nodes with at least one model element in the core
    */
   public List<Node> getNodes()
@@ -126,6 +152,8 @@ public class ModelElementSet
   }
 
   /**
+   * Returns the associated post analysis.
+   *
    * @return the associated post analysis.
    */
   public PostAnalysis getPostAnalysis()

@@ -15,13 +15,27 @@ import java.io.PrintWriter;
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
 import edu.uiowa.cs.clc.kind2.util.Util;
 
+/**
+ * Writes Kind 2 debug output to a temporary file.
+ * <p>
+ * A logger built with the no-argument constructor discards everything written to it.
+ */
 public class DebugLogger {
   private final PrintWriter debug;
 
+  /**
+   * Constructs a logger that discards all output.
+   */
   public DebugLogger() {
     debug = null;
   }
 
+  /**
+   * Constructs a logger writing to a new temporary file.
+   *
+   * @param prefix the prefix of the temporary file's name
+   * @throws edu.uiowa.cs.clc.kind2.Kind2Exception if the file cannot be created
+   */
   public DebugLogger(String prefix) {
     try {
       File debugFile = File.createTempFile(prefix, ".txt");
@@ -31,18 +45,32 @@ public class DebugLogger {
     }
   }
 
+  /**
+   * Writes an empty line.
+   */
   public void println() {
     if (debug != null) {
       debug.println();
     }
   }
 
+  /**
+   * Writes a line of text.
+   *
+   * @param text the text to write
+   */
   public void println(String text) {
     if (debug != null) {
       debug.println(text);
     }
   }
 
+  /**
+   * Writes a line of text followed by the contents of a file.
+   *
+   * @param text the text to write
+   * @param file the file whose contents to append
+   */
   public void println(String text, File file) {
     if (debug != null) {
       try {
@@ -53,6 +81,14 @@ public class DebugLogger {
     }
   }
 
+  /**
+   * Saves the given contents to a temporary file for later inspection.
+   *
+   * @param prefix the prefix of the file's name
+   * @param suffix the suffix of the file's name
+   * @param contents the text to write
+   * @return the file written, or null if debugging is off
+   */
   public File saveFile(String prefix, String suffix, String contents) {
     if (debug != null) {
       try {
@@ -67,6 +103,11 @@ public class DebugLogger {
     }
   }
 
+  /**
+   * Deletes a file unless debugging is enabled, in which case it is kept.
+   *
+   * @param file the file to delete
+   */
   public void deleteIfUnneeded(File file) {
     if (debug == null && file != null && file.exists()) {
       file.delete();

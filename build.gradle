@@ -28,6 +28,63 @@ java {
   withSourcesJar()
 }
 
+tasks.withType(Javadoc).configureEach {
+  options.addBooleanOption('Xdoclint:all', true)
+  failOnError = true
+}
+
+// The javadoc task above runs doclint, but Gradle always passes -quiet, which
+// hides warning-level diagnostics such as "no comment", and it does not fail on
+// them. This task runs doclint separately and fails `check` if anything is
+// reported. Note that JDK 11's javadoc does not report missing comments at all,
+// so this only bites on newer JDKs; the documentation was verified against the
+// JDK 25 javadoc, which does report them.
+def doclintCheck = tasks.register('doclintCheck') {
+  description = 'Runs javadoc doclint over the main sources and fails on any warning.'
+  group = 'verification'
+  dependsOn tasks.named('classes')
+
+  def sources = sourceSets.main.allJava
+  def classpath = sourceSets.main.compileClasspath
+  def workDir = layout.buildDirectory.dir('tmp/doclint')
+
+  inputs.files(sources)
+  inputs.files(classpath)
+  outputs.dir(workDir)
+
+  doLast {
+    def dir = workDir.get().asFile
+    dir.deleteDir()
+    dir.mkdirs()
+
+    // The in-process javadoc ToolProvider does not honour -Xdoclint, so fork the
+    // real javadoc executable and read its diagnostics.
+    def argFile = new File(dir, 'sources.txt')
+    argFile.text = sources.files.collect { it.absolutePath }.join('\n')
+
+    def command = ["${System.getProperty('java.home')}/bin/javadoc".toString(),
+                   '-Xdoclint:all', '-Xmaxwarns', '100000',
+                   '-classpath', classpath.asPath,
+                   '-d', new File(dir, 'out').absolutePath,
+                   '@' + argFile.absolutePath]
+
+    def process = new ProcessBuilder(command).redirectErrorStream(true).start()
+    def output = process.inputStream.text
+    def exitCode = process.waitFor()
+
+    def problems = output.readLines().findAll { it =~ /: (warning|error): / }
+    if (exitCode != 0 || !problems.isEmpty()) {
+      problems.each { logger.error(it) }
+      throw new GradleException(
+          "javadoc doclint reported ${problems.size()} problem(s); see the messages above.")
+    }
+  }
+}
+
+tasks.named('check') {
+  dependsOn doclintCheck
+}
+
 publishing {
   publications {
     maven(MavenPublication) {
