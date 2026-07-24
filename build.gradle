@@ -36,9 +36,15 @@ tasks.withType(Javadoc).configureEach {
 // The javadoc task above runs doclint, but Gradle always passes -quiet, which
 // hides warning-level diagnostics such as "no comment", and it does not fail on
 // them. This task runs doclint separately and fails `check` if anything is
-// reported. Note that JDK 11's javadoc does not report missing comments at all,
-// so this only bites on newer JDKs; the documentation was verified against the
-// JDK 25 javadoc, which does report them.
+// reported.
+//
+// Only newer JDKs report missing documentation: JDK 11 reports none, JDK 25
+// reports it, and the documentation here was verified against JDK 25. Rather
+// than hard-code a version, the task probes the javadoc it is about to use and
+// skips when that javadoc cannot report a missing comment, so building on an
+// older JDK (CI uses Java 8) neither fails nor gives false assurance.
+def javadocTool = javaToolchains.javadocToolFor(java.toolchain)
+
 def doclintCheck = tasks.register('doclintCheck') {
   description = 'Runs javadoc doclint over the main sources and fails on any warning.'
   group = 'verification'
@@ -47,6 +53,7 @@ def doclintCheck = tasks.register('doclintCheck') {
   def sources = sourceSets.main.allJava
   def classpath = sourceSets.main.compileClasspath
   def workDir = layout.buildDirectory.dir('tmp/doclint')
+  def tool = javadocTool
 
   inputs.files(sources)
   inputs.files(classpath)
@@ -57,26 +64,49 @@ def doclintCheck = tasks.register('doclintCheck') {
     dir.deleteDir()
     dir.mkdirs()
 
-    // The in-process javadoc ToolProvider does not honour -Xdoclint, so fork the
-    // real javadoc executable and read its diagnostics.
+    // Resolve javadoc through the toolchain: on Java 8, java.home points at the
+    // JRE, which has no bin/javadoc.
+    def javadoc = tool.get().executablePath.asFile.absolutePath
+
+    // The in-process javadoc ToolProvider ignores -Xdoclint, so fork the real
+    // executable and read its diagnostics.
+    def runJavadoc = { List<String> extraArgs ->
+      def process = new ProcessBuilder([javadoc] + extraArgs)
+          .redirectErrorStream(true).start()
+      def text = process.inputStream.text
+      [output: text, exitCode: process.waitFor(),
+       problems: text.readLines().findAll { it =~ /: (warning|error): / }]
+    }
+
+    def flags = ['-Xdoclint:all', '-Xmaxwarns', '100000']
+
+    // Probe: a public method with no comment, run with the same flags as the
+    // real check. If this javadoc does not flag it -- because its doclint does
+    // not report missing documentation, or because it rejects one of the flags
+    // -- the real run would prove nothing, so skip rather than give false
+    // assurance or fail for an environmental reason.
+    def probeDir = new File(dir, 'probe')
+    probeDir.mkdirs()
+    def probeSource = new File(probeDir, 'DoclintProbe.java')
+    probeSource.text = 'public class DoclintProbe { public void undocumented() {} }\n'
+    def probe = runJavadoc(flags + ['-d', new File(probeDir, 'out').absolutePath,
+                                    probeSource.absolutePath])
+    if (probe.problems.isEmpty()) {
+      logger.lifecycle('doclintCheck: skipped, ' + javadoc +
+          ' does not report missing documentation (needs a newer JDK).')
+      return
+    }
+
     def argFile = new File(dir, 'sources.txt')
     argFile.text = sources.files.collect { it.absolutePath }.join('\n')
 
-    def command = ["${System.getProperty('java.home')}/bin/javadoc".toString(),
-                   '-Xdoclint:all', '-Xmaxwarns', '100000',
-                   '-classpath', classpath.asPath,
-                   '-d', new File(dir, 'out').absolutePath,
-                   '@' + argFile.absolutePath]
-
-    def process = new ProcessBuilder(command).redirectErrorStream(true).start()
-    def output = process.inputStream.text
-    def exitCode = process.waitFor()
-
-    def problems = output.readLines().findAll { it =~ /: (warning|error): / }
-    if (exitCode != 0 || !problems.isEmpty()) {
-      problems.each { logger.error(it) }
+    def result = runJavadoc(flags + ['-classpath', classpath.asPath,
+                                     '-d', new File(dir, 'out').absolutePath,
+                                     '@' + argFile.absolutePath])
+    if (result.exitCode != 0 || !result.problems.isEmpty()) {
+      result.problems.each { logger.error(it) }
       throw new GradleException(
-          "javadoc doclint reported ${problems.size()} problem(s); see the messages above.")
+          "javadoc doclint reported ${result.problems.size()} problem(s); see the messages above.")
     }
   }
 }
