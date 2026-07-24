@@ -8,7 +8,6 @@
 package edu.uiowa.cs.clc.kind2.results;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +70,7 @@ public class Suggestion
   /**
    * @return the associated kind2 result.
    */
-  private Result getKind2Result()
+  public Result getKind2Result()
   {
     return nodeResult.getKind2Result();
   }

@@ -9,7 +9,6 @@ package edu.uiowa.cs.clc.kind2.results;
 
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 

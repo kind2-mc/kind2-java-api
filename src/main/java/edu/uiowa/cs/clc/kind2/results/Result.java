@@ -435,6 +435,10 @@ private boolean emptyAnalysis = false;
           // no properties to check, causing missing analyses before postAnalyses, as well as this object.
         }
       break;
+
+      default:
+        // other object types are not tracked by the result
+        break;
   }
 
   }

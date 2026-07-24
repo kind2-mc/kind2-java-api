@@ -24,7 +24,6 @@ public class Node
    */
   private final String json;
 
-  private final JsonElement jsonElement;
   /**
    * Name of the node
    */
@@ -41,7 +40,6 @@ public class Node
   public Node(ModelElementSet modelElementSet, JsonElement jsonElement)
   {
     this.modelElementSet = modelElementSet;
-    this.jsonElement = jsonElement;
     json = new GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
     JsonObject jsonObject = jsonElement.getAsJsonObject();
     name = jsonObject.get(Labels.name).getAsString();

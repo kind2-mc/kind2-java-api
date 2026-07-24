@@ -50,4 +50,10 @@ public enum LogLevel
         throw new UnsupportedOperationException("Log " + level + " is not defined");
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return this.value;
+  }
 }

@@ -42,12 +42,6 @@ public class NodeResult
   private boolean isAnalyzed = false;
 
   /**
-   * determines whether the current component is printed. The current component may be called recursively
-   * by multiple components, and we need to print it only once.
-   */
-  private boolean isVisited = true;
-
-  /**
    * The list of suggestions for this component.
    */
   private List<Suggestion> suggestions = new ArrayList<>();
