@@ -290,7 +290,16 @@ public class Kind2Api {
     options.add("interpreter");
     options.add("--interpreter_input_file");
     options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
-    options.add(Paths.get(uri).toString());
+    try {
+      // Paths.get(uri) requires a file: URI with no query/fragment/authority;
+      // fall back to the raw path for anything else (e.g. platform:/resource/...).
+      String filePath = "file".equalsIgnoreCase(uri.getScheme())
+          ? Paths.get(uri).toString()
+          : uri.getPath();
+      options.add(filePath);
+    } catch (IllegalArgumentException | java.nio.file.FileSystemNotFoundException e) {
+      throw new Kind2Exception(e.getMessage(), e);
+    }
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
       Process process = builder.start();
