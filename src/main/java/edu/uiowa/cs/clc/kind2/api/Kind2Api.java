@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -288,8 +289,8 @@ public class Kind2Api {
     options.add("--enable");
     options.add("interpreter");
     options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
-    options.add(uri.getPath());
+    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
+    options.add(Paths.get(uri).toString());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
       Process process = builder.start();
@@ -326,7 +327,7 @@ public class Kind2Api {
     options.add("--enable");
     options.add("interpreter");
     options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
+    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
       Process process = builder.start();
@@ -981,7 +982,7 @@ public class Kind2Api {
    */
   public void setInterpreterInput(String json) {
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
-    this.interpreterInputFile = interpreterFile.toURI().getPath();
+    this.interpreterInputFile = interpreterFile.getAbsolutePath();
   }
 
   /**
