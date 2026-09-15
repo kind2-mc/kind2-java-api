@@ -11,6 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -273,11 +276,11 @@ public class Kind2Api {
   /**
    * Runs the Kind 2 interpreter on a Lustre file.
    *
-   * @param uri the Lustre file to interpret
+   * @param uri the Lustre file to interpret, as a scheme-less path or a {@code file:} URI
    * @param main the main node to interpret
    * @param json the input values, as a json string
    * @return the interpreter output
-   * @throws Kind2Exception if Kind 2 fails to run
+   * @throws Kind2Exception if {@code uri} is not a local file or Kind 2 fails to run
    */
   public String interpret(URI uri, String main, String json) {
     List<String> options = new ArrayList<>();
@@ -288,8 +291,8 @@ public class Kind2Api {
     options.add("--enable");
     options.add("interpreter");
     options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
-    options.add(uri.getPath());
+    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
+    options.add(toLocalPath(uri).toString());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
       Process process = builder.start();
@@ -305,6 +308,26 @@ public class Kind2Api {
       return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
+    }
+  }
+
+  /**
+   * Converts a URI to a path on the local file system, since Kind 2 can only read local files.
+   * Scheme-less URIs are treated as plain paths; the query and fragment of a file: URI are ignored.
+   */
+  private static Path toLocalPath(URI uri) {
+    String scheme = uri.getScheme();
+    if ((scheme != null && !"file".equalsIgnoreCase(scheme)) || uri.getPath() == null) {
+      throw new Kind2Exception("Not a local file URI: " + uri);
+    }
+    try {
+      if (scheme == null) {
+        return Paths.get(uri.getPath());
+      }
+      // Keep the authority so Windows UNC paths (file://server/share/...) still resolve.
+      return Paths.get(new URI("file", uri.getAuthority(), uri.getPath(), null, null));
+    } catch (URISyntaxException | IllegalArgumentException e) {
+      throw new Kind2Exception("Not a local file URI: " + uri, e);
     }
   }
 
@@ -326,7 +349,7 @@ public class Kind2Api {
     options.add("--enable");
     options.add("interpreter");
     options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).toURI().getPath());
+    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
     ProcessBuilder builder = new ProcessBuilder(options);
     try {
       Process process = builder.start();
@@ -981,7 +1004,7 @@ public class Kind2Api {
    */
   public void setInterpreterInput(String json) {
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
-    this.interpreterInputFile = interpreterFile.toURI().getPath();
+    this.interpreterInputFile = interpreterFile.getAbsolutePath();
   }
 
   /**
