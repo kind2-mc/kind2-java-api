@@ -122,6 +122,16 @@ abstract public class Type
           return new SubRange(min, max);
         }
 
+        // A machine integer, of any width. Kind 2 names every one of them
+        // this way in its JSON output, the eight that have a keyword of
+        // their own included, so the cases above never match what it prints
+        // and this is what reaches a machine integer. Like those cases, it
+        // gives the width up and reports the stream as an integer.
+        if (typeString.matches("(u|s)int<[1-9][0-9]*>"))
+        {
+          return new Int();
+        }
+
         if (typeString.startsWith("array of"))
         {
           String elementTypeName = typeString.replaceFirst("array of", "").trim();
