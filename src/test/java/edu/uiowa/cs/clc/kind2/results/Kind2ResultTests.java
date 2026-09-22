@@ -9,6 +9,7 @@
 package edu.uiowa.cs.clc.kind2.results;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -630,5 +631,37 @@ public class Kind2ResultTests
 
     DatatypeValue cons = (DatatypeValue) stream.getStepValues().get(1).getKind2Value();
     assertEquals("Cons(1, Nil)", cons.toString());
+  }
+  /**
+   * A counterexample over machine integers. Kind 2 names them in the general
+   * form, which admits a width that has no keyword of its own, and they are
+   * integers rather than names.
+   */
+  @Test
+  void machineIntegerCounterExample()
+  {
+    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v3.0.0'},{'objectType' : 'analysisStart','top' : 'main','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l8c3]','source' : 'PropAnnot','file' : './examples/bv.lus','line' : 8,'column' : 3,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.010},'k' : 0,'answer' : {'source' : 'bmc', 'value' : 'falsifiable'},'counterExample' :[{'blockType' : 'node','name' : 'main','streams' :[{'name' : 'i','type' : 'uint<8>','class' : 'local','instantValues' : [[0, 200],[1, 201]]},{'name' : 'j','type' : 'sint<8>','class' : 'local','instantValues' : [[0, 127],[1, -128]]},{'name' : 'k','type' : 'uint<24>','class' : 'local','instantValues' : [[0, 16777215]]}]}]},{'objectType' : 'analysisStop'}]";
+
+    Result result = Result.analyzeJsonResult(json);
+    assertNotNull(result.getRoot());
+
+    Property property = result.getRoot().getAnalyses().get(0).getFalsifiedProperties().get(0);
+    List<Stream> streams = property.getCounterExample().getTopNode().getStreams();
+
+    for (Stream stream : streams)
+    {
+      assertTrue(stream.getKind2Type() instanceof Int,
+          stream.getName() + " should be an integer, not " + stream.getKind2Type());
+    }
+
+    IntValue unsigned = (IntValue) streams.get(0).getStepValues().get(0).getKind2Value();
+    assertEquals(new BigInteger("200"), unsigned.getValue());
+
+    IntValue negative = (IntValue) streams.get(1).getStepValues().get(1).getKind2Value();
+    assertEquals(new BigInteger("-128"), negative.getValue());
+
+    // A width with no keyword of its own, which only the general form names
+    IntValue wide = (IntValue) streams.get(2).getStepValues().get(0).getKind2Value();
+    assertEquals(new BigInteger("16777215"), wide.getValue());
   }
 }
