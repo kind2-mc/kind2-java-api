@@ -39,6 +39,8 @@ public class Kind2Api {
 
   private List<String> otherOptions;
 
+  private Boolean safeMode;
+
   // module smt
   private SolverOption smtSolver;
   private QESolverOption qeSmtSolver;
@@ -129,6 +131,7 @@ public class Kind2Api {
    */
   public Kind2Api() {
     otherOptions = new ArrayList<>();
+    safeMode = false;
     smtSolver = null;
     qeSmtSolver = null;
     itpSmtSolver = null;
@@ -764,8 +767,24 @@ public class Kind2Api {
       options.add("--fake_filepath");
       options.add(fakeFilepath);
     }
+    if (safeMode != null){
+      options.add("--no_include");
+      options.add(safeMode.toString());
+    }
     options.addAll(this.otherOptions);
     return options;
+  }
+
+  /**
+   * If called with true, enables safe mode for this API instance. 
+   * Safe mode enables the following features: disabling the use of include statements, 
+   * automatic use of docker containers for executions of Kind 2 (to be implemented)
+   * <p>
+   * Default: false
+   * @param safeMode whether or not to enable safe mode.
+   */
+  public void setSafeMode(boolean safeMode){
+    this.safeMode = true;
   }
 
   /**
