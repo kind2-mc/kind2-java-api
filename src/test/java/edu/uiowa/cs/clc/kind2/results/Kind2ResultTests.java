@@ -9,6 +9,7 @@
 package edu.uiowa.cs.clc.kind2.results;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -16,7 +17,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.uiowa.cs.clc.kind2.Kind2Exception;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -663,5 +668,54 @@ public class Kind2ResultTests
     // A width with no keyword of its own, which only the general form names
     IntValue wide = (IntValue) streams.get(2).getStepValues().get(0).getKind2Value();
     assertEquals(new BigInteger("16777215"), wide.getValue());
+  }
+  /**
+   * A counterexample holding the rationals that are not numbers. A division
+   * by zero in the model reaches it as a fraction over a zero denominator,
+   * and reading one used to throw out of the constructor of {@link
+   * RealValue} and take the whole result with it.
+   */
+  @Test
+  void realValuesThatAreNotNumbers()
+  {
+    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v3.0.0'},{'objectType' : 'analysisStart','top' : 'bla','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l18c3]','source' : 'PropAnnot','file' : './examples/div.lus','line' : 18,'column' : 3,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.010},'k' : 0,'answer' : {'source' : 'bmc', 'value' : 'falsifiable'},'counterExample' :[{'blockType' : 'node','name' : 'bla','streams' :[{'name' : 'i','type' : 'real','class' : 'input','instantValues' : [[0, {'num': 0, 'den': 1}]]},{'name' : 'inf_pos','type' : 'real','class' : 'local','instantValues' : [[0, {'num': 1, 'den': 0}]]},{'name' : 'inf_neg','type' : 'real','class' : 'local','instantValues' : [[0, {'num': -1, 'den': 0}]]},{'name' : 'inf_p_div_n','type' : 'real','class' : 'local','instantValues' : [[0, {'num': 0, 'den': 0}]]}]}]},{'objectType' : 'analysisStop'}]";
+
+    Result result = Result.analyzeJsonResult(json);
+    assertNotNull(result.getRoot());
+
+    Property property = result.getRoot().getAnalyses().get(0).getFalsifiedProperties().get(0);
+    List<Stream> streams = property.getCounterExample().getTopNode().getStreams();
+
+    RealValue finite = realValueOf(streams.get(0));
+    assertEquals(RealValue.Kind.FINITE, finite.getKind());
+    assertTrue(finite.isFinite());
+    assertEquals(0, BigDecimal.ZERO.compareTo(finite.getValue()));
+    assertEquals(0.0, finite.getDoubleValue());
+
+    RealValue positive = realValueOf(streams.get(1));
+    assertEquals(RealValue.Kind.POSITIVE_INFINITY, positive.getKind());
+    assertFalse(positive.isFinite());
+    assertEquals("1/0", positive.toString());
+    assertEquals(Double.POSITIVE_INFINITY, positive.getDoubleValue());
+    assertThrows(Kind2Exception.class, positive::getValue);
+
+    RealValue negative = realValueOf(streams.get(2));
+    assertEquals(RealValue.Kind.NEGATIVE_INFINITY, negative.getKind());
+    assertEquals("-1/0", negative.toString());
+    assertEquals(Double.NEGATIVE_INFINITY, negative.getDoubleValue());
+
+    RealValue undefined = realValueOf(streams.get(3));
+    assertEquals(RealValue.Kind.UNDEFINED, undefined.getKind());
+    assertEquals("0/0", undefined.toString());
+    assertTrue(Double.isNaN(undefined.getDoubleValue()));
+
+    // The fraction Kind 2 reported is readable whichever kind it is
+    assertEquals(BigInteger.ONE, positive.getNumerator());
+    assertEquals(BigInteger.ZERO, positive.getDenominator());
+  }
+
+  private static RealValue realValueOf(Stream stream)
+  {
+    return (RealValue) stream.getStepValues().get(0).getKind2Value();
   }
 }
