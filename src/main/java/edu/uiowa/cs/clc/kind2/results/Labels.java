@@ -140,6 +140,21 @@ public class Labels
    * The element type of an array type, or the underlying type of a subrange type.
    */
   public static final String baseType = "baseType";
+
+  /**
+   * The constructors of a datatype.
+   */
+  public static final String constructors = "constructors";
+
+  /**
+   * The constructor an algebraic datatype value was built with.
+   */
+  public static final String constructor = "constructor";
+
+  /**
+   * The fields a datatype constructor was applied to.
+   */
+  public static final String args = "args";
   /**
    * The class of a stream, which is one of input, output, or local.
    */

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -574,5 +575,60 @@ public class Kind2ResultTests
     Result result = Result.analyzeJsonResult(json);
     assertNotNull(result.getRoot());
     System.out.println(result);
+  }
+  /**
+   * A counterexample over an algebraic datatype. A constructor taking no
+   * fields is written as a constructor with an empty field list.
+   */
+  @Test
+  void datatypeCounterExample()
+  {
+    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v3.0.0'},{'objectType' : 'analysisStart','top' : 'main','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l6c3]','source' : 'PropAnnot','file' : './examples/adt.lus','line' : 6,'column' : 3,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.010},'k' : 0,'answer' : {'source' : 'bmc', 'value' : 'falsifiable'},'counterExample' :[{'blockType' : 'node','name' : 'main','streams' :[{'name' : 'l','type' : 'datatype','typeInfo' : {'name' : 'List','constructors' : ['Nil','Cons']},'class' : 'input','instantValues' : [[0, {'constructor' : 'Nil', 'args' : []}],[1, {'constructor' : 'Cons', 'args' : [1, {'constructor' : 'Nil', 'args' : []}]}]]}]}]},{'objectType' : 'analysisStop'}]";
+
+    Result result = Result.analyzeJsonResult(json);
+    assertNotNull(result.getRoot());
+
+    Property property = result.getRoot().getAnalyses().get(0).getFalsifiedProperties().get(0);
+    Stream stream = property.getCounterExample().getTopNode().getStreams().get(0);
+
+    Datatype datatype = (Datatype) stream.getKind2Type();
+    assertEquals("List", datatype.toString());
+    assertEquals(Arrays.asList("Nil", "Cons"), datatype.getConstructors());
+
+    DatatypeValue nil = (DatatypeValue) stream.getStepValues().get(0).getKind2Value();
+    assertEquals("Nil", nil.getConstructor());
+    assertTrue(nil.getArgs().isEmpty());
+    assertEquals("Nil", nil.toString());
+
+    DatatypeValue cons = (DatatypeValue) stream.getStepValues().get(1).getKind2Value();
+    assertEquals("Cons", cons.getConstructor());
+    assertEquals(2, cons.getArgs().size());
+    assertEquals("1", cons.getArgs().get(0).toString());
+    assertEquals("Nil", cons.getArgs().get(1).toString());
+    assertEquals("Cons(1, Nil)", cons.toString());
+  }
+
+  /**
+   * Kind 2 releases up to 3.0.0 wrote a constructor taking no fields as a
+   * bare name, which gson read as a string. That output still reads as the
+   * constructor it names.
+   */
+  @Test
+  void datatypeCounterExampleFromOlderKind2()
+  {
+    String json = "[{'objectType' : 'log','level' : 'info','source' : 'parse','value' : 'kind2 v3.0.0'},{'objectType' : 'analysisStart','top' : 'main','concrete' : [],'abstract' : [],'assumptions' : []},{'objectType' : 'property','name' : 'InvProp[l6c3]','source' : 'PropAnnot','file' : './examples/adt.lus','line' : 6,'column' : 3,'runtime' : {'unit' : 'sec', 'timeout' : false, 'value' : 0.010},'k' : 0,'answer' : {'source' : 'bmc', 'value' : 'falsifiable'},'counterExample' :[{'blockType' : 'node','name' : 'main','streams' :[{'name' : 'l','type' : 'datatype','typeInfo' : {'name' : 'List','constructors' : ['Nil','Cons']},'class' : 'input','instantValues' : [[0, Nil],[1, {'constructor' : 'Cons', 'args' : [1, Nil]}]]}]}]},{'objectType' : 'analysisStop'}]";
+
+    Result result = Result.analyzeJsonResult(json);
+    assertNotNull(result.getRoot());
+
+    Property property = result.getRoot().getAnalyses().get(0).getFalsifiedProperties().get(0);
+    Stream stream = property.getCounterExample().getTopNode().getStreams().get(0);
+
+    DatatypeValue nil = (DatatypeValue) stream.getStepValues().get(0).getKind2Value();
+    assertEquals("Nil", nil.getConstructor());
+    assertTrue(nil.getArgs().isEmpty());
+
+    DatatypeValue cons = (DatatypeValue) stream.getStepValues().get(1).getKind2Value();
+    assertEquals("Cons(1, Nil)", cons.toString());
   }
 }

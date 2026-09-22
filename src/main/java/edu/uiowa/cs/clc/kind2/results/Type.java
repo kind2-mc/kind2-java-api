@@ -9,6 +9,10 @@ package edu.uiowa.cs.clc.kind2.results;
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An abstract class for all kind2 types.
@@ -40,6 +44,31 @@ abstract public class Type
   {
     return getType(type, null);
   }
+  /**
+   * Builds the datatype described by the given type information. The element
+   * type of an array is named without any information of its own, so a
+   * datatype reached that way is left with its constructors unknown rather
+   * than rejected.
+   */
+  private static Type makeDatatype(JsonElement typeInfo)
+  {
+    if (typeInfo == null)
+    {
+      return new Datatype("datatype", new ArrayList<>());
+    }
+    JsonObject info = typeInfo.getAsJsonObject();
+    String name = info.has(Labels.name) ? info.get(Labels.name).getAsString() : "datatype";
+    List<String> constructors = new ArrayList<>();
+    if (info.has(Labels.constructors))
+    {
+      for (JsonElement constructor : info.get(Labels.constructors).getAsJsonArray())
+      {
+        constructors.add(constructor.getAsString());
+      }
+    }
+    return new Datatype(name, constructors);
+  }
+
   private static Type makeNestedArray(String baseType, int numDims){
     if (numDims == 0){
       return getType(baseType);
@@ -80,6 +109,8 @@ abstract public class Type
         String baseType =  typeInfo.getAsJsonObject().get(Labels.baseType).getAsString();
         int numIndicies = typeInfo.getAsJsonObject().get("sizes").getAsJsonArray().size();
         return makeNestedArray(baseType, numIndicies);
+      case "datatype":
+        return makeDatatype(typeInfo);
       default:
       {
         if (typeString.matches("subrange \\[.*?\\] of int"))
