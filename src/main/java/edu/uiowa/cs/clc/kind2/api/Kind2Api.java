@@ -36,6 +36,10 @@ public class Kind2Api {
    */
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
+  private static final Double SAFE_MODE_CPU_USAGE = 1.0;
+  private static final String SAFE_MODE_MEMORY_USAGE = "2g";
+  private static final String SAFE_MODE_MEMORY_SWAP = SAFE_MODE_MEMORY_USAGE;
+  
 
   private List<String> otherOptions;
 
@@ -286,17 +290,23 @@ public class Kind2Api {
    * @throws Kind2Exception if {@code uri} is not a local file or Kind 2 fails to run
    */
   public String interpret(URI uri, String main, String json) {
-    List<String> options = new ArrayList<>();
-    options.add(KIND2);
-    options.addAll(getOptions());
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    Path lustreFile = toLocalPath(uri).toAbsolutePath().normalize();
+
+    List<String> options = getInterpreterCommand(
+        interpreterFile,
+        lustreFile
+    );
+
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
-    options.add(toLocalPath(uri).toString());
+    
     ProcessBuilder builder = new ProcessBuilder(options);
+    
+    setApiDebug();
+    debug.println("Kind 2 command(URI Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
     try {
       Process process = builder.start();
       final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
@@ -344,16 +354,21 @@ public class Kind2Api {
    * @throws Kind2Exception if Kind 2 fails to run
    */
   public String interpret(String program, String main, String json) {
-    List<String> options = new ArrayList<>();
-    options.add(KIND2);
-    options.addAll(getOptions());
+
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+
+    List<String> options =
+        getInterpreterCommand(interpreterFile, null);
+
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
+    
     ProcessBuilder builder = new ProcessBuilder(options);
+
+    setApiDebug();
+    debug.println("Kind 2 command(String Interpret):\n " + ApiUtil.getQuotedCommand(builder.command()));
     try {
       Process process = builder.start();
       process.getOutputStream().write(program.getBytes());
@@ -406,6 +421,7 @@ public class Kind2Api {
   private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder();
+    setApiDebug();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
     boolean exceptionThrown = false;
@@ -464,13 +480,142 @@ public class Kind2Api {
     }
   }
 
+  private String dockerImage = "kind2-safe:latest";
+  private static final String DOCKER_KIND2 = "/usr/local/bin/kind2";
+  private static final String DOCKER_INTERPRETER_INPUT = "/tmp/interpreter-input.json";
+  private static final String DOCKER_LUSTRE_FILE = "/tmp/program.lus";
+
+  public void setDockerImage(String dockerImage) {
+    this.dockerImage = dockerImage;
+  }
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
-    options.add(KIND2);
+
+    if (safeMode) {
+      Path kind2Path = Paths.get(KIND2).normalize().toAbsolutePath();
+      Path z3Path = Paths.get(z3Bin).normalize().toAbsolutePath();
+      if (!kind2Path.isAbsolute()) {
+        throw new Kind2Exception("Kind 2 path must be absolute: " + KIND2);
+      }
+
+      if (!kind2Path.toFile().isFile()) {
+        throw new Kind2Exception(
+            "Kind 2 executable does not exist: " + kind2Path);
+      }
+
+      options.add("docker");
+      options.add("run");
+      options.add("--rm");
+      options.add("-i");
+
+      options.add("--cpus");
+      options.add(SAFE_MODE_CPU_USAGE.toString());
+
+      options.add("--memory");
+      options.add(SAFE_MODE_MEMORY_USAGE);
+
+      options.add("--memory-swap");
+      options.add(SAFE_MODE_MEMORY_SWAP);
+
+      options.add("--network");
+      options.add("none");
+
+      options.add("--mount");
+      options.add(
+          "type=bind,source=" + kind2Path
+          + ",target=/usr/local/bin/kind2,readonly");
+      options.add("--mount");
+      options.add(
+          "type=bind,source=" + z3Path +
+          ",target=/usr/local/bin/z3,readonly"
+      );
+      options.add(dockerImage);
+      options.add("/usr/local/bin/kind2");
+    } else {
+      options.add(KIND2);
+    }
+
     options.addAll(getOptions());
+
     ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
     return builder;
+  }
+
+
+  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile) {
+    List<String> options = new ArrayList<>();
+
+    if (!safeMode) {
+      options.add(KIND2);
+      options.addAll(getOptions());
+
+      options.add("--interpreter_input_file");
+      options.add(interpreterFile.getAbsolutePath());
+
+      if (lustreFile != null) {
+        options.add(lustreFile.toString());
+      }
+
+      return options;
+    }
+    Path z3Path = Paths.get(z3Bin).normalize().toAbsolutePath();
+    Path kind2Path = Paths.get(KIND2).normalize().toAbsolutePath();
+
+    options.add("docker");
+    options.add("run");
+    options.add("--rm");
+    options.add("-i");
+
+    options.add("--cpus");
+    options.add(SAFE_MODE_CPU_USAGE.toString());
+
+    options.add("--memory");
+    options.add(SAFE_MODE_MEMORY_USAGE);
+
+    options.add("--memory-swap");
+    options.add(SAFE_MODE_MEMORY_SWAP);
+
+    options.add("--network");
+    options.add("none");
+
+    options.add("--mount");
+      options.add(
+          "type=bind,source=" + kind2Path
+          + ",target=/usr/local/bin/kind2,readonly");
+      options.add("--mount");
+      options.add(
+          "type=bind,source=" + z3Path +
+          ",target=/usr/local/bin/z3,readonly"
+      );
+
+    options.add("--mount");
+    options.add(
+        "type=bind,source=" + interpreterFile.getAbsolutePath()
+            + ",target=" + DOCKER_INTERPRETER_INPUT
+            + ",readonly");
+
+    if (lustreFile != null) {
+      options.add("--mount");
+      options.add(
+          "type=bind,source=" + lustreFile.toAbsolutePath()
+              + ",target=" + DOCKER_LUSTRE_FILE
+              + ",readonly");
+    }
+
+    options.add(dockerImage);
+    options.add(DOCKER_KIND2);
+
+    options.addAll(getOptions());
+
+    options.add("--interpreter_input_file");
+    options.add(DOCKER_INTERPRETER_INPUT);
+
+    if (lustreFile != null) {
+      options.add(DOCKER_LUSTRE_FILE);
+    }
+
+    return options;
   }
 
   /**
@@ -529,37 +674,79 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if (bitwuzlaBin != null) {
-      options.add("--bitwuzla_bin");
-      options.add(bitwuzlaBin);
-    }
-    if (cvc5Bin != null) {
-      options.add("--cvc5_bin");
-      options.add(cvc5Bin);
-    }
-    if (mathsatBin != null) {
-      options.add("--mathsat_bin");
-      options.add(mathsatBin);
-    }
-    if (opensmtBin != null) {
-      options.add("--opensmt_bin");
-      options.add(opensmtBin);
-    }
-    if (smtinterpolJar != null) {
-      options.add("--smtinterpol_jar");
-      options.add(smtinterpolJar);
-    }
-    if (yicesBin != null) {
-      options.add("--yices_bin");
-      options.add(yicesBin);
-    }
-    if (yices2Bin != null) {
-      options.add("--yices2_bin");
-      options.add(yices2Bin);
-    }
-    if (z3Bin != null) {
-      options.add("--z3_bin");
-      options.add(z3Bin);
+    if(!safeMode){
+      if (bitwuzlaBin != null) {
+        options.add("--bitwuzla_bin");
+        options.add(bitwuzlaBin);
+      }
+      if (cvc5Bin != null) {
+        options.add("--cvc5_bin");
+        options.add(cvc5Bin);
+      }
+      if (mathsatBin != null) {
+        options.add("--mathsat_bin");
+        options.add(mathsatBin);
+      }
+      if (opensmtBin != null) {
+        options.add("--opensmt_bin");
+        options.add(opensmtBin);
+      }
+      if (smtinterpolJar != null) {
+        options.add("--smtinterpol_jar");
+        options.add(smtinterpolJar);
+      }
+      if (yicesBin != null) {
+        options.add("--yices_bin");
+        options.add(yicesBin);
+      }
+      if (yices2Bin != null) {
+        options.add("--yices2_bin");
+        options.add(yices2Bin);
+      }
+      if (z3Bin != null) {
+        options.add("--z3_bin");
+        options.add(z3Bin);
+      }
+    } else { // safe mode, use fixed container paths
+      if (bitwuzlaBin != null) {  
+        options.add("--bitwuzla_bin");
+        options.add("/usr/local/bin/bitwuzla");
+      }
+
+      if (cvc5Bin != null) {
+        options.add("--cvc5_bin");
+        options.add("/usr/local/bin/cvc5");
+      }
+
+      if (mathsatBin != null) {
+        options.add("--mathsat_bin");
+        options.add("/usr/local/bin/mathsat");
+      }
+
+      if (opensmtBin != null) {
+        options.add("--opensmt_bin");
+        options.add("/usr/local/bin/opensmt");
+      }
+
+      if (smtinterpolJar != null) {
+        options.add("--smtinterpol_jar");
+        options.add("/usr/local/lib/smtinterpol.jar");
+      }
+
+      if (yicesBin != null) {
+        options.add("--yices_bin");
+        options.add("/usr/local/bin/yices");
+      }
+
+      if (yices2Bin != null) {
+        options.add("--yices2_bin");
+        options.add("/usr/local/bin/yices-smt2");
+      }
+
+      if (z3Bin != null) {
+        options.add("--z3_bin");
+        options.add("/usr/local/bin/z3");
+      }
     }
     if (smtTrace != null) {
       options.add("--smt_trace");
