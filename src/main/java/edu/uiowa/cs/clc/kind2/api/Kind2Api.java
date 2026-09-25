@@ -131,7 +131,7 @@ public class Kind2Api {
    */
   public Kind2Api() {
     otherOptions = new ArrayList<>();
-    safeMode = false;
+    safeMode = null;
     smtSolver = null;
     qeSmtSolver = null;
     itpSmtSolver = null;
@@ -784,7 +784,7 @@ public class Kind2Api {
    * @param safeMode whether or not to enable safe mode.
    */
   public void setSafeMode(boolean safeMode){
-    this.safeMode = true;
+    this.safeMode = safeMode;
   }
 
   /**
