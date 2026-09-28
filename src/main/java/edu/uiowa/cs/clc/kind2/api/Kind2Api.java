@@ -36,9 +36,9 @@ public class Kind2Api {
    */
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private static final Double SAFE_MODE_CPU_USAGE = 1.0;
-  private static final String SAFE_MODE_MEMORY_USAGE = "2g";
-  private static final String SAFE_MODE_MEMORY_SWAP = SAFE_MODE_MEMORY_USAGE;
+  private static Double SAFE_MODE_CPU_USAGE = 1.0;
+  private static String SAFE_MODE_MEMORY_USAGE = "2g";
+  private static String SAFE_MODE_MEMORY_SWAP = SAFE_MODE_MEMORY_USAGE;
   
 
   private List<String> otherOptions;
@@ -960,6 +960,39 @@ public class Kind2Api {
     }
     options.addAll(this.otherOptions);
     return options;
+  }
+  /**
+   * Sets the amount of CPU usage that the API allows each execution of Kind 2 to use.
+   * Units are in cores, so a value of 1.5 means "Use up to 1.5 CPU cores"
+   * <p>
+   * Default: 1.0
+   * @param usage Usage (in cores) allowed to executions of Kind 2.
+   */
+  public void setSafeModeCpuUsage(double usage){
+    SAFE_MODE_CPU_USAGE = usage;
+  }
+  /**
+   * Sets the amount of physical memory usage that the API allows each execution of Kind 2 to use.
+   * Units are included in the string, so "1.5g" means "Use up to 1.5 gigabytes of RAM"
+   * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
+   * <p>
+   * Default: "2g"
+   * @param amount of physical memory allowed to executions of Kind 2.
+   */
+  public void setSafeModeMemoryUsage(String amount){
+    SAFE_MODE_MEMORY_USAGE = amount;
+  }
+  /**
+   * Sets the cumulative amount of swap space and physical memory usage that the 
+   * API allows each execution of Kind 2 to use.
+   * Units are included in the string, so "1.5g" means "Use up to 1.5 gigabytes of RAM"
+   * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
+   * <p>
+   * Default: "2g"
+   * @param amount of swap + physical memory allowed to executions of Kind 2.
+   */
+  public void setSafeModeSwapUsage(String amount){
+    SAFE_MODE_MEMORY_SWAP = amount;
   }
 
   /**
