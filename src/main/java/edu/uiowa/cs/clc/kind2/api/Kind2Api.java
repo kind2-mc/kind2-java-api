@@ -987,14 +987,12 @@ public class Kind2Api {
     String num = value.substring(0, value.length()-1);
     String allowedUnits = "gmkb";
     if (!allowedUnits.contains(unit)){
-          throw new IllegalArgumentException(setting + " was set to " + value + 
-            ", but a unit was expected (e.g. 1g)");
-    }
-    try {
-      if (Integer.parseInt(num) <= 0) throw new NumberFormatException();
-    } catch (NumberFormatException e) {
       throw new IllegalArgumentException(setting + " was set to " + value + 
-        ", but a positive integer value with a unit was expected (e.g. 1g)");
+        ", but a unit was expected (e.g. 1g)");
+    }
+    if (Integer.parseInt(num) <= 0){
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+      ", but a positive integer value with a unit was expected (e.g. 1g)"); 
     }
   }
   /**
@@ -1010,12 +1008,10 @@ public class Kind2Api {
     switch(unit){
       case 'b': modifier = 1L; break;
       case 'k': modifier = 1000L; break;
-      case 'm': modifier = 1000L^2; break; 
-      case 'g': modifier = 1000L^3; break;
+      case 'm': modifier = 1000L * 1000L; break; 
+      case 'g': modifier = 1000L * 1000L * 1000L; break;
       default: /* Should be impossible given validateMemoryValue() was called on v beforehand */ throw new IllegalArgumentException(v + " is not a valid memory value");
     }
-    this.setApiDebug();
-    apiDebug(v + "=" + value*modifier + " bytes");
     return value*modifier;
   }
   /**
