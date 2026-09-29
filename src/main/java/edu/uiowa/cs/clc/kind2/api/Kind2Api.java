@@ -491,21 +491,31 @@ public class Kind2Api {
   public void setDockerImage(String dockerImage) {
     this.dockerImage = dockerImage;
   }
+  private void mountIfPresent(List<String> options, String binPath){
+    if (binPath != null) {
+        Path path = Paths.get(binPath).normalize().toAbsolutePath();
+        String filename = path.getFileName().toString();
+        options.add("--mount");
+        options.add(
+            "type=bind,source=" + path
+            + ",target=/usr/local/bin/"+ filename + ",readonly"
+        );
+      }
+  }
+  private void mountSolversToDocker(List<String> options){
+    mountIfPresent(options, bitwuzlaBin);
+    mountIfPresent(options, cvc5Bin);
+    mountIfPresent(options, mathsatBin);
+    mountIfPresent(options, opensmtBin);
+    mountIfPresent(options, smtinterpolJar);
+    mountIfPresent(options, yicesBin);
+    mountIfPresent(options, yices2Bin);
+    mountIfPresent(options, z3Bin);    
+  }
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
 
     if (safeMode) {
-      Path kind2Path = Paths.get(KIND2).normalize().toAbsolutePath();
-      Path z3Path = Paths.get(z3Bin).normalize().toAbsolutePath();
-      if (!kind2Path.isAbsolute()) {
-        throw new Kind2Exception("Kind 2 path must be absolute: " + KIND2);
-      }
-
-      if (!kind2Path.toFile().isFile()) {
-        throw new Kind2Exception(
-            "Kind 2 executable does not exist: " + kind2Path);
-      }
-
       options.add("docker");
       options.add("run");
       options.add("--rm");
@@ -522,16 +532,10 @@ public class Kind2Api {
 
       options.add("--network");
       options.add("none");
-
-      options.add("--mount");
-      options.add(
-          "type=bind,source=" + kind2Path
-          + ",target=/usr/local/bin/kind2,readonly");
-      options.add("--mount");
-      options.add(
-          "type=bind,source=" + z3Path +
-          ",target=/usr/local/bin/z3,readonly"
-      );
+      mountIfPresent(options, KIND2);
+      
+      mountSolversToDocker(options);
+      
       options.add(dockerImage);
       options.add("/usr/local/bin/kind2");
     } else {
@@ -562,8 +566,6 @@ public class Kind2Api {
 
       return options;
     }
-    Path z3Path = Paths.get(z3Bin).normalize().toAbsolutePath();
-    Path kind2Path = Paths.get(KIND2).normalize().toAbsolutePath();
 
     options.add("docker");
     options.add("run");
@@ -582,15 +584,8 @@ public class Kind2Api {
     options.add("--network");
     options.add("none");
 
-    options.add("--mount");
-      options.add(
-          "type=bind,source=" + kind2Path
-          + ",target=/usr/local/bin/kind2,readonly");
-      options.add("--mount");
-      options.add(
-          "type=bind,source=" + z3Path +
-          ",target=/usr/local/bin/z3,readonly"
-      );
+    mountIfPresent(options, KIND2);
+    mountSolversToDocker(options);
 
     options.add("--mount");
     options.add(
