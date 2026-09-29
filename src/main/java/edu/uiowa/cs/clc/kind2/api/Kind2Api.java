@@ -36,9 +36,12 @@ public class Kind2Api {
    */
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private static Double safeModeCpuUsage = 1.0;
-  private static String safeModeMemoryUsage = "2g";
-  private static String safeModeSwapUsage = safeModeMemoryUsage;
+  private static final Double DEFAULT_SAFE_MODE_CPU_USAGE = 1.0;
+  private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
+  private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+  private Double safeModeCpuUsage;
+  private String safeModeMemoryUsage;
+  private String safeModeSwapUsage;
   
 
   private List<String> otherOptions;
@@ -201,6 +204,9 @@ public class Kind2Api {
     lusMain = null;
     lusMainType = null;
     lusMainConst = null;
+    safeModeCpuUsage = DEFAULT_SAFE_MODE_CPU_USAGE;
+    safeModeMemoryUsage = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+    safeModeSwapUsage  = DEFAULT_SAFE_MODE_SWAP_USAGE;
   }
 
   DebugLogger debug = new DebugLogger();
