@@ -998,15 +998,40 @@ public class Kind2Api {
     }
   }
   /**
+   * This function should onlt be called after v has been validated by validateMemoryValue().
+   * @param v the source string
+   * @return the number of bytes that v represents
+   */
+  private long memoryValueToBytes(String v){
+
+    long value = Long.parseLong(v.substring(0, v.length()-1));
+    char unit = v.charAt(v.toLowerCase().length()-1);
+    long modifier;
+    switch(unit){
+      case 'b': modifier = 1L; break;
+      case 'k': modifier = 1000L; break;
+      case 'm': modifier = 1000L^2; break; 
+      case 'g': modifier = 1000L^3; break;
+      default: /* Should be impossible given validateMemoryValue() was called on v beforehand */ throw new IllegalArgumentException(v + " is not a valid memory value");
+    }
+    this.setApiDebug();
+    apiDebug(v + "=" + value*modifier + " bytes");
+    return value*modifier;
+  }
+  /**
    * Sets the amount of physical memory usage that the API allows each execution of Kind 2 to use.
    * Units are included in the string, so "1g" means "Use up to 1 gigabyte of RAM"
    * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
+   * If the value set here exceeds the safe mode swap usage, the swap usage is increased to the amount provided.
    * <p>
    * Default: "2g"
    * @param amount of physical memory allowed to executions of Kind 2.
    */
   public void setSafeModeMemoryUsage(String amount){
     validateMemoryValue(amount, "Memory usage");
+    if (memoryValueToBytes(amount) > memoryValueToBytes(safeModeSwapUsage)){
+      safeModeSwapUsage = amount;
+    }
     safeModeMemoryUsage = amount;
   }
   /**
