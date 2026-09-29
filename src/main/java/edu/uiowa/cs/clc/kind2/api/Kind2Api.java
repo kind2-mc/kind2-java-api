@@ -497,8 +497,8 @@ public class Kind2Api {
         String filename = path.getFileName().toString();
         options.add("--mount");
         options.add(
-            "type=bind,source=" + path
-            + ",target=/usr/local/bin/"+ filename + ",readonly"
+            "type=bind,source=\"" + path
+            + "\",target=/usr/local/bin/"+ filename + ",readonly"
         );
       }
   }
