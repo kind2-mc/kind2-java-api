@@ -36,9 +36,9 @@ public class Kind2Api {
    */
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
-  private static Double SAFE_MODE_CPU_USAGE = 1.0;
-  private static String SAFE_MODE_MEMORY_USAGE = "2g";
-  private static String SAFE_MODE_MEMORY_SWAP = SAFE_MODE_MEMORY_USAGE;
+  private static Double safeModeCpuUsage = 1.0;
+  private static String safeModeMemoryUsage = "2g";
+  private static String safeModeSwapUsage = safeModeMemoryUsage;
   
 
   private List<String> otherOptions;
@@ -509,13 +509,13 @@ public class Kind2Api {
       options.add("-i");
 
       options.add("--cpus");
-      options.add(SAFE_MODE_CPU_USAGE.toString());
+      options.add(safeModeCpuUsage.toString());
 
       options.add("--memory");
-      options.add(SAFE_MODE_MEMORY_USAGE);
+      options.add(safeModeMemoryUsage);
 
       options.add("--memory-swap");
-      options.add(SAFE_MODE_MEMORY_SWAP);
+      options.add(safeModeSwapUsage);
 
       options.add("--network");
       options.add("none");
@@ -568,13 +568,13 @@ public class Kind2Api {
     options.add("-i");
 
     options.add("--cpus");
-    options.add(SAFE_MODE_CPU_USAGE.toString());
+    options.add(safeModeCpuUsage.toString());
 
     options.add("--memory");
-    options.add(SAFE_MODE_MEMORY_USAGE);
+    options.add(safeModeMemoryUsage);
 
     options.add("--memory-swap");
-    options.add(SAFE_MODE_MEMORY_SWAP);
+    options.add(safeModeSwapUsage);
 
     options.add("--network");
     options.add("none");
@@ -961,6 +961,7 @@ public class Kind2Api {
     options.addAll(this.otherOptions);
     return options;
   }
+
   /**
    * Sets the amount of CPU usage that the API allows each execution of Kind 2 to use.
    * Units are in cores, so a value of 1.5 means "Use up to 1.5 CPU cores"
@@ -969,30 +970,54 @@ public class Kind2Api {
    * @param usage Usage (in cores) allowed to executions of Kind 2.
    */
   public void setSafeModeCpuUsage(double usage){
-    SAFE_MODE_CPU_USAGE = usage;
+    if(usage <= 0.0) throw new IllegalArgumentException("CPU usage was set to " + usage + 
+      ", but a positive value is expected (e.g. 1.5)");
+    safeModeCpuUsage = usage;
+  }
+
+  private void validateMemoryValue(String value, String setting){
+    if (value == null || value.length() < 2) {
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+        ", but a positive integer value with a unit was expected (e.g. 1g)");
+    }
+    String unit = String.valueOf(value.charAt(value.length()-1)).toLowerCase();
+    String num = value.substring(0, value.length()-1);
+    String allowedUnits = "gmkb";
+    if (!allowedUnits.contains(unit)){
+          throw new IllegalArgumentException(setting + " was set to " + value + 
+            ", but a unit was expected (e.g. 1g)");
+    }
+    try {
+      if (Integer.parseInt(num) <= 0) throw new NumberFormatException();
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+        ", but a positive integer value with a unit was expected (e.g. 1g)");
+    }
   }
   /**
    * Sets the amount of physical memory usage that the API allows each execution of Kind 2 to use.
-   * Units are included in the string, so "1.5g" means "Use up to 1.5 gigabytes of RAM"
+   * Units are included in the string, so "1g" means "Use up to 1 gigabyte of RAM"
    * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
    * <p>
    * Default: "2g"
    * @param amount of physical memory allowed to executions of Kind 2.
    */
   public void setSafeModeMemoryUsage(String amount){
-    SAFE_MODE_MEMORY_USAGE = amount;
+    validateMemoryValue(amount, "Memory usage");
+    safeModeMemoryUsage = amount;
   }
   /**
    * Sets the cumulative amount of swap space and physical memory usage that the 
    * API allows each execution of Kind 2 to use.
-   * Units are included in the string, so "1.5g" means "Use up to 1.5 gigabytes of RAM"
+   * Units are included in the string, "1g" means "Use up to 1 gigabyte of combined physical memory and swap"
    * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
    * <p>
    * Default: "2g"
    * @param amount of swap + physical memory allowed to executions of Kind 2.
    */
   public void setSafeModeSwapUsage(String amount){
-    SAFE_MODE_MEMORY_SWAP = amount;
+    validateMemoryValue(amount, "Swap usage");
+    safeModeSwapUsage = amount;
   }
 
   /**
