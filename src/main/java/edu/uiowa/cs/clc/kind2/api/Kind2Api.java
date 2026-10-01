@@ -1026,7 +1026,7 @@ public class Kind2Api {
   private long memoryValueToBytes(String v){
 
     long value = Long.parseLong(v.substring(0, v.length()-1));
-    char unit = v.charAt(v.toLowerCase().length()-1);
+    char unit = Character.toLowerCase(v.charAt(v.length()-1));
     long modifier;
     switch(unit){
       case 'b': modifier = 1L; break;
