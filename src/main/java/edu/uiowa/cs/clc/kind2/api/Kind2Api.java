@@ -739,7 +739,7 @@ public class Kind2Api {
         options.add("--z3_bin");
         options.add(DOCKER_Z3_BIN);
       }
-    } else { // safe mode, use fixed container paths
+    } else { // normal mode, use given paths
       if (bitwuzlaBin != null) {
         options.add("--bitwuzla_bin");
         options.add(bitwuzlaBin);
