@@ -426,6 +426,7 @@ public class Kind2Api {
   private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
       throws IOException, InterruptedException {
     ProcessBuilder builder = getKind2ProcessBuilder();
+    setApiDebug();
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
     Process process = null;
     boolean exceptionThrown = false;
@@ -521,14 +522,15 @@ public class Kind2Api {
 
   private void mountIfPresent(List<String> options, String settingName, String binPath){
     if (binPath != null) {
-        Path path = requireSafeModePath(settingName, binPath);
-        String filename = path.getFileName().toString();
-        options.add("--mount");
-        options.add(
-            "type=bind,source=\"" + path
-            + "\",target=/usr/local/bin/"+ filename + ",readonly"
-        );
-      }
+      Path path = requireSafeModePath(settingName, binPath);
+      String filename = path.getFileName().toString();
+      String dockerSourcePath = path.toString().replace(" ", "\\\\ ");
+      options.add("--mount");
+      options.add(
+      "type=bind,source=" + dockerSourcePath
+          + ",target=/usr/local/bin/"+ filename + ",readonly"
+      );
+    }
   }
   private void mountSolversToDocker(List<String> options){
     mountIfPresent(options, "bitwuzlaBin", bitwuzlaBin);
