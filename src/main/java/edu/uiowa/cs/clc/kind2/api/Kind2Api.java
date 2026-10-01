@@ -527,15 +527,19 @@ public class Kind2Api {
     return path;
   }
 
+  private static String csvQuote(String text) {
+    return "\"" + text.replace("\"", "\"\"") + "\"";
+  }
+
+  private static String bindMountSpec(Path sourcePath, String dockerTargetPath) {
+    return "type=bind," + csvQuote("source=" + sourcePath) + ",target=" + dockerTargetPath + ",readonly";
+  }
+
   private void mountIfPresent(List<String> options, String settingName, String binPath, String dockerTargetPath){
     if (binPath != null) {
       Path path = requireSafeModePath(settingName, binPath);
-      String dockerSourcePath = path.toString().replace(" ", "\\\\ ");
       options.add("--mount");
-      options.add(
-      "type=bind,source=" + dockerSourcePath
-          + ",target=" + dockerTargetPath + ",readonly"
-      );
+      options.add(bindMountSpec(path, dockerTargetPath));
     }
   }
   private void mountSolversToDocker(List<String> options){
@@ -611,17 +615,11 @@ public class Kind2Api {
       mountSolversToDocker(options);
 
       options.add("--mount");
-      options.add(
-          "type=bind,source=" + interpreterFile.getAbsolutePath()
-              + ",target=" + DOCKER_INTERPRETER_INPUT
-              + ",readonly");
+      options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
 
       if (lustreFile != null) {
         options.add("--mount");
-        options.add(
-            "type=bind,source=" + lustreFile.toAbsolutePath()
-                + ",target=" + DOCKER_LUSTRE_FILE
-                + ",readonly");
+        options.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
       }
 
       options.add(dockerImage);
