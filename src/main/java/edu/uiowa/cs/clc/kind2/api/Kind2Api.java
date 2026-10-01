@@ -1064,6 +1064,10 @@ public class Kind2Api {
    */
   public void setSafeModeSwapUsage(String amount){
     validateMemoryValue(amount, "Swap usage");
+    if (memoryValueToBytes(amount) < memoryValueToBytes(safeModeMemoryUsage)) {
+      throw new IllegalArgumentException("Swap usage was set to " + amount
+          + ", but it must be greater than or equal to the memory usage (" + safeModeMemoryUsage + ")");
+    }
     safeModeSwapUsage = amount;
   }
 
