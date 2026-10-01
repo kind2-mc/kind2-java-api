@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -491,9 +492,36 @@ public class Kind2Api {
   public void setDockerImage(String dockerImage) {
     this.dockerImage = dockerImage;
   }
-  private void mountIfPresent(List<String> options, String binPath){
+  private Path requireSafeModePath(String settingName, String configuredPath) {
+    if (configuredPath == null) {
+      return null;
+    }
+
+    final Path path;
+    try {
+      path = Paths.get(configuredPath).normalize();
+    } catch (InvalidPathException e) {
+      throw new Kind2Exception(settingName + " is not a valid path: " + configuredPath, e);
+    }
+
+    if (!path.isAbsolute()) {
+      throw new Kind2Exception(settingName + " must be set to an absolute path in safe mode: " + configuredPath);
+    }
+
+    if (!path.toFile().exists()) {
+      throw new Kind2Exception(settingName + " does not exist: " + path);
+    }
+
+    if (!path.toFile().isFile()) {
+      throw new Kind2Exception(settingName + " is not a file: " + path);
+    }
+
+    return path;
+  }
+
+  private void mountIfPresent(List<String> options, String settingName, String binPath){
     if (binPath != null) {
-        Path path = Paths.get(binPath).normalize().toAbsolutePath();
+        Path path = requireSafeModePath(settingName, binPath);
         String filename = path.getFileName().toString();
         options.add("--mount");
         options.add(
@@ -503,19 +531,19 @@ public class Kind2Api {
       }
   }
   private void mountSolversToDocker(List<String> options){
-    mountIfPresent(options, bitwuzlaBin);
-    mountIfPresent(options, cvc5Bin);
-    mountIfPresent(options, mathsatBin);
-    mountIfPresent(options, opensmtBin);
-    mountIfPresent(options, smtinterpolJar);
-    mountIfPresent(options, yicesBin);
-    mountIfPresent(options, yices2Bin);
-    mountIfPresent(options, z3Bin);    
+    mountIfPresent(options, "bitwuzlaBin", bitwuzlaBin);
+    mountIfPresent(options, "cvc5Bin", cvc5Bin);
+    mountIfPresent(options, "mathsatBin", mathsatBin);
+    mountIfPresent(options, "opensmtBin", opensmtBin);
+    mountIfPresent(options, "smtinterpolJar", smtinterpolJar);
+    mountIfPresent(options, "yicesBin", yicesBin);
+    mountIfPresent(options, "yices2Bin", yices2Bin);
+    mountIfPresent(options, "z3Bin", z3Bin);    
   }
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
 
-    if (safeMode) {
+    if (safeMode != null && safeMode) {
       options.add("docker");
       options.add("run");
       options.add("--rm");
@@ -532,7 +560,7 @@ public class Kind2Api {
 
       options.add("--network");
       options.add("none");
-      mountIfPresent(options, KIND2);
+      mountIfPresent(options, "KIND2", KIND2);
       
       mountSolversToDocker(options);
       
@@ -553,8 +581,57 @@ public class Kind2Api {
   private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile) {
     List<String> options = new ArrayList<>();
 
-    if (!safeMode) {
-      options.add(KIND2);
+    if (safeMode != null && safeMode) {
+      options.add("docker");
+      options.add("run");
+      options.add("--rm");
+      options.add("-i");
+
+      options.add("--cpus");
+      options.add(safeModeCpuUsage.toString());
+
+      options.add("--memory");
+      options.add(safeModeMemoryUsage);
+
+      options.add("--memory-swap");
+      options.add(safeModeSwapUsage);
+
+      options.add("--network");
+      options.add("none");
+
+      mountIfPresent(options, "KIND2", KIND2);
+      mountSolversToDocker(options);
+
+      options.add("--mount");
+      options.add(
+          "type=bind,source=" + interpreterFile.getAbsolutePath()
+              + ",target=" + DOCKER_INTERPRETER_INPUT
+              + ",readonly");
+
+      if (lustreFile != null) {
+        options.add("--mount");
+        options.add(
+            "type=bind,source=" + lustreFile.toAbsolutePath()
+                + ",target=" + DOCKER_LUSTRE_FILE
+                + ",readonly");
+      }
+
+      options.add(dockerImage);
+      options.add(DOCKER_KIND2);
+
+      options.addAll(getOptions());
+
+      options.add("--interpreter_input_file");
+      options.add(DOCKER_INTERPRETER_INPUT);
+
+      if (lustreFile != null) {
+        options.add(DOCKER_LUSTRE_FILE);
+      }
+
+      return options;      
+    }
+
+    options.add(KIND2);
       options.addAll(getOptions());
 
       options.add("--interpreter_input_file");
@@ -565,55 +642,6 @@ public class Kind2Api {
       }
 
       return options;
-    }
-
-    options.add("docker");
-    options.add("run");
-    options.add("--rm");
-    options.add("-i");
-
-    options.add("--cpus");
-    options.add(safeModeCpuUsage.toString());
-
-    options.add("--memory");
-    options.add(safeModeMemoryUsage);
-
-    options.add("--memory-swap");
-    options.add(safeModeSwapUsage);
-
-    options.add("--network");
-    options.add("none");
-
-    mountIfPresent(options, KIND2);
-    mountSolversToDocker(options);
-
-    options.add("--mount");
-    options.add(
-        "type=bind,source=" + interpreterFile.getAbsolutePath()
-            + ",target=" + DOCKER_INTERPRETER_INPUT
-            + ",readonly");
-
-    if (lustreFile != null) {
-      options.add("--mount");
-      options.add(
-          "type=bind,source=" + lustreFile.toAbsolutePath()
-              + ",target=" + DOCKER_LUSTRE_FILE
-              + ",readonly");
-    }
-
-    options.add(dockerImage);
-    options.add(DOCKER_KIND2);
-
-    options.addAll(getOptions());
-
-    options.add("--interpreter_input_file");
-    options.add(DOCKER_INTERPRETER_INPUT);
-
-    if (lustreFile != null) {
-      options.add(DOCKER_LUSTRE_FILE);
-    }
-
-    return options;
   }
 
   /**
@@ -672,7 +700,40 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if(!safeMode){
+    if(safeMode != null && safeMode){
+      if (bitwuzlaBin != null) {  
+        options.add("--bitwuzla_bin");
+        options.add("/usr/local/bin/bitwuzla");
+      }
+      if (cvc5Bin != null) {
+        options.add("--cvc5_bin");
+        options.add("/usr/local/bin/cvc5");
+      }
+      if (mathsatBin != null) {
+        options.add("--mathsat_bin");
+        options.add("/usr/local/bin/mathsat");
+      }
+      if (opensmtBin != null) {
+        options.add("--opensmt_bin");
+        options.add("/usr/local/bin/opensmt");
+      }
+      if (smtinterpolJar != null) {
+        options.add("--smtinterpol_jar");
+        options.add("/usr/local/lib/smtinterpol.jar");
+      }
+      if (yicesBin != null) {
+        options.add("--yices_bin");
+        options.add("/usr/local/bin/yices");
+      }
+      if (yices2Bin != null) {
+        options.add("--yices2_bin");
+        options.add("/usr/local/bin/yices-smt2");
+      }
+      if (z3Bin != null) {
+        options.add("--z3_bin");
+        options.add("/usr/local/bin/z3");
+      }
+    } else { // safe mode, use fixed container paths
       if (bitwuzlaBin != null) {
         options.add("--bitwuzla_bin");
         options.add(bitwuzlaBin);
@@ -705,46 +766,7 @@ public class Kind2Api {
         options.add("--z3_bin");
         options.add(z3Bin);
       }
-    } else { // safe mode, use fixed container paths
-      if (bitwuzlaBin != null) {  
-        options.add("--bitwuzla_bin");
-        options.add("/usr/local/bin/bitwuzla");
-      }
-
-      if (cvc5Bin != null) {
-        options.add("--cvc5_bin");
-        options.add("/usr/local/bin/cvc5");
-      }
-
-      if (mathsatBin != null) {
-        options.add("--mathsat_bin");
-        options.add("/usr/local/bin/mathsat");
-      }
-
-      if (opensmtBin != null) {
-        options.add("--opensmt_bin");
-        options.add("/usr/local/bin/opensmt");
-      }
-
-      if (smtinterpolJar != null) {
-        options.add("--smtinterpol_jar");
-        options.add("/usr/local/lib/smtinterpol.jar");
-      }
-
-      if (yicesBin != null) {
-        options.add("--yices_bin");
-        options.add("/usr/local/bin/yices");
-      }
-
-      if (yices2Bin != null) {
-        options.add("--yices2_bin");
-        options.add("/usr/local/bin/yices-smt2");
-      }
-
-      if (z3Bin != null) {
-        options.add("--z3_bin");
-        options.add("/usr/local/bin/z3");
-      }
+      
     }
     if (smtTrace != null) {
       options.add("--smt_trace");
@@ -1042,7 +1064,9 @@ public class Kind2Api {
   /**
    * If called with true, enables safe mode for this API instance. 
    * Safe mode enables the following features: disabling the use of include statements, 
-   * automatic use of docker containers for executions of Kind 2 (to be implemented)
+   * automatic use of docker containers for executions of Kind 2.
+   * In safe mode, the location of the Kind 2 executable and solvers will not be searched 
+   * for on the PATH variable: they must be set via the API
    * <p>
    * Default: false
    * @param safeMode whether or not to enable safe mode.
