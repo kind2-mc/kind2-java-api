@@ -486,6 +486,14 @@ public class Kind2Api {
 
   private String dockerImage = "kind2-safe:latest";
   private static final String DOCKER_KIND2 = "/usr/local/bin/kind2";
+  private static final String DOCKER_BITWUZLA_BIN = "/usr/local/bin/bitwuzla";
+  private static final String DOCKER_CVC5_BIN = "/usr/local/bin/cvc5";
+  private static final String DOCKER_MATHSAT_BIN = "/usr/local/bin/mathsat";
+  private static final String DOCKER_OPENSMT_BIN = "/usr/local/bin/opensmt";
+  private static final String DOCKER_SMTINTERPOL_JAR = "/usr/local/lib/smtinterpol.jar";
+  private static final String DOCKER_YICES_BIN = "/usr/local/bin/yices";
+  private static final String DOCKER_YICES2_BIN = "/usr/local/bin/yices-smt2";
+  private static final String DOCKER_Z3_BIN = "/usr/local/bin/z3";
   private static final String DOCKER_INTERPRETER_INPUT = "/tmp/interpreter-input.json";
   private static final String DOCKER_LUSTRE_FILE = "/tmp/program.lus";
 
@@ -519,27 +527,26 @@ public class Kind2Api {
     return path;
   }
 
-  private void mountIfPresent(List<String> options, String settingName, String binPath){
+  private void mountIfPresent(List<String> options, String settingName, String binPath, String dockerTargetPath){
     if (binPath != null) {
       Path path = requireSafeModePath(settingName, binPath);
-      String filename = path.getFileName().toString();
       String dockerSourcePath = path.toString().replace(" ", "\\\\ ");
       options.add("--mount");
       options.add(
       "type=bind,source=" + dockerSourcePath
-          + ",target=/usr/local/bin/"+ filename + ",readonly"
+          + ",target=" + dockerTargetPath + ",readonly"
       );
     }
   }
   private void mountSolversToDocker(List<String> options){
-    mountIfPresent(options, "bitwuzlaBin", bitwuzlaBin);
-    mountIfPresent(options, "cvc5Bin", cvc5Bin);
-    mountIfPresent(options, "mathsatBin", mathsatBin);
-    mountIfPresent(options, "opensmtBin", opensmtBin);
-    mountIfPresent(options, "smtinterpolJar", smtinterpolJar);
-    mountIfPresent(options, "yicesBin", yicesBin);
-    mountIfPresent(options, "yices2Bin", yices2Bin);
-    mountIfPresent(options, "z3Bin", z3Bin);    
+    mountIfPresent(options, "bitwuzlaBin", bitwuzlaBin, DOCKER_BITWUZLA_BIN);
+    mountIfPresent(options, "cvc5Bin", cvc5Bin, DOCKER_CVC5_BIN);
+    mountIfPresent(options, "mathsatBin", mathsatBin, DOCKER_MATHSAT_BIN);
+    mountIfPresent(options, "opensmtBin", opensmtBin, DOCKER_OPENSMT_BIN);
+    mountIfPresent(options, "smtinterpolJar", smtinterpolJar, DOCKER_SMTINTERPOL_JAR);
+    mountIfPresent(options, "yicesBin", yicesBin, DOCKER_YICES_BIN);
+    mountIfPresent(options, "yices2Bin", yices2Bin, DOCKER_YICES2_BIN);
+    mountIfPresent(options, "z3Bin", z3Bin, DOCKER_Z3_BIN);
   }
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
@@ -561,7 +568,7 @@ public class Kind2Api {
 
       options.add("--network");
       options.add("none");
-      mountIfPresent(options, "KIND2", KIND2);
+      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
       
       mountSolversToDocker(options);
       
@@ -600,7 +607,7 @@ public class Kind2Api {
       options.add("--network");
       options.add("none");
 
-      mountIfPresent(options, "KIND2", KIND2);
+      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
       mountSolversToDocker(options);
 
       options.add("--mount");
@@ -704,35 +711,35 @@ public class Kind2Api {
     if(safeMode != null && safeMode){
       if (bitwuzlaBin != null) {  
         options.add("--bitwuzla_bin");
-        options.add("/usr/local/bin/bitwuzla");
+        options.add(DOCKER_BITWUZLA_BIN);
       }
       if (cvc5Bin != null) {
         options.add("--cvc5_bin");
-        options.add("/usr/local/bin/cvc5");
+        options.add(DOCKER_CVC5_BIN);
       }
       if (mathsatBin != null) {
         options.add("--mathsat_bin");
-        options.add("/usr/local/bin/mathsat");
+        options.add(DOCKER_MATHSAT_BIN);
       }
       if (opensmtBin != null) {
         options.add("--opensmt_bin");
-        options.add("/usr/local/bin/opensmt");
+        options.add(DOCKER_OPENSMT_BIN);
       }
       if (smtinterpolJar != null) {
         options.add("--smtinterpol_jar");
-        options.add("/usr/local/lib/smtinterpol.jar");
+        options.add(DOCKER_SMTINTERPOL_JAR);
       }
       if (yicesBin != null) {
         options.add("--yices_bin");
-        options.add("/usr/local/bin/yices");
+        options.add(DOCKER_YICES_BIN);
       }
       if (yices2Bin != null) {
         options.add("--yices2_bin");
-        options.add("/usr/local/bin/yices-smt2");
+        options.add(DOCKER_YICES2_BIN);
       }
       if (z3Bin != null) {
         options.add("--z3_bin");
-        options.add("/usr/local/bin/z3");
+        options.add(DOCKER_Z3_BIN);
       }
     } else { // safe mode, use fixed container paths
       if (bitwuzlaBin != null) {
