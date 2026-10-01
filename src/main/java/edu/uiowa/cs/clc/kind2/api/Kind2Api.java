@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,6 +37,13 @@ public class Kind2Api {
    */
   public static String KIND2 = "kind2";
   private static final long POLL_INTERVAL = 100;
+  private static final Double DEFAULT_SAFE_MODE_CPU_USAGE = 1.0;
+  private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
+  private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+  private Double safeModeCpuUsage;
+  private String safeModeMemoryUsage;
+  private String safeModeSwapUsage;
+  
 
   private List<String> otherOptions;
 
@@ -197,6 +205,9 @@ public class Kind2Api {
     lusMain = null;
     lusMainType = null;
     lusMainConst = null;
+    safeModeCpuUsage = DEFAULT_SAFE_MODE_CPU_USAGE;
+    safeModeMemoryUsage = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+    safeModeSwapUsage  = DEFAULT_SAFE_MODE_SWAP_USAGE;
   }
 
   DebugLogger debug = new DebugLogger();
@@ -286,17 +297,22 @@ public class Kind2Api {
    * @throws Kind2Exception if {@code uri} is not a local file or Kind 2 fails to run
    */
   public String interpret(URI uri, String main, String json) {
-    List<String> options = new ArrayList<>();
-    options.add(KIND2);
-    options.addAll(getOptions());
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    Path lustreFile = toLocalPath(uri).toAbsolutePath().normalize();
+
+    List<String> options = getInterpreterCommand(
+        interpreterFile,
+        lustreFile
+    );
+
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
-    options.add(toLocalPath(uri).toString());
+    
     ProcessBuilder builder = new ProcessBuilder(options);
+    
+    debug.println("Kind 2 command(URI Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
     try {
       Process process = builder.start();
       final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
@@ -344,16 +360,20 @@ public class Kind2Api {
    * @throws Kind2Exception if Kind 2 fails to run
    */
   public String interpret(String program, String main, String json) {
-    List<String> options = new ArrayList<>();
-    options.add(KIND2);
-    options.addAll(getOptions());
+
+    File interpreterFile = ApiUtil.writeInterpreterFile(json);
+
+    List<String> options =
+        getInterpreterCommand(interpreterFile, null);
+
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    options.add("--interpreter_input_file");
-    options.add(ApiUtil.writeInterpreterFile(json).getAbsolutePath());
+    
     ProcessBuilder builder = new ProcessBuilder(options);
+
+    debug.println("Kind 2 command(String Interpret):\n " + ApiUtil.getQuotedCommand(builder.command()));
     try {
       Process process = builder.start();
       process.getOutputStream().write(program.getBytes());
@@ -464,13 +484,170 @@ public class Kind2Api {
     }
   }
 
+  private String dockerImage = "kind2-safe:latest";
+  private static final String DOCKER_KIND2 = "/usr/local/bin/kind2";
+  private static final String DOCKER_BITWUZLA_BIN = "/usr/local/bin/bitwuzla";
+  private static final String DOCKER_CVC5_BIN = "/usr/local/bin/cvc5";
+  private static final String DOCKER_MATHSAT_BIN = "/usr/local/bin/mathsat";
+  private static final String DOCKER_OPENSMT_BIN = "/usr/local/bin/opensmt";
+  private static final String DOCKER_SMTINTERPOL_JAR = "/usr/local/lib/smtinterpol.jar";
+  private static final String DOCKER_YICES_BIN = "/usr/local/bin/yices";
+  private static final String DOCKER_YICES2_BIN = "/usr/local/bin/yices-smt2";
+  private static final String DOCKER_Z3_BIN = "/usr/local/bin/z3";
+  private static final String DOCKER_INTERPRETER_INPUT = "/tmp/interpreter-input.json";
+  private static final String DOCKER_LUSTRE_FILE = "/tmp/program.lus";
+
+  public void setDockerImage(String dockerImage) {
+    this.dockerImage = dockerImage;
+  }
+  private Path requireSafeModePath(String settingName, String configuredPath) {
+    if (configuredPath == null) {
+      return null;
+    }
+
+    final Path path;
+    try {
+      path = Paths.get(configuredPath).normalize();
+    } catch (InvalidPathException e) {
+      throw new Kind2Exception(settingName + " is not a valid path: " + configuredPath, e);
+    }
+
+    if (!path.isAbsolute()) {
+      throw new Kind2Exception(settingName + " must be set to an absolute path in safe mode: " + configuredPath);
+    }
+
+    if (!path.toFile().exists()) {
+      throw new Kind2Exception(settingName + " does not exist: " + path);
+    }
+
+    if (!path.toFile().isFile()) {
+      throw new Kind2Exception(settingName + " is not a file: " + path);
+    }
+
+    return path;
+  }
+
+  private static String csvQuote(String text) {
+    return "\"" + text.replace("\"", "\"\"") + "\"";
+  }
+
+  private static String bindMountSpec(Path sourcePath, String dockerTargetPath) {
+    return "type=bind," + csvQuote("source=" + sourcePath) + ",target=" + dockerTargetPath + ",readonly";
+  }
+
+  private void mountIfPresent(List<String> options, String settingName, String binPath, String dockerTargetPath){
+    if (binPath != null) {
+      Path path = requireSafeModePath(settingName, binPath);
+      options.add("--mount");
+      options.add(bindMountSpec(path, dockerTargetPath));
+    }
+  }
+  private void mountSolversToDocker(List<String> options){
+    mountIfPresent(options, "bitwuzlaBin", bitwuzlaBin, DOCKER_BITWUZLA_BIN);
+    mountIfPresent(options, "cvc5Bin", cvc5Bin, DOCKER_CVC5_BIN);
+    mountIfPresent(options, "mathsatBin", mathsatBin, DOCKER_MATHSAT_BIN);
+    mountIfPresent(options, "opensmtBin", opensmtBin, DOCKER_OPENSMT_BIN);
+    mountIfPresent(options, "smtinterpolJar", smtinterpolJar, DOCKER_SMTINTERPOL_JAR);
+    mountIfPresent(options, "yicesBin", yicesBin, DOCKER_YICES_BIN);
+    mountIfPresent(options, "yices2Bin", yices2Bin, DOCKER_YICES2_BIN);
+    mountIfPresent(options, "z3Bin", z3Bin, DOCKER_Z3_BIN);
+  }
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
-    options.add(KIND2);
+
+    if (safeMode != null && safeMode) {
+      options.add("docker");
+      options.add("run");
+      options.add("--rm");
+      options.add("-i");
+
+      options.add("--cpus");
+      options.add(safeModeCpuUsage.toString());
+
+      options.add("--memory");
+      options.add(safeModeMemoryUsage);
+
+      options.add("--memory-swap");
+      options.add(safeModeSwapUsage);
+
+      options.add("--network");
+      options.add("none");
+      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
+      
+      mountSolversToDocker(options);
+      
+      options.add(dockerImage);
+      options.add("/usr/local/bin/kind2");
+    } else {
+      options.add(KIND2);
+    }
+
     options.addAll(getOptions());
+
     ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
     return builder;
+  }
+
+
+  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile) {
+    List<String> options = new ArrayList<>();
+
+    if (safeMode != null && safeMode) {
+      options.add("docker");
+      options.add("run");
+      options.add("--rm");
+      options.add("-i");
+
+      options.add("--cpus");
+      options.add(safeModeCpuUsage.toString());
+
+      options.add("--memory");
+      options.add(safeModeMemoryUsage);
+
+      options.add("--memory-swap");
+      options.add(safeModeSwapUsage);
+
+      options.add("--network");
+      options.add("none");
+
+      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
+      mountSolversToDocker(options);
+
+      options.add("--mount");
+      options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
+
+      if (lustreFile != null) {
+        options.add("--mount");
+        options.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
+      }
+
+      options.add(dockerImage);
+      options.add(DOCKER_KIND2);
+
+      options.addAll(getOptions());
+
+      options.add("--interpreter_input_file");
+      options.add(DOCKER_INTERPRETER_INPUT);
+
+      if (lustreFile != null) {
+        options.add(DOCKER_LUSTRE_FILE);
+      }
+
+      return options;      
+    }
+
+    options.add(KIND2);
+      options.addAll(getOptions());
+
+      options.add("--interpreter_input_file");
+      options.add(interpreterFile.getAbsolutePath());
+
+      if (lustreFile != null) {
+        options.add(lustreFile.toString());
+      }
+
+      return options;
   }
 
   /**
@@ -529,37 +706,73 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if (bitwuzlaBin != null) {
-      options.add("--bitwuzla_bin");
-      options.add(bitwuzlaBin);
-    }
-    if (cvc5Bin != null) {
-      options.add("--cvc5_bin");
-      options.add(cvc5Bin);
-    }
-    if (mathsatBin != null) {
-      options.add("--mathsat_bin");
-      options.add(mathsatBin);
-    }
-    if (opensmtBin != null) {
-      options.add("--opensmt_bin");
-      options.add(opensmtBin);
-    }
-    if (smtinterpolJar != null) {
-      options.add("--smtinterpol_jar");
-      options.add(smtinterpolJar);
-    }
-    if (yicesBin != null) {
-      options.add("--yices_bin");
-      options.add(yicesBin);
-    }
-    if (yices2Bin != null) {
-      options.add("--yices2_bin");
-      options.add(yices2Bin);
-    }
-    if (z3Bin != null) {
-      options.add("--z3_bin");
-      options.add(z3Bin);
+    if(safeMode != null && safeMode){
+      if (bitwuzlaBin != null) {  
+        options.add("--bitwuzla_bin");
+        options.add(DOCKER_BITWUZLA_BIN);
+      }
+      if (cvc5Bin != null) {
+        options.add("--cvc5_bin");
+        options.add(DOCKER_CVC5_BIN);
+      }
+      if (mathsatBin != null) {
+        options.add("--mathsat_bin");
+        options.add(DOCKER_MATHSAT_BIN);
+      }
+      if (opensmtBin != null) {
+        options.add("--opensmt_bin");
+        options.add(DOCKER_OPENSMT_BIN);
+      }
+      if (smtinterpolJar != null) {
+        options.add("--smtinterpol_jar");
+        options.add(DOCKER_SMTINTERPOL_JAR);
+      }
+      if (yicesBin != null) {
+        options.add("--yices_bin");
+        options.add(DOCKER_YICES_BIN);
+      }
+      if (yices2Bin != null) {
+        options.add("--yices2_bin");
+        options.add(DOCKER_YICES2_BIN);
+      }
+      if (z3Bin != null) {
+        options.add("--z3_bin");
+        options.add(DOCKER_Z3_BIN);
+      }
+    } else { // normal mode, use given paths
+      if (bitwuzlaBin != null) {
+        options.add("--bitwuzla_bin");
+        options.add(bitwuzlaBin);
+      }
+      if (cvc5Bin != null) {
+        options.add("--cvc5_bin");
+        options.add(cvc5Bin);
+      }
+      if (mathsatBin != null) {
+        options.add("--mathsat_bin");
+        options.add(mathsatBin);
+      }
+      if (opensmtBin != null) {
+        options.add("--opensmt_bin");
+        options.add(opensmtBin);
+      }
+      if (smtinterpolJar != null) {
+        options.add("--smtinterpol_jar");
+        options.add(smtinterpolJar);
+      }
+      if (yicesBin != null) {
+        options.add("--yices_bin");
+        options.add(yicesBin);
+      }
+      if (yices2Bin != null) {
+        options.add("--yices2_bin");
+        options.add(yices2Bin);
+      }
+      if (z3Bin != null) {
+        options.add("--z3_bin");
+        options.add(z3Bin);
+      }
+      
     }
     if (smtTrace != null) {
       options.add("--smt_trace");
@@ -776,9 +989,94 @@ public class Kind2Api {
   }
 
   /**
+   * Sets the amount of CPU usage that the API allows each execution of Kind 2 to use.
+   * Units are in cores, so a value of 1.5 means "Use up to 1.5 CPU cores"
+   * <p>
+   * Default: 1.0
+   * @param usage Usage (in cores) allowed to executions of Kind 2.
+   */
+  public void setSafeModeCpuUsage(double usage){
+    if(usage <= 0.0) throw new IllegalArgumentException("CPU usage was set to " + usage + 
+      ", but a positive value is expected (e.g. 1.5)");
+    safeModeCpuUsage = usage;
+  }
+
+  private void validateMemoryValue(String value, String setting){
+    if (value == null || value.length() < 2) {
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+        ", but a positive integer value with a unit was expected (e.g. 1g)");
+    }
+    String unit = String.valueOf(value.charAt(value.length()-1)).toLowerCase();
+    String num = value.substring(0, value.length()-1);
+    String allowedUnits = "gmkb";
+    if (!allowedUnits.contains(unit)){
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+        ", but a unit was expected (e.g. 1g)");
+    }
+    if (Integer.parseInt(num) <= 0){
+      throw new IllegalArgumentException(setting + " was set to " + value + 
+      ", but a positive integer value with a unit was expected (e.g. 1g)"); 
+    }
+  }
+  /**
+   * This function should onlt be called after v has been validated by validateMemoryValue().
+   * @param v the source string
+   * @return the number of bytes that v represents
+   */
+  private long memoryValueToBytes(String v){
+
+    long value = Long.parseLong(v.substring(0, v.length()-1));
+    char unit = Character.toLowerCase(v.charAt(v.length()-1));
+    long modifier;
+    switch(unit){
+      case 'b': modifier = 1L; break;
+      case 'k': modifier = 1024L; break;
+      case 'm': modifier = 1024L * 1024L; break; 
+      case 'g': modifier = 1024L * 1024L * 1024L; break;
+      default: /* Should be impossible given validateMemoryValue() was called on v beforehand */ throw new IllegalArgumentException(v + " is not a valid memory value");
+    }
+    return value*modifier;
+  }
+  /**
+   * Sets the amount of physical memory usage that the API allows each execution of Kind 2 to use.
+   * Units are included in the string, so "1g" means "Use up to 1 gigabyte of RAM"
+   * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
+   * If the value set here exceeds the safe mode swap usage, the swap usage is increased to the amount provided.
+   * <p>
+   * Default: "2g"
+   * @param amount of physical memory allowed to executions of Kind 2.
+   */
+  public void setSafeModeMemoryUsage(String amount){
+    validateMemoryValue(amount, "Memory usage");
+    if (memoryValueToBytes(amount) > memoryValueToBytes(safeModeSwapUsage)){
+      safeModeSwapUsage = amount;
+    }
+    safeModeMemoryUsage = amount;
+  }
+  /**
+   * Sets the cumulative amount of swap space and physical memory usage that the 
+   * API allows each execution of Kind 2 to use.
+   * Units are included in the string, "1g" means "Use up to 1 gigabyte of combined physical memory and swap"
+   * Alternative units: 'g' for gigabytes, 'm' for megabytes, 'k' for kilobytes, 'b' for bytes
+   * <p>
+   * Default: "2g"
+   * @param amount of swap + physical memory allowed to executions of Kind 2.
+   */
+  public void setSafeModeSwapUsage(String amount){
+    validateMemoryValue(amount, "Swap usage");
+    if (memoryValueToBytes(amount) < memoryValueToBytes(safeModeMemoryUsage)) {
+      throw new IllegalArgumentException("Swap usage was set to " + amount
+          + ", but it must be greater than or equal to the memory usage (" + safeModeMemoryUsage + ")");
+    }
+    safeModeSwapUsage = amount;
+  }
+
+  /**
    * If called with true, enables safe mode for this API instance. 
    * Safe mode enables the following features: disabling the use of include statements, 
-   * automatic use of docker containers for executions of Kind 2 (to be implemented)
+   * automatic use of docker containers for executions of Kind 2.
+   * In safe mode, the location of the Kind 2 executable and solvers will not be searched 
+   * for on the PATH variable: they must be set via the API
    * <p>
    * Default: false
    * @param safeMode whether or not to enable safe mode.

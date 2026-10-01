@@ -1,0 +1,4 @@
+ARG JAVA_MAJOR=8
+FROM eclipse-temurin:${JAVA_MAJOR}-jre
+
+ENTRYPOINT []
