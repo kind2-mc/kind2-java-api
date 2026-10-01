@@ -1026,9 +1026,9 @@ public class Kind2Api {
     long modifier;
     switch(unit){
       case 'b': modifier = 1L; break;
-      case 'k': modifier = 1000L; break;
-      case 'm': modifier = 1000L * 1000L; break; 
-      case 'g': modifier = 1000L * 1000L * 1000L; break;
+      case 'k': modifier = 1024L; break;
+      case 'm': modifier = 1024L * 1024L; break; 
+      case 'g': modifier = 1024L * 1024L * 1024L; break;
       default: /* Should be impossible given validateMemoryValue() was called on v beforehand */ throw new IllegalArgumentException(v + " is not a valid memory value");
     }
     return value*modifier;
