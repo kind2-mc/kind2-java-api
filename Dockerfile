@@ -1,3 +1,4 @@
-FROM ubuntu:24.04
+ARG JAVA_MAJOR=8
+FROM eclipse-temurin:${JAVA_MAJOR}-jre
 
 ENTRYPOINT []
