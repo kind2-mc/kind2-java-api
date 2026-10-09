@@ -552,32 +552,45 @@ public class Kind2Api {
     mountIfPresent(options, "yices2Bin", yices2Bin, DOCKER_YICES2_BIN);
     mountIfPresent(options, "z3Bin", z3Bin, DOCKER_Z3_BIN);
   }
+  /**
+   * Returns the docker run command, up to but not including the image name, with the resource
+   * limits and the Kind 2 and solver mounts that every safe mode execution uses.
+   */
+  private List<String> getDockerRunCommand() {
+    List<String> options = new ArrayList<>();
+    options.add("docker");
+    options.add("run");
+    options.add("--rm");
+    options.add("-i");
+
+    // Run an init process as PID 1 so that signals reach Kind 2 even if it installs no handler,
+    // and so that orphaned solver processes are reaped.
+    options.add("--init");
+
+    options.add("--cpus");
+    options.add(safeModeCpuUsage.toString());
+
+    options.add("--memory");
+    options.add(safeModeMemoryUsage);
+
+    options.add("--memory-swap");
+    options.add(safeModeSwapUsage);
+
+    options.add("--network");
+    options.add("none");
+
+    mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
+    mountSolversToDocker(options);
+    return options;
+  }
+
   private ProcessBuilder getKind2ProcessBuilder() {
     List<String> options = new ArrayList<>();
 
     if (safeMode != null && safeMode) {
-      options.add("docker");
-      options.add("run");
-      options.add("--rm");
-      options.add("-i");
-
-      options.add("--cpus");
-      options.add(safeModeCpuUsage.toString());
-
-      options.add("--memory");
-      options.add(safeModeMemoryUsage);
-
-      options.add("--memory-swap");
-      options.add(safeModeSwapUsage);
-
-      options.add("--network");
-      options.add("none");
-      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
-      
-      mountSolversToDocker(options);
-      
+      options.addAll(getDockerRunCommand());
       options.add(dockerImage);
-      options.add("/usr/local/bin/kind2");
+      options.add(DOCKER_KIND2);
     } else {
       options.add(KIND2);
     }
@@ -594,25 +607,7 @@ public class Kind2Api {
     List<String> options = new ArrayList<>();
 
     if (safeMode != null && safeMode) {
-      options.add("docker");
-      options.add("run");
-      options.add("--rm");
-      options.add("-i");
-
-      options.add("--cpus");
-      options.add(safeModeCpuUsage.toString());
-
-      options.add("--memory");
-      options.add(safeModeMemoryUsage);
-
-      options.add("--memory-swap");
-      options.add(safeModeSwapUsage);
-
-      options.add("--network");
-      options.add("none");
-
-      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
-      mountSolversToDocker(options);
+      options.addAll(getDockerRunCommand());
 
       options.add("--mount");
       options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
@@ -980,9 +975,9 @@ public class Kind2Api {
       options.add("--fake_filepath");
       options.add(fakeFilepath);
     }
-    if (safeMode != null){
+    if (safeMode != null && safeMode) {
       options.add("--no_include");
-      options.add(safeMode.toString());
+      options.add("true");
     }
     options.addAll(this.otherOptions);
     return options;
@@ -1862,12 +1857,23 @@ public class Kind2Api {
    * @throws java.lang.Exception When Kind is not available
    */
   public String checkAvailable() throws Exception {
-    ProcessBuilder builder = new ProcessBuilder(KIND2, "--version");
+    List<String> command = new ArrayList<>();
+    if (safeMode != null && safeMode) {
+      command.addAll(getDockerRunCommand());
+      command.add(dockerImage);
+      command.add(DOCKER_KIND2);
+    } else {
+      command.add(KIND2);
+    }
+    command.add("--version");
+
+    ProcessBuilder builder = new ProcessBuilder(command);
     builder.redirectErrorStream(true);
     Process process = builder.start();
+    process.getOutputStream().close();
 
     String output = ApiUtil.readAll(process.getInputStream());
-    if (process.exitValue() != 0) {
+    if (process.waitFor() != 0) {
       throw new Kind2Exception("Error running kind2: " + output);
     }
     return output;
