@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
@@ -40,6 +43,10 @@ public class Kind2Api {
   private static final Double DEFAULT_SAFE_MODE_CPU_USAGE = 1.0;
   private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
   private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+  private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
+  private static final long DOCKER_KILL_TIMEOUT_SECONDS = 10;
+  // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
+  private static volatile Semaphore safeModeRuns = new Semaphore(DEFAULT_SAFE_MODE_MAX_RUNS, true);
   private Double safeModeCpuUsage;
   private String safeModeMemoryUsage;
   private String safeModeSwapUsage;
@@ -299,35 +306,7 @@ public class Kind2Api {
   public String interpret(URI uri, String main, String json) {
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
     Path lustreFile = toLocalPath(uri).toAbsolutePath().normalize();
-
-    List<String> options = getInterpreterCommand(
-        interpreterFile,
-        lustreFile
-    );
-
-    options.add("--lus_main");
-    options.add(main);
-    options.add("--enable");
-    options.add("interpreter");
-    
-    ProcessBuilder builder = new ProcessBuilder(options);
-    
-    debug.println("Kind 2 command(URI Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
-    try {
-      Process process = builder.start();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      JsonStreamParser jsp = new JsonStreamParser(reader);
-      String trace = "";
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
-              trace = jele.getAsJsonObject().get("trace").toString();
-          }
-      }
-      return trace;
-    } catch (IOException e) {
-      throw new Kind2Exception(e.getMessage());
-    }
+    return runInterpreter(interpreterFile, lustreFile, null, main);
   }
 
   /**
@@ -360,24 +339,33 @@ public class Kind2Api {
    * @throws Kind2Exception if Kind 2 fails to run
    */
   public String interpret(String program, String main, String json) {
-
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    return runInterpreter(interpreterFile, null, program, main);
+  }
 
-    List<String> options =
-        getInterpreterCommand(interpreterFile, null);
+  /**
+   * Runs the interpreter on either {@code lustreFile} or {@code program}, whichever is non-null,
+   * and returns the trace.
+   */
+  private String runInterpreter(File interpreterFile, Path lustreFile, String program, String main) {
+    String containerName = newContainerName();
+    List<String> options = getInterpreterCommand(interpreterFile, lustreFile, containerName);
 
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    
+
     ProcessBuilder builder = new ProcessBuilder(options);
 
-    debug.println("Kind 2 command(String Interpret):\n " + ApiUtil.getQuotedCommand(builder.command()));
+    debug.println("Kind 2 command(Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
+    Semaphore runs = acquireSafeModeRun(null);
+    Process process = null;
     try {
-      Process process = builder.start();
-      process.getOutputStream().write(program.getBytes());
-      process.getOutputStream().flush();
+      process = builder.start();
+      if (program != null) {
+        process.getOutputStream().write(program.getBytes());
+      }
       process.getOutputStream().close();
       final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
       JsonStreamParser jsp = new JsonStreamParser(reader);
@@ -391,6 +379,14 @@ public class Kind2Api {
       return trace;
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
+    } finally {
+      if (process != null && process.isAlive()) {
+        killContainer(containerName);
+        process.destroy();
+      }
+      if (runs != null) {
+        runs.release();
+      }
     }
   }
 
@@ -425,8 +421,18 @@ public class Kind2Api {
 
   private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
       throws IOException, InterruptedException {
-    ProcessBuilder builder = getKind2ProcessBuilder();
+    String containerName = newContainerName();
+    ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
+    Semaphore runs = acquireSafeModeRun(monitor);
+    if (monitor.isCanceled()) {
+      // Cancelled while waiting for a free run.
+      if (runs != null) {
+        runs.release();
+      }
+      monitor.done();
+      return;
+    }
     Process process = null;
     boolean exceptionThrown = false;
     JsonStreamParser jsp;
@@ -477,7 +483,15 @@ public class Kind2Api {
         }
       } finally {
         if (process != null) {
+          // Destroying the docker client does not reliably stop the container (for example on
+          // Windows), so kill the container itself if the run did not finish on its own.
+          if (process.isAlive() || monitor.isCanceled()) {
+            killContainer(containerName);
+          }
           process.destroy();
+        }
+        if (runs != null) {
+          runs.release();
         }
         monitor.done();
       }
@@ -553,15 +567,77 @@ public class Kind2Api {
     mountIfPresent(options, "z3Bin", z3Bin, DOCKER_Z3_BIN);
   }
   /**
+   * Returns a unique container name in safe mode, or null otherwise.
+   */
+  private String newContainerName() {
+    if (safeMode != null && safeMode) {
+      return "kind2-api-" + UUID.randomUUID();
+    }
+    return null;
+  }
+
+  /**
+   * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots and returns the
+   * semaphore to release it to. Returns null outside safe mode, or if {@code monitor} is
+   * cancelled while waiting.
+   */
+  private Semaphore acquireSafeModeRun(IProgressMonitor monitor) {
+    if (safeMode == null || !safeMode) {
+      return null;
+    }
+    Semaphore runs = safeModeRuns;
+    try {
+      while (!runs.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
+        if (monitor != null && monitor.isCanceled()) {
+          return null;
+        }
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new Kind2Exception("Interrupted while waiting to run Kind 2", e);
+    }
+    return runs;
+  }
+
+  /**
+   * Kills a safe mode container, ignoring failures such as the container having already exited.
+   */
+  private void killContainer(String containerName) {
+    if (containerName == null) {
+      return;
+    }
+    try {
+      ProcessBuilder builder = new ProcessBuilder("docker", "kill", containerName);
+      builder.redirectErrorStream(true);
+      Process kill = builder.start();
+      kill.getOutputStream().close();
+      String output = ApiUtil.readAll(kill.getInputStream());
+      if (!kill.waitFor(DOCKER_KILL_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+        kill.destroy();
+      }
+      debug.println("docker kill " + containerName + ": " + output.trim());
+    } catch (IOException e) {
+      debug.println("docker kill " + containerName + " failed: " + e.getMessage());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  /**
    * Returns the docker run command, up to but not including the image name, with the resource
    * limits and the Kind 2 and solver mounts that every safe mode execution uses.
    */
-  private List<String> getDockerRunCommand() {
+  private List<String> getDockerRunCommand(String containerName) {
     List<String> options = new ArrayList<>();
     options.add("docker");
     options.add("run");
     options.add("--rm");
     options.add("-i");
+
+    if (containerName != null) {
+      options.add("--name");
+      options.add(containerName);
+    }
 
     // Run an init process as PID 1 so that signals reach Kind 2 even if it installs no handler,
     // and so that orphaned solver processes are reaped.
@@ -584,11 +660,11 @@ public class Kind2Api {
     return options;
   }
 
-  private ProcessBuilder getKind2ProcessBuilder() {
+  private ProcessBuilder getKind2ProcessBuilder(String containerName) {
     List<String> options = new ArrayList<>();
 
     if (safeMode != null && safeMode) {
-      options.addAll(getDockerRunCommand());
+      options.addAll(getDockerRunCommand(containerName));
       options.add(dockerImage);
       options.add(DOCKER_KIND2);
     } else {
@@ -603,11 +679,11 @@ public class Kind2Api {
   }
 
 
-  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile) {
+  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile, String containerName) {
     List<String> options = new ArrayList<>();
 
     if (safeMode != null && safeMode) {
-      options.addAll(getDockerRunCommand());
+      options.addAll(getDockerRunCommand(containerName));
 
       options.add("--mount");
       options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
@@ -1064,6 +1140,23 @@ public class Kind2Api {
           + ", but it must be greater than or equal to the memory usage (" + safeModeMemoryUsage + ")");
     }
     safeModeSwapUsage = amount;
+  }
+
+  /**
+   * Sets how many safe mode executions of Kind 2 may run at once in this JVM. The limit is shared
+   * by every {@code Kind2Api} instance, so the worst-case resource usage is this value times the
+   * per-run CPU and memory limits. Further executions wait until a run finishes. Runs already in
+   * progress when the limit changes are not affected.
+   * <p>
+   * Default: 2
+   * @param maxRuns the maximum number of concurrent safe mode executions, at least 1.
+   */
+  public static void setSafeModeMaxRuns(int maxRuns) {
+    if (maxRuns < 1) {
+      throw new IllegalArgumentException("Max runs was set to " + maxRuns
+          + ", but a value of at least 1 is expected");
+    }
+    safeModeRuns = new Semaphore(maxRuns, true);
   }
 
   /**
@@ -1859,7 +1952,7 @@ public class Kind2Api {
   public String checkAvailable() throws Exception {
     List<String> command = new ArrayList<>();
     if (safeMode != null && safeMode) {
-      command.addAll(getDockerRunCommand());
+      command.addAll(getDockerRunCommand(null));
       command.add(dockerImage);
       command.add(DOCKER_KIND2);
     } else {
