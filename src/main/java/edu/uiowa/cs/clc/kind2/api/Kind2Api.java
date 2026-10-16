@@ -9,6 +9,7 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -366,6 +367,19 @@ public class Kind2Api {
       Process process = null;
       try {
         process = builder.start();
+        // Read stderr on its own thread so that it cannot fill its pipe and block Kind 2. It is
+        // kept apart from stdout, which must hold only JSON.
+        final InputStream errorStream = process.getErrorStream();
+        final StringBuffer errors = new StringBuffer();
+        Thread errorReader = new Thread(() -> {
+          try {
+            errors.append(ApiUtil.readAll(errorStream));
+          } catch (IOException e) {
+            // The stream is closed when the process is destroyed.
+          }
+        });
+        errorReader.setDaemon(true);
+        errorReader.start();
         if (program != null) {
           process.getOutputStream().write(program.getBytes());
         }
@@ -373,15 +387,35 @@ public class Kind2Api {
         final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
         JsonStreamParser jsp = new JsonStreamParser(reader);
         String trace = "";
-        while (jsp.hasNext()) {
-            JsonElement jele = jsp.next();
-            if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
-                trace = jele.getAsJsonObject().get("trace").toString();
-            }
+        JsonIOException outputError = null;
+        try {
+          while (jsp.hasNext()) {
+              JsonElement jele = jsp.next();
+              if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+                  trace = jele.getAsJsonObject().get("trace").toString();
+              }
+          }
+        } catch (JsonIOException e) {
+          // Thrown when stdout is empty, for example when docker fails to start the container.
+          outputError = e;
+        }
+        if (trace.isEmpty()) {
+          // Without a trace, stderr may say why, for example a docker error in safe mode.
+          errorReader.join(DOCKER_EXIT_GRACE_MILLIS);
+          String errorOutput = errors.toString().trim();
+          if (!errorOutput.isEmpty()) {
+            throw new Kind2Exception("Error running the Kind 2 interpreter: " + errorOutput);
+          }
+        }
+        if (outputError != null) {
+          throw outputError;
         }
         return trace;
       } catch (IOException e) {
         throw new Kind2Exception(e.getMessage());
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new Kind2Exception("Interrupted while running the Kind 2 interpreter", e);
       } finally {
         if (process != null) {
           if (!exitsOnItsOwn(process, containerName)) {
