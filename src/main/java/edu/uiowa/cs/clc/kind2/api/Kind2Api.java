@@ -712,17 +712,26 @@ public class Kind2Api {
     return options;
   }
 
-  private ProcessBuilder getKind2ProcessBuilder(String containerName) {
-    List<String> options = new ArrayList<>();
-
+  /**
+   * Returns the command that starts Kind 2, without its options: {@code docker run ...} with the
+   * given extra docker arguments, the image and the Kind 2 path in the container in safe mode, or
+   * just {@link #KIND2} otherwise.
+   */
+  private List<String> getKind2Command(String containerName, List<String> dockerArgs) {
+    List<String> command = new ArrayList<>();
     if (safeMode != null && safeMode) {
-      options.addAll(getDockerRunCommand(containerName));
-      options.add(dockerImage);
-      options.add(DOCKER_KIND2);
+      command.addAll(getDockerRunCommand(containerName));
+      command.addAll(dockerArgs);
+      command.add(dockerImage);
+      command.add(DOCKER_KIND2);
     } else {
-      options.add(KIND2);
+      command.add(KIND2);
     }
+    return command;
+  }
 
+  private ProcessBuilder getKind2ProcessBuilder(String containerName) {
+    List<String> options = getKind2Command(containerName, new ArrayList<>());
     options.addAll(getOptions());
 
     ProcessBuilder builder = new ProcessBuilder(options);
@@ -732,45 +741,28 @@ public class Kind2Api {
 
 
   private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile, String containerName) {
-    List<String> options = new ArrayList<>();
-
-    if (safeMode != null && safeMode) {
-      options.addAll(getDockerRunCommand(containerName));
-
-      options.add("--mount");
-      options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
-
+    boolean inDocker = safeMode != null && safeMode;
+    List<String> mounts = new ArrayList<>();
+    if (inDocker) {
+      mounts.add("--mount");
+      mounts.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
       if (lustreFile != null) {
-        options.add("--mount");
-        options.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
+        mounts.add("--mount");
+        mounts.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
       }
-
-      options.add(dockerImage);
-      options.add(DOCKER_KIND2);
-
-      options.addAll(getOptions());
-
-      options.add("--interpreter_input_file");
-      options.add(DOCKER_INTERPRETER_INPUT);
-
-      if (lustreFile != null) {
-        options.add(DOCKER_LUSTRE_FILE);
-      }
-
-      return options;      
     }
 
-    options.add(KIND2);
-      options.addAll(getOptions());
+    List<String> options = getKind2Command(containerName, mounts);
+    options.addAll(getOptions());
 
-      options.add("--interpreter_input_file");
-      options.add(interpreterFile.getAbsolutePath());
+    options.add("--interpreter_input_file");
+    options.add(inDocker ? DOCKER_INTERPRETER_INPUT : interpreterFile.getAbsolutePath());
 
-      if (lustreFile != null) {
-        options.add(lustreFile.toString());
-      }
+    if (lustreFile != null) {
+      options.add(inDocker ? DOCKER_LUSTRE_FILE : lustreFile.toString());
+    }
 
-      return options;
+    return options;
   }
 
   /**
@@ -2028,14 +2020,7 @@ public class Kind2Api {
    * @throws java.lang.Exception When Kind is not available
    */
   public String checkAvailable() throws Exception {
-    List<String> command = new ArrayList<>();
-    if (safeMode != null && safeMode) {
-      command.addAll(getDockerRunCommand(null));
-      command.add(dockerImage);
-      command.add(DOCKER_KIND2);
-    } else {
-      command.add(KIND2);
-    }
+    List<String> command = getKind2Command(null, new ArrayList<>());
     command.add("--version");
 
     ProcessBuilder builder = new ProcessBuilder(command);
