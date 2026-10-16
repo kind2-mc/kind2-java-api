@@ -360,35 +360,33 @@ public class Kind2Api {
     ProcessBuilder builder = new ProcessBuilder(options);
 
     debug.println("Kind 2 command(Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
-    Semaphore runs = acquireSafeModeRun(null);
-    Process process = null;
-    try {
-      process = builder.start();
-      if (program != null) {
-        process.getOutputStream().write(program.getBytes());
-      }
-      process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      JsonStreamParser jsp = new JsonStreamParser(reader);
-      String trace = "";
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
-              trace = jele.getAsJsonObject().get("trace").toString();
-          }
-      }
-      return trace;
-    } catch (IOException e) {
-      throw new Kind2Exception(e.getMessage());
-    } finally {
-      if (process != null) {
-        if (!exitsOnItsOwn(process, containerName)) {
-          killContainer(containerName);
+    try (RunSlot slot = acquireSafeModeRun(null)) {
+      Process process = null;
+      try {
+        process = builder.start();
+        if (program != null) {
+          process.getOutputStream().write(program.getBytes());
         }
-        process.destroy();
-      }
-      if (runs != null) {
-        runs.release();
+        process.getOutputStream().close();
+        final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+        JsonStreamParser jsp = new JsonStreamParser(reader);
+        String trace = "";
+        while (jsp.hasNext()) {
+            JsonElement jele = jsp.next();
+            if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+                trace = jele.getAsJsonObject().get("trace").toString();
+            }
+        }
+        return trace;
+      } catch (IOException e) {
+        throw new Kind2Exception(e.getMessage());
+      } finally {
+        if (process != null) {
+          if (!exitsOnItsOwn(process, containerName)) {
+            killContainer(containerName);
+          }
+          process.destroy();
+        }
       }
     }
   }
@@ -427,76 +425,72 @@ public class Kind2Api {
     String containerName = newContainerName();
     ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
-    Semaphore runs = acquireSafeModeRun(monitor);
-    if (monitor.isCanceled()) {
+    RunSlot slot = acquireSafeModeRun(monitor);
+    if (slot == null) {
       // Cancelled while waiting for a free run.
-      if (runs != null) {
-        runs.release();
-      }
       monitor.done();
       return;
     }
-    Process process = null;
-    boolean exceptionThrown = false;
-    JsonStreamParser jsp;
-    try {
-      process = builder.start();
-      process.getOutputStream().write(program.getBytes());
-      process.getOutputStream().flush();
-      process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      jsp = new JsonStreamParser(reader);
-      // The following assignment is required because variables used in lambdas must be final or effectively final.
-      final Process processForMonitor = process;
-      Thread monitorThread = new Thread(() -> {
-        while (!monitor.isCanceled() && processForMonitor.isAlive()) {
-          sleep(POLL_INTERVAL);
-        }
-        if (monitor.isCanceled() && processForMonitor.isAlive()) {
-          debug.println("Monitor canceled, destroying Kind2 process");
-          processForMonitor.destroy();
-          try { reader.close(); } catch (IOException e) { /* ignore */ }
-        }
-      });
-      monitorThread.start();
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          debug.println("Parsing JSON element: " + jele.toString());
-          result.addJsonElement(jele);
-          if(listener != null){
-            listener.onUpdate(result);
-          }
-          debug.println(result.getResultMap().toString());
-      }
-    } catch (JsonIOException e) {
-      // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
-    } catch (Throwable t) {
-      exceptionThrown = true;
-      throw t;
-    } finally {
+    try (RunSlot heldSlot = slot) {
+      Process process = null;
+      boolean exceptionThrown = false;
+      JsonStreamParser jsp;
       try {
-        if (!monitor.isCanceled()) {
-          try {
-            result.finish();
-          } catch (Throwable t) {
-            if (!exceptionThrown) {
-              throw t;
+        process = builder.start();
+        process.getOutputStream().write(program.getBytes());
+        process.getOutputStream().flush();
+        process.getOutputStream().close();
+        final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+        jsp = new JsonStreamParser(reader);
+        // The following assignment is required because variables used in lambdas must be final or effectively final.
+        final Process processForMonitor = process;
+        Thread monitorThread = new Thread(() -> {
+          while (!monitor.isCanceled() && processForMonitor.isAlive()) {
+            sleep(POLL_INTERVAL);
+          }
+          if (monitor.isCanceled() && processForMonitor.isAlive()) {
+            debug.println("Monitor canceled, destroying Kind2 process");
+            processForMonitor.destroy();
+            try { reader.close(); } catch (IOException e) { /* ignore */ }
+          }
+        });
+        monitorThread.start();
+        while (jsp.hasNext()) {
+            JsonElement jele = jsp.next();
+            debug.println("Parsing JSON element: " + jele.toString());
+            result.addJsonElement(jele);
+            if(listener != null){
+              listener.onUpdate(result);
+            }
+            debug.println(result.getResultMap().toString());
+        }
+      } catch (JsonIOException e) {
+        // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
+      } catch (Throwable t) {
+        exceptionThrown = true;
+        throw t;
+      } finally {
+        try {
+          if (!monitor.isCanceled()) {
+            try {
+              result.finish();
+            } catch (Throwable t) {
+              if (!exceptionThrown) {
+                throw t;
+              }
             }
           }
-        }
-      } finally {
-        if (process != null) {
-          // Destroying the docker client does not reliably stop the container (for example on
-          // Windows), so kill the container itself if the run did not finish on its own.
-          if (monitor.isCanceled() || !exitsOnItsOwn(process, containerName)) {
-            killContainer(containerName);
+        } finally {
+          if (process != null) {
+            // Destroying the docker client does not reliably stop the container (for example on
+            // Windows), so kill the container itself if the run did not finish on its own.
+            if (monitor.isCanceled() || !exitsOnItsOwn(process, containerName)) {
+              killContainer(containerName);
+            }
+            process.destroy();
           }
-          process.destroy();
+          monitor.done();
         }
-        if (runs != null) {
-          runs.release();
-        }
-        monitor.done();
       }
     }
   }
@@ -580,17 +574,17 @@ public class Kind2Api {
   }
 
   /**
-   * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots and returns the
-   * semaphore to release it to. Returns null outside safe mode, or if {@code monitor} is
-   * cancelled while waiting.
+   * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots. Outside safe
+   * mode, returns a slot that holds nothing. Close the slot when the run ends.
+   *
+   * @return the slot, or null only if {@code monitor} is cancelled before a slot is free
    */
-  private Semaphore acquireSafeModeRun(IProgressMonitor monitor) {
+  private RunSlot acquireSafeModeRun(IProgressMonitor monitor) {
     if (safeMode == null || !safeMode) {
-      return null;
+      return RunSlot.NONE;
     }
-    RunLimit runs = safeModeRuns;
     try {
-      while (!runs.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
+      while (!safeModeRuns.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
         if (monitor != null && monitor.isCanceled()) {
           return null;
         }
@@ -599,7 +593,30 @@ public class Kind2Api {
       Thread.currentThread().interrupt();
       throw new Kind2Exception("Interrupted while waiting to run Kind 2", e);
     }
-    return runs;
+    if (monitor != null && monitor.isCanceled()) {
+      safeModeRuns.release();
+      return null;
+    }
+    return new RunSlot(safeModeRuns);
+  }
+
+  /**
+   * A held safe mode run slot, released by {@link #close()}. Outside safe mode it holds nothing.
+   */
+  private static final class RunSlot implements AutoCloseable {
+    static final RunSlot NONE = new RunSlot(null);
+    private final Semaphore runs;
+
+    RunSlot(Semaphore runs) {
+      this.runs = runs;
+    }
+
+    @Override
+    public void close() {
+      if (runs != null) {
+        runs.release();
+      }
+    }
   }
 
   /**
