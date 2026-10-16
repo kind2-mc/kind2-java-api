@@ -47,7 +47,7 @@ public class Kind2Api {
   private static final long DOCKER_KILL_TIMEOUT_SECONDS = 10;
   private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
   // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
-  private static volatile Semaphore safeModeRuns = new Semaphore(DEFAULT_SAFE_MODE_MAX_RUNS, true);
+  private static final RunLimit safeModeRuns = new RunLimit(DEFAULT_SAFE_MODE_MAX_RUNS);
   private Double safeModeCpuUsage;
   private String safeModeMemoryUsage;
   private String safeModeSwapUsage;
@@ -588,7 +588,7 @@ public class Kind2Api {
     if (safeMode == null || !safeMode) {
       return null;
     }
-    Semaphore runs = safeModeRuns;
+    RunLimit runs = safeModeRuns;
     try {
       while (!runs.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
         if (monitor != null && monitor.isCanceled()) {
@@ -1170,8 +1170,9 @@ public class Kind2Api {
   /**
    * Sets how many safe mode executions of Kind 2 may run at once in this JVM. The limit is shared
    * by every {@code Kind2Api} instance, so the worst-case resource usage is this value times the
-   * per-run CPU and memory limits. Further executions wait until a run finishes. Runs already in
-   * progress when the limit changes are not affected.
+   * per-run CPU and memory limits. Further executions wait until a run finishes. The new limit also
+   * applies to executions that are already waiting; runs already in progress are not stopped, but
+   * no new run starts while more than {@code maxRuns} are in progress.
    * <p>
    * Default: 2
    * @param maxRuns the maximum number of concurrent safe mode executions, at least 1.
@@ -1181,7 +1182,32 @@ public class Kind2Api {
       throw new IllegalArgumentException("Max runs was set to " + maxRuns
           + ", but a value of at least 1 is expected");
     }
-    safeModeRuns = new Semaphore(maxRuns, true);
+    safeModeRuns.setLimit(maxRuns);
+  }
+
+  /**
+   * A fair semaphore whose number of permits can be changed while runs hold or wait for them.
+   */
+  private static final class RunLimit extends Semaphore {
+    private static final long serialVersionUID = 1L;
+    /** The current limit; guarded by {@code this}. */
+    private int limit;
+
+    RunLimit(int limit) {
+      super(limit, true);
+      this.limit = limit;
+    }
+
+    synchronized void setLimit(int newLimit) {
+      int delta = newLimit - limit;
+      limit = newLimit;
+      if (delta > 0) {
+        release(delta);
+      } else if (delta < 0) {
+        // May leave the available permits negative until enough running runs finish.
+        reducePermits(-delta);
+      }
+    }
   }
 
   /**
