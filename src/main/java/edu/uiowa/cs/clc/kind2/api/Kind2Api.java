@@ -611,10 +611,14 @@ public class Kind2Api {
       builder.redirectErrorStream(true);
       Process kill = builder.start();
       kill.getOutputStream().close();
-      String output = ApiUtil.readAll(kill.getInputStream());
+      // Wait before reading, since reading blocks until docker kill exits. Its output is a line at
+      // most, so it cannot fill the pipe while we wait.
       if (!kill.waitFor(DOCKER_KILL_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
         kill.destroy();
+        debug.println("docker kill " + containerName + " timed out");
+        return;
       }
+      String output = ApiUtil.readAll(kill.getInputStream());
       debug.println("docker kill " + containerName + ": " + output.trim());
     } catch (IOException e) {
       debug.println("docker kill " + containerName + " failed: " + e.getMessage());
