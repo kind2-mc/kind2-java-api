@@ -46,6 +46,8 @@ public class Kind2Api {
   private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
   private static final long DOCKER_KILL_TIMEOUT_SECONDS = 10;
   private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
+  // The interpreter has no monitor to cancel it, so it gives up waiting for a run slot after this.
+  private static final long SAFE_MODE_INTERPRET_WAIT_SECONDS = 60;
   // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
   private static final RunLimit safeModeRuns = new RunLimit(DEFAULT_SAFE_MODE_MAX_RUNS);
   private Double safeModeCpuUsage;
@@ -360,7 +362,7 @@ public class Kind2Api {
     ProcessBuilder builder = new ProcessBuilder(options);
 
     debug.println("Kind 2 command(Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
-    try (RunSlot slot = acquireSafeModeRun(null)) {
+    try (RunSlot slot = acquireSafeModeRun(null, SAFE_MODE_INTERPRET_WAIT_SECONDS)) {
       Process process = null;
       try {
         process = builder.start();
@@ -425,7 +427,7 @@ public class Kind2Api {
     String containerName = newContainerName();
     ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
-    RunSlot slot = acquireSafeModeRun(monitor);
+    RunSlot slot = acquireSafeModeRun(monitor, 0);
     if (slot == null) {
       // Cancelled while waiting for a free run.
       monitor.done();
@@ -577,16 +579,24 @@ public class Kind2Api {
    * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots. Outside safe
    * mode, returns a slot that holds nothing. Close the slot when the run ends.
    *
+   * @param monitor checked for cancellation while waiting, or null
+   * @param timeoutSeconds how long to wait before throwing, or 0 to wait as long as it takes
    * @return the slot, or null only if {@code monitor} is cancelled before a slot is free
+   * @throws Kind2Exception if no slot is free within {@code timeoutSeconds}
    */
-  private RunSlot acquireSafeModeRun(IProgressMonitor monitor) {
+  private RunSlot acquireSafeModeRun(IProgressMonitor monitor, long timeoutSeconds) {
     if (safeMode == null || !safeMode) {
       return RunSlot.NONE;
     }
+    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
     try {
       while (!safeModeRuns.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
         if (monitor != null && monitor.isCanceled()) {
           return null;
+        }
+        if (timeoutSeconds > 0 && System.nanoTime() - deadline >= 0) {
+          throw new Kind2Exception("No safe mode run was free after " + timeoutSeconds
+              + " seconds, since the limit of concurrent runs was reached");
         }
       }
     } catch (InterruptedException e) {
