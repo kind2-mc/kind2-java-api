@@ -45,6 +45,7 @@ public class Kind2Api {
   private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
   private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
   private static final long DOCKER_KILL_TIMEOUT_SECONDS = 10;
+  private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
   // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
   private static volatile Semaphore safeModeRuns = new Semaphore(DEFAULT_SAFE_MODE_MAX_RUNS, true);
   private Double safeModeCpuUsage;
@@ -380,8 +381,10 @@ public class Kind2Api {
     } catch (IOException e) {
       throw new Kind2Exception(e.getMessage());
     } finally {
-      if (process != null && process.isAlive()) {
-        killContainer(containerName);
+      if (process != null) {
+        if (!exitsOnItsOwn(process, containerName)) {
+          killContainer(containerName);
+        }
         process.destroy();
       }
       if (runs != null) {
@@ -485,7 +488,7 @@ public class Kind2Api {
         if (process != null) {
           // Destroying the docker client does not reliably stop the container (for example on
           // Windows), so kill the container itself if the run did not finish on its own.
-          if (process.isAlive() || monitor.isCanceled()) {
+          if (monitor.isCanceled() || !exitsOnItsOwn(process, containerName)) {
             killContainer(containerName);
           }
           process.destroy();
@@ -597,6 +600,24 @@ public class Kind2Api {
       throw new Kind2Exception("Interrupted while waiting to run Kind 2", e);
     }
     return runs;
+  }
+
+  /**
+   * Returns whether a run's process exits on its own once its output has ended. In safe mode the
+   * docker client outlives the output while it waits for the container's exit status, so it gets
+   * a short grace period. Outside safe mode ({@code containerName} is null) there is no container
+   * to kill, so this returns true without waiting.
+   */
+  private static boolean exitsOnItsOwn(Process process, String containerName) {
+    if (containerName == null) {
+      return true;
+    }
+    try {
+      return process.waitFor(DOCKER_EXIT_GRACE_MILLIS, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return !process.isAlive();
+    }
   }
 
   /**
