@@ -381,7 +381,7 @@ public class Kind2Api {
         errorReader.setDaemon(true);
         errorReader.start();
         if (program != null) {
-          process.getOutputStream().write(program.getBytes());
+          process.getOutputStream().write(program.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
         process.getOutputStream().close();
         final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
@@ -473,7 +473,7 @@ public class Kind2Api {
       JsonStreamParser jsp;
       try {
         process = builder.start();
-        process.getOutputStream().write(program.getBytes());
+        process.getOutputStream().write(program.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         process.getOutputStream().flush();
         process.getOutputStream().close();
         final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
