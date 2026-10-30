@@ -388,10 +388,12 @@ public class Kind2Api {
         final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
         JsonStreamParser jsp = new JsonStreamParser(reader);
         String trace = "";
+        boolean sawOutput = false;
         JsonParseException outputError = null;
         try {
           while (jsp.hasNext()) {
               JsonElement jele = jsp.next();
+              sawOutput = true;
               if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
                   trace = jele.getAsJsonObject().get("trace").toString();
               }
@@ -401,17 +403,21 @@ public class Kind2Api {
           // container), or a JsonSyntaxException when it isn't JSON.
           outputError = e;
         }
-        if (trace.isEmpty()) {
-          // Without a trace, stderr may say why, for example a docker error in safe mode.
+        if (!sawOutput || outputError != null) {
+          // Without usable output, stderr may say why, for example a docker error in safe mode.
+          // Otherwise it is ignored, since docker can print harmless warnings there, and Kind 2
+          // reports its own errors as JSON on stdout.
           errorReader.join(DOCKER_EXIT_GRACE_MILLIS);
           String errorOutput = errors.toString().trim();
-          if (!errorOutput.isEmpty()) {
-            throw new Kind2Exception("Error running the Kind 2 interpreter: " + errorOutput);
+          if (!sawOutput && !errorOutput.isEmpty()) {
+            throw new Kind2Exception("Error running the Kind 2 interpreter: " + errorOutput,
+                outputError);
           }
-        }
-        if (outputError != null) {
-          throw new Kind2Exception("Could not read the Kind 2 interpreter output: "
-              + outputError.getMessage(), outputError);
+          if (outputError != null) {
+            throw new Kind2Exception("Could not read the Kind 2 interpreter output: "
+                + outputError.getMessage()
+                + (errorOutput.isEmpty() ? "" : "\n" + errorOutput), outputError);
+          }
         }
         return trace;
       } catch (IOException e) {
