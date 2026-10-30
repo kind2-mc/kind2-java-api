@@ -9,6 +9,7 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,9 +20,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonStreamParser;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
@@ -40,6 +45,15 @@ public class Kind2Api {
   private static final Double DEFAULT_SAFE_MODE_CPU_USAGE = 1.0;
   private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
   private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
+  private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
+  private static final long DOCKER_COMMAND_TIMEOUT_SECONDS = 10;
+  private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
+  // Calls that cannot be cancelled (the interpreter, and execute without a monitor) give up
+  // waiting for a safe mode run slot after this.
+  private static final long SAFE_MODE_SLOT_WAIT_SECONDS = 60;
+  private static final long CHECK_AVAILABLE_TIMEOUT_SECONDS = 30;
+  // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
+  private static final RunLimit safeModeRuns = new RunLimit(DEFAULT_SAFE_MODE_MAX_RUNS);
   private Double safeModeCpuUsage;
   private String safeModeMemoryUsage;
   private String safeModeSwapUsage;
@@ -252,19 +266,11 @@ public class Kind2Api {
    *
    * @param program Lustre program
    * @return result of running kind2 on program
+   * @throws Kind2Exception if Kind 2 fails to run, or in safe mode if no run is free within 60
+   *     seconds
    */
   public Result execute(Program program) {
-    Result result = new Result();
-    execute(program.toString(), result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
-
-      @Override
-      public void done() {}
-    });
-    return result;
+    return execute(program.toString());
   }
 
   /**
@@ -272,18 +278,13 @@ public class Kind2Api {
    *
    * @param program Lustre program as text
    * @return result of running kind2 on program
+   * @throws Kind2Exception if Kind 2 fails to run, or in safe mode if no run is free within 60
+   *     seconds
    */
   public Result execute(String program) {
     Result result = new Result();
-    execute(program, result, new IProgressMonitor() {
-      @Override
-      public boolean isCanceled() {
-        return false;
-      }
-
-      @Override
-      public void done() {}
-    });
+    // Nothing can cancel this call, so it must not wait for a run slot forever.
+    execute(program, result, NEVER_CANCELED, null, SAFE_MODE_SLOT_WAIT_SECONDS);
     return result;
   }
 
@@ -299,35 +300,7 @@ public class Kind2Api {
   public String interpret(URI uri, String main, String json) {
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
     Path lustreFile = toLocalPath(uri).toAbsolutePath().normalize();
-
-    List<String> options = getInterpreterCommand(
-        interpreterFile,
-        lustreFile
-    );
-
-    options.add("--lus_main");
-    options.add(main);
-    options.add("--enable");
-    options.add("interpreter");
-    
-    ProcessBuilder builder = new ProcessBuilder(options);
-    
-    debug.println("Kind 2 command(URI Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
-    try {
-      Process process = builder.start();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      JsonStreamParser jsp = new JsonStreamParser(reader);
-      String trace = "";
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
-              trace = jele.getAsJsonObject().get("trace").toString();
-          }
-      }
-      return trace;
-    } catch (IOException e) {
-      throw new Kind2Exception(e.getMessage());
-    }
+    return runInterpreter(interpreterFile, lustreFile, null, main);
   }
 
   /**
@@ -360,37 +333,83 @@ public class Kind2Api {
    * @throws Kind2Exception if Kind 2 fails to run
    */
   public String interpret(String program, String main, String json) {
-
     File interpreterFile = ApiUtil.writeInterpreterFile(json);
+    return runInterpreter(interpreterFile, null, program, main);
+  }
 
-    List<String> options =
-        getInterpreterCommand(interpreterFile, null);
+  /**
+   * Runs the interpreter on either {@code lustreFile} or {@code program}, whichever is non-null,
+   * and returns the trace.
+   */
+  private String runInterpreter(File interpreterFile, Path lustreFile, String program, String main) {
+    String containerName = newContainerName();
+    List<String> options = getInterpreterCommand(interpreterFile, lustreFile, containerName);
 
     options.add("--lus_main");
     options.add(main);
     options.add("--enable");
     options.add("interpreter");
-    
+
     ProcessBuilder builder = new ProcessBuilder(options);
 
-    debug.println("Kind 2 command(String Interpret):\n " + ApiUtil.getQuotedCommand(builder.command()));
-    try {
-      Process process = builder.start();
-      process.getOutputStream().write(program.getBytes());
-      process.getOutputStream().flush();
-      process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      JsonStreamParser jsp = new JsonStreamParser(reader);
-      String trace = "";
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
-              trace = jele.getAsJsonObject().get("trace").toString();
+    debug.println("Kind 2 command(Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
+    try (RunSlot slot = acquireSafeModeRun(containerName, null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
+      Process process = null;
+      try {
+        process = builder.start();
+        // Read stderr on its own thread so that it cannot fill its pipe and block Kind 2. It is
+        // kept apart from stdout, which must hold only JSON.
+        final StringBuffer errors = new StringBuffer();
+        Thread errorReader = readInBackground(process.getErrorStream(), errors);
+        if (program != null) {
+          process.getOutputStream().write(program.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+        process.getOutputStream().close();
+        final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+        JsonStreamParser jsp = new JsonStreamParser(reader);
+        String trace = "";
+        boolean sawOutput = false;
+        JsonParseException outputError = null;
+        try {
+          while (jsp.hasNext()) {
+              JsonElement jele = jsp.next();
+              sawOutput = true;
+              if (jele.isJsonObject() && jele.getAsJsonObject().has("trace")) {
+                  trace = jele.getAsJsonObject().get("trace").toString();
+              }
           }
+        } catch (JsonParseException e) {
+          // A JsonIOException when stdout is empty (for example when docker fails to start the
+          // container), or a JsonSyntaxException when it isn't JSON.
+          outputError = e;
+        }
+        if (!sawOutput || outputError != null) {
+          // Without usable output, stderr may say why, for example a docker error in safe mode.
+          // Otherwise it is ignored, since docker can print harmless warnings there, and Kind 2
+          // reports its own errors as JSON on stdout.
+          errorReader.join(DOCKER_EXIT_GRACE_MILLIS);
+          String errorOutput = errors.toString().trim();
+          if (!sawOutput && !errorOutput.isEmpty()) {
+            throw new Kind2Exception("Error running the Kind 2 interpreter: " + errorOutput,
+                outputError);
+          }
+          if (outputError != null) {
+            throw new Kind2Exception("Could not read the Kind 2 interpreter output: "
+                + outputError.getMessage()
+                + (errorOutput.isEmpty() ? "" : "\n" + errorOutput), outputError);
+          }
+        }
+        return trace;
+      } catch (IOException e) {
+        throw new Kind2Exception(e.getMessage());
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new Kind2Exception("Interrupted while running the Kind 2 interpreter", e);
+      } finally {
+        if (process != null) {
+          stopRun(process, containerName, false);
+        }
       }
-      return trace;
-    } catch (IOException e) {
-      throw new Kind2Exception(e.getMessage());
     }
   }
 
@@ -416,70 +435,97 @@ public class Kind2Api {
    * @throws Kind2Exception if Kind 2 fails to run or its output cannot be parsed
    */
   public void execute(String program, Result result, IProgressMonitor monitor, ResultListener listener) {
+    execute(program, result, monitor, listener, 0);
+  }
+
+  /**
+   * Runs Kind 2 as {@link #execute(String, Result, IProgressMonitor, ResultListener)} does, giving
+   * up after {@code slotWaitSeconds} if no safe mode run is free (0 to wait as long as it takes).
+   */
+  private void execute(String program, Result result, IProgressMonitor monitor,
+      ResultListener listener, long slotWaitSeconds) {
     try {
-      callKind2(program, result, monitor, listener);
+      callKind2(program, result, monitor, listener, slotWaitSeconds);
     } catch (Throwable t) {
       throw new Kind2Exception(t.getMessage(), t);
     }
   }
 
-  private void callKind2(String program, Result result, IProgressMonitor monitor, ResultListener listener)
-      throws IOException, InterruptedException {
-    ProcessBuilder builder = getKind2ProcessBuilder();
+  private static final IProgressMonitor NEVER_CANCELED = new IProgressMonitor() {
+    @Override
+    public boolean isCanceled() {
+      return false;
+    }
+
+    @Override
+    public void done() {}
+  };
+
+  private void callKind2(String program, Result result, IProgressMonitor monitor,
+      ResultListener listener, long slotWaitSeconds) throws IOException, InterruptedException {
+    String containerName = newContainerName();
+    ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
-    Process process = null;
-    boolean exceptionThrown = false;
-    JsonStreamParser jsp;
-    try {
-      process = builder.start();
-      process.getOutputStream().write(program.getBytes());
-      process.getOutputStream().flush();
-      process.getOutputStream().close();
-      final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
-      jsp = new JsonStreamParser(reader);
-      // The following assignment is required because variables used in lambdas must be final or effectively final.
-      final Process processForMonitor = process;
-      Thread monitorThread = new Thread(() -> {
-        while (!monitor.isCanceled() && processForMonitor.isAlive()) {
-          sleep(POLL_INTERVAL);
-        }
-        if (monitor.isCanceled() && processForMonitor.isAlive()) {
-          debug.println("Monitor canceled, destroying Kind2 process");
-          processForMonitor.destroy();
-          try { reader.close(); } catch (IOException e) { /* ignore */ }
-        }
-      });
-      monitorThread.start();
-      while (jsp.hasNext()) {
-          JsonElement jele = jsp.next();
-          debug.println("Parsing JSON element: " + jele.toString());
-          result.addJsonElement(jele);
-          if(listener != null){
-            listener.onUpdate(result);
-          }
-          debug.println(result.getResultMap().toString());
+    try (RunSlot slot = acquireSafeModeRun(containerName, monitor, slotWaitSeconds)) {
+      if (slot.isCancelled()) {
+        // Cancelled while waiting for a free run.
+        monitor.done();
+        return;
       }
-    } catch (JsonIOException e) {
-      // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
-    } catch (Throwable t) {
-      exceptionThrown = true;
-      throw t;
-    } finally {
+      Process process = null;
+      boolean exceptionThrown = false;
+      JsonStreamParser jsp;
       try {
-        if (!monitor.isCanceled()) {
-          try {
-            result.finish();
-          } catch (Throwable t) {
-            if (!exceptionThrown) {
-              throw t;
+        process = builder.start();
+        process.getOutputStream().write(program.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        process.getOutputStream().flush();
+        process.getOutputStream().close();
+        final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+        jsp = new JsonStreamParser(reader);
+        // The following assignment is required because variables used in lambdas must be final or effectively final.
+        final Process processForMonitor = process;
+        Thread monitorThread = new Thread(() -> {
+          while (!monitor.isCanceled() && processForMonitor.isAlive()) {
+            sleep(POLL_INTERVAL);
+          }
+          if (monitor.isCanceled() && processForMonitor.isAlive()) {
+            debug.println("Monitor canceled, destroying Kind2 process");
+            processForMonitor.destroy();
+            try { reader.close(); } catch (IOException e) { /* ignore */ }
+          }
+        });
+        monitorThread.start();
+        while (jsp.hasNext()) {
+            JsonElement jele = jsp.next();
+            debug.println("Parsing JSON element: " + jele.toString());
+            result.addJsonElement(jele);
+            if(listener != null){
+              listener.onUpdate(result);
+            }
+            debug.println(result.getResultMap().toString());
+        }
+      } catch (JsonIOException e) {
+        // ignore JsonIOException, which may occur if the process is destroyed while reading JSON
+      } catch (Throwable t) {
+        exceptionThrown = true;
+        throw t;
+      } finally {
+        try {
+          if (!monitor.isCanceled()) {
+            try {
+              result.finish();
+            } catch (Throwable t) {
+              if (!exceptionThrown) {
+                throw t;
+              }
             }
           }
+        } finally {
+          if (process != null) {
+            stopRun(process, containerName, monitor.isCanceled());
+          }
+          monitor.done();
         }
-      } finally {
-        if (process != null) {
-          process.destroy();
-        }
-        monitor.done();
       }
     }
   }
@@ -552,37 +598,249 @@ public class Kind2Api {
     mountIfPresent(options, "yices2Bin", yices2Bin, DOCKER_YICES2_BIN);
     mountIfPresent(options, "z3Bin", z3Bin, DOCKER_Z3_BIN);
   }
-  private ProcessBuilder getKind2ProcessBuilder() {
-    List<String> options = new ArrayList<>();
-
+  /**
+   * Returns a unique container name in safe mode, or null otherwise.
+   * <p>
+   * This is the only place a run reads {@link #safeMode}. Everything else that depends on safe mode
+   * for that run is decided by whether its container name is null, so that a concurrent call to
+   * {@link #setSafeMode(boolean)} cannot leave a run half in Docker and half outside it.
+   */
+  private String newContainerName() {
     if (safeMode != null && safeMode) {
-      options.add("docker");
-      options.add("run");
-      options.add("--rm");
-      options.add("-i");
+      return "kind2-api-" + UUID.randomUUID();
+    }
+    return null;
+  }
 
-      options.add("--cpus");
-      options.add(safeModeCpuUsage.toString());
+  /**
+   * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots. Outside safe
+   * mode, returns a slot that holds nothing. Close the slot when the run ends.
+   *
+   * @param containerName the run's container name, null outside safe mode
+   * @param monitor checked for cancellation while waiting, or null
+   * @param timeoutSeconds how long to wait before throwing, or 0 to wait as long as it takes
+   * @return the slot, or {@link RunSlot#CANCELLED} if {@code monitor} is cancelled before a slot
+   *     is free
+   * @throws Kind2Exception if no slot is free within {@code timeoutSeconds}
+   */
+  private RunSlot acquireSafeModeRun(String containerName, IProgressMonitor monitor,
+      long timeoutSeconds) {
+    if (containerName == null) {
+      return RunSlot.NONE;
+    }
+    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
+    try {
+      while (!safeModeRuns.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
+        if (monitor != null && monitor.isCanceled()) {
+          return RunSlot.CANCELLED;
+        }
+        if (timeoutSeconds > 0 && System.nanoTime() - deadline >= 0) {
+          throw new Kind2Exception("No safe mode run was free after " + timeoutSeconds
+              + " seconds, since the limit of concurrent runs was reached");
+        }
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new Kind2Exception("Interrupted while waiting to run Kind 2", e);
+    }
+    if (monitor != null && monitor.isCanceled()) {
+      safeModeRuns.release();
+      return RunSlot.CANCELLED;
+    }
+    return new RunSlot(safeModeRuns);
+  }
 
-      options.add("--memory");
-      options.add(safeModeMemoryUsage);
+  /**
+   * A held safe mode run slot, released by {@link #close()}. Outside safe mode, or when the run was
+   * cancelled before a slot was free, it holds nothing.
+   */
+  private static final class RunSlot implements AutoCloseable {
+    static final RunSlot NONE = new RunSlot(null, false);
+    static final RunSlot CANCELLED = new RunSlot(null, true);
+    private final Semaphore runs;
+    private final boolean cancelled;
 
-      options.add("--memory-swap");
-      options.add(safeModeSwapUsage);
-
-      options.add("--network");
-      options.add("none");
-      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
-      
-      mountSolversToDocker(options);
-      
-      options.add(dockerImage);
-      options.add("/usr/local/bin/kind2");
-    } else {
-      options.add(KIND2);
+    RunSlot(Semaphore runs) {
+      this(runs, false);
     }
 
-    options.addAll(getOptions());
+    private RunSlot(Semaphore runs, boolean cancelled) {
+      this.runs = runs;
+      this.cancelled = cancelled;
+    }
+
+    /** Returns whether the run was cancelled before a slot was free, so it must not start. */
+    boolean isCancelled() {
+      return cancelled;
+    }
+
+    @Override
+    public void close() {
+      if (runs != null) {
+        runs.release();
+      }
+    }
+  }
+
+  /**
+   * Reads {@code in} to its end on a daemon thread, appending what it reads to {@code into}, and
+   * returns the thread.
+   */
+  private static Thread readInBackground(InputStream in, StringBuffer into) {
+    Thread reader = new Thread(() -> {
+      try {
+        into.append(ApiUtil.readAll(in));
+      } catch (IOException e) {
+        // The stream is closed when the process is destroyed.
+      }
+    });
+    reader.setDaemon(true);
+    reader.start();
+    return reader;
+  }
+
+  /**
+   * Stops a run's process after its output has ended or it was cancelled. Destroying the docker
+   * client does not reliably stop the container (for example on Windows), so in safe mode the
+   * container itself is killed if the run was cancelled or does not finish on its own.
+   * <p>
+   * The kill can miss a container that docker is still creating. Once the client has exited, it
+   * can no longer start the container, so the container is then removed with {@code docker rm -f},
+   * which also covers one left in the Created state (which {@code --rm} never removes) or started
+   * just after the kill.
+   * <p>
+   * The thread's interrupt flag is cleared while this waits, so that the waits still apply and the
+   * run slot is not released before the container is stopped, and is restored afterwards.
+   */
+  private void stopRun(Process process, String containerName, boolean cancelled) {
+    boolean interrupted = Thread.interrupted();
+    try {
+      if (cancelled || !exitsOnItsOwn(process, containerName)) {
+        dockerCommand("kill", containerName);
+        process.destroy();
+        exitsOnItsOwn(process, containerName);
+        dockerCommand("rm", "-f", containerName);
+      } else {
+        process.destroy();
+      }
+    } finally {
+      if (interrupted) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
+  /**
+   * Returns whether a run's process exits on its own once its output has ended. In safe mode the
+   * docker client outlives the output while it waits for the container's exit status, so it gets
+   * a short grace period. Outside safe mode ({@code containerName} is null) there is no container
+   * to kill, so this returns true without waiting.
+   */
+  private static boolean exitsOnItsOwn(Process process, String containerName) {
+    if (containerName == null) {
+      return true;
+    }
+    try {
+      return process.waitFor(DOCKER_EXIT_GRACE_MILLIS, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return !process.isAlive();
+    }
+  }
+
+  /**
+   * Runs a docker command on a safe mode container, such as {@code docker kill <name>}, ignoring
+   * failures such as the container having already exited or been removed. Does nothing outside
+   * safe mode ({@code containerName} is null).
+   */
+  private void dockerCommand(String... args) {
+    String containerName = args[args.length - 1];
+    if (containerName == null) {
+      return;
+    }
+    List<String> command = new ArrayList<>();
+    command.add("docker");
+    command.addAll(java.util.Arrays.asList(args));
+    String quoted = ApiUtil.getQuotedCommand(command);
+    try {
+      ProcessBuilder builder = new ProcessBuilder(command);
+      builder.redirectErrorStream(true);
+      Process docker = builder.start();
+      docker.getOutputStream().close();
+      // Wait before reading, since reading blocks until docker exits. Its output is a line at
+      // most, so it cannot fill the pipe while we wait.
+      if (!docker.waitFor(DOCKER_COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+        docker.destroy();
+        debug.println(quoted + " timed out");
+        return;
+      }
+      String output = ApiUtil.readAll(docker.getInputStream());
+      debug.println(quoted + ": " + output.trim());
+    } catch (IOException e) {
+      debug.println(quoted + " failed: " + e.getMessage());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  /**
+   * Returns the docker run command, up to but not including the image name, with the resource
+   * limits and the Kind 2 and solver mounts that every safe mode execution uses.
+   */
+  private List<String> getDockerRunCommand(String containerName) {
+    List<String> options = new ArrayList<>();
+    options.add("docker");
+    options.add("run");
+    options.add("--rm");
+    options.add("-i");
+
+    if (containerName != null) {
+      options.add("--name");
+      options.add(containerName);
+    }
+
+    // Run an init process as PID 1 so that signals reach Kind 2 even if it installs no handler,
+    // and so that orphaned solver processes are reaped.
+    options.add("--init");
+
+    options.add("--cpus");
+    options.add(safeModeCpuUsage.toString());
+
+    options.add("--memory");
+    options.add(safeModeMemoryUsage);
+
+    options.add("--memory-swap");
+    options.add(safeModeSwapUsage);
+
+    options.add("--network");
+    options.add("none");
+
+    mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
+    mountSolversToDocker(options);
+    return options;
+  }
+
+  /**
+   * Returns the command that starts Kind 2, without its options: {@code docker run ...} with the
+   * given extra docker arguments, the image and the Kind 2 path in the container in safe mode, or
+   * just {@link #KIND2} otherwise.
+   */
+  private List<String> getKind2Command(String containerName, List<String> dockerArgs) {
+    List<String> command = new ArrayList<>();
+    if (containerName != null) {
+      command.addAll(getDockerRunCommand(containerName));
+      command.addAll(dockerArgs);
+      command.add(dockerImage);
+      command.add(DOCKER_KIND2);
+    } else {
+      command.add(KIND2);
+    }
+    return command;
+  }
+
+  private ProcessBuilder getKind2ProcessBuilder(String containerName) {
+    List<String> options = getKind2Command(containerName, new ArrayList<>());
+    options.addAll(getOptions(containerName != null));
 
     ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
@@ -590,64 +848,29 @@ public class Kind2Api {
   }
 
 
-  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile) {
-    List<String> options = new ArrayList<>();
-
-    if (safeMode != null && safeMode) {
-      options.add("docker");
-      options.add("run");
-      options.add("--rm");
-      options.add("-i");
-
-      options.add("--cpus");
-      options.add(safeModeCpuUsage.toString());
-
-      options.add("--memory");
-      options.add(safeModeMemoryUsage);
-
-      options.add("--memory-swap");
-      options.add(safeModeSwapUsage);
-
-      options.add("--network");
-      options.add("none");
-
-      mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
-      mountSolversToDocker(options);
-
-      options.add("--mount");
-      options.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
-
+  private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile, String containerName) {
+    boolean inDocker = containerName != null;
+    List<String> mounts = new ArrayList<>();
+    if (inDocker) {
+      mounts.add("--mount");
+      mounts.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
       if (lustreFile != null) {
-        options.add("--mount");
-        options.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
+        mounts.add("--mount");
+        mounts.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
       }
-
-      options.add(dockerImage);
-      options.add(DOCKER_KIND2);
-
-      options.addAll(getOptions());
-
-      options.add("--interpreter_input_file");
-      options.add(DOCKER_INTERPRETER_INPUT);
-
-      if (lustreFile != null) {
-        options.add(DOCKER_LUSTRE_FILE);
-      }
-
-      return options;      
     }
 
-    options.add(KIND2);
-      options.addAll(getOptions());
+    List<String> options = getKind2Command(containerName, mounts);
+    options.addAll(getOptions(inDocker));
 
-      options.add("--interpreter_input_file");
-      options.add(interpreterFile.getAbsolutePath());
+    options.add("--interpreter_input_file");
+    options.add(inDocker ? DOCKER_INTERPRETER_INPUT : interpreterFile.getAbsolutePath());
 
-      if (lustreFile != null) {
-        options.add(lustreFile.toString());
-      }
+    if (lustreFile != null) {
+      options.add(inDocker ? DOCKER_LUSTRE_FILE : lustreFile.toString());
+    }
 
-      return options;
+    return options;
   }
 
   /**
@@ -665,6 +888,13 @@ public class Kind2Api {
    * @return the command line options this API will pass to Kind 2
    */
   public List<String> getOptions() {
+    return getOptions(safeMode != null && safeMode);
+  }
+
+  /**
+   * Returns the command line options to pass to Kind 2, for a run in safe mode if {@code inDocker}.
+   */
+  private List<String> getOptions(boolean inDocker) {
     List<String> options = new ArrayList<>();
     options.add("-ijson");
     if (logLevel != null) {
@@ -706,7 +936,7 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if(safeMode != null && safeMode){
+    if (inDocker) {
       if (bitwuzlaBin != null) {  
         options.add("--bitwuzla_bin");
         options.add(DOCKER_BITWUZLA_BIN);
@@ -980,9 +1210,9 @@ public class Kind2Api {
       options.add("--fake_filepath");
       options.add(fakeFilepath);
     }
-    if (safeMode != null){
+    if (inDocker) {
       options.add("--no_include");
-      options.add(safeMode.toString());
+      options.add("true");
     }
     options.addAll(this.otherOptions);
     return options;
@@ -1069,6 +1299,49 @@ public class Kind2Api {
           + ", but it must be greater than or equal to the memory usage (" + safeModeMemoryUsage + ")");
     }
     safeModeSwapUsage = amount;
+  }
+
+  /**
+   * Sets how many safe mode executions of Kind 2 may run at once in this JVM. The limit is shared
+   * by every {@code Kind2Api} instance, so the worst-case resource usage is this value times the
+   * per-run CPU and memory limits. Further executions wait until a run finishes. The new limit also
+   * applies to executions that are already waiting; runs already in progress are not stopped, but
+   * no new run starts while more than {@code maxRuns} are in progress.
+   * <p>
+   * Default: 2
+   * @param maxRuns the maximum number of concurrent safe mode executions, at least 1.
+   */
+  public static void setSafeModeMaxRuns(int maxRuns) {
+    if (maxRuns < 1) {
+      throw new IllegalArgumentException("Max runs was set to " + maxRuns
+          + ", but a value of at least 1 is expected");
+    }
+    safeModeRuns.setLimit(maxRuns);
+  }
+
+  /**
+   * A fair semaphore whose number of permits can be changed while runs hold or wait for them.
+   */
+  private static final class RunLimit extends Semaphore {
+    private static final long serialVersionUID = 1L;
+    /** The current limit; guarded by {@code this}. */
+    private int limit;
+
+    RunLimit(int limit) {
+      super(limit, true);
+      this.limit = limit;
+    }
+
+    synchronized void setLimit(int newLimit) {
+      int delta = newLimit - limit;
+      limit = newLimit;
+      if (delta > 0) {
+        release(delta);
+      } else if (delta < 0) {
+        // May leave the available permits negative until enough running runs finish.
+        reducePermits(-delta);
+      }
+    }
   }
 
   /**
@@ -1858,18 +2131,42 @@ public class Kind2Api {
   /**
    * Check if the KindApi is available for running and throw exception if not
    *
+   * In safe mode this starts a container like any other run: it takes a run slot (waiting at most
+   * 60 seconds for one) and its container is killed if it does not finish.
+   *
    * @return Availability information when Kind is available
-   * @throws java.lang.Exception When Kind is not available
+   * @throws java.lang.Exception When Kind is not available, or does not report its version within
+   *     30 seconds
    */
   public String checkAvailable() throws Exception {
-    ProcessBuilder builder = new ProcessBuilder(KIND2, "--version");
-    builder.redirectErrorStream(true);
-    Process process = builder.start();
+    String containerName = newContainerName();
+    List<String> command = getKind2Command(containerName, new ArrayList<>());
+    command.add("--version");
 
-    String output = ApiUtil.readAll(process.getInputStream());
-    if (process.exitValue() != 0) {
-      throw new Kind2Exception("Error running kind2: " + output);
+    ProcessBuilder builder = new ProcessBuilder(command);
+    builder.redirectErrorStream(true);
+    try (RunSlot slot = acquireSafeModeRun(containerName, null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
+      Process process = builder.start();
+      boolean finished = false;
+      try {
+        process.getOutputStream().close();
+        // Read on another thread, so that a hung docker (for example a stuck daemon) cannot block
+        // this call past the timeout.
+        StringBuffer output = new StringBuffer();
+        Thread reader = readInBackground(process.getInputStream(), output);
+        finished = process.waitFor(CHECK_AVAILABLE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!finished) {
+          throw new Kind2Exception("Kind 2 did not report its version within "
+              + CHECK_AVAILABLE_TIMEOUT_SECONDS + " seconds");
+        }
+        reader.join(DOCKER_EXIT_GRACE_MILLIS);
+        if (process.exitValue() != 0) {
+          throw new Kind2Exception("Error running kind2: " + output);
+        }
+        return output.toString();
+      } finally {
+        stopRun(process, containerName, !finished);
+      }
     }
-    return output;
   }
 }
