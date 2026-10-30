@@ -46,7 +46,7 @@ public class Kind2Api {
   private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
   private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
   private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
-  private static final long DOCKER_KILL_TIMEOUT_SECONDS = 10;
+  private static final long DOCKER_COMMAND_TIMEOUT_SECONDS = 10;
   private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
   // Calls that cannot be cancelled (the interpreter, and execute without a monitor) give up
   // waiting for a safe mode run slot after this.
@@ -676,6 +676,11 @@ public class Kind2Api {
    * client does not reliably stop the container (for example on Windows), so in safe mode the
    * container itself is killed if the run was cancelled or does not finish on its own.
    * <p>
+   * The kill can miss a container that docker is still creating. Once the client has exited, it
+   * can no longer start the container, so the container is then removed with {@code docker rm -f},
+   * which also covers one left in the Created state (which {@code --rm} never removes) or started
+   * just after the kill.
+   * <p>
    * The thread's interrupt flag is cleared while this waits, so that the waits still apply and the
    * run slot is not released before the container is stopped, and is restored afterwards.
    */
@@ -683,9 +688,13 @@ public class Kind2Api {
     boolean interrupted = Thread.interrupted();
     try {
       if (cancelled || !exitsOnItsOwn(process, containerName)) {
-        killContainer(containerName);
+        dockerCommand("kill", containerName);
+        process.destroy();
+        exitsOnItsOwn(process, containerName);
+        dockerCommand("rm", "-f", containerName);
+      } else {
+        process.destroy();
       }
-      process.destroy();
     } finally {
       if (interrupted) {
         Thread.currentThread().interrupt();
@@ -712,28 +721,35 @@ public class Kind2Api {
   }
 
   /**
-   * Kills a safe mode container, ignoring failures such as the container having already exited.
+   * Runs a docker command on a safe mode container, such as {@code docker kill <name>}, ignoring
+   * failures such as the container having already exited or been removed. Does nothing outside
+   * safe mode ({@code containerName} is null).
    */
-  private void killContainer(String containerName) {
+  private void dockerCommand(String... args) {
+    String containerName = args[args.length - 1];
     if (containerName == null) {
       return;
     }
+    List<String> command = new ArrayList<>();
+    command.add("docker");
+    command.addAll(java.util.Arrays.asList(args));
+    String quoted = ApiUtil.getQuotedCommand(command);
     try {
-      ProcessBuilder builder = new ProcessBuilder("docker", "kill", containerName);
+      ProcessBuilder builder = new ProcessBuilder(command);
       builder.redirectErrorStream(true);
-      Process kill = builder.start();
-      kill.getOutputStream().close();
-      // Wait before reading, since reading blocks until docker kill exits. Its output is a line at
+      Process docker = builder.start();
+      docker.getOutputStream().close();
+      // Wait before reading, since reading blocks until docker exits. Its output is a line at
       // most, so it cannot fill the pipe while we wait.
-      if (!kill.waitFor(DOCKER_KILL_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-        kill.destroy();
-        debug.println("docker kill " + containerName + " timed out");
+      if (!docker.waitFor(DOCKER_COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+        docker.destroy();
+        debug.println(quoted + " timed out");
         return;
       }
-      String output = ApiUtil.readAll(kill.getInputStream());
-      debug.println("docker kill " + containerName + ": " + output.trim());
+      String output = ApiUtil.readAll(docker.getInputStream());
+      debug.println(quoted + ": " + output.trim());
     } catch (IOException e) {
-      debug.println("docker kill " + containerName + " failed: " + e.getMessage());
+      debug.println(quoted + " failed: " + e.getMessage());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }
