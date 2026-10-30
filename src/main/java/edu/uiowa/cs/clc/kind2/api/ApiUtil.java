@@ -9,10 +9,11 @@ package edu.uiowa.cs.clc.kind2.api;
 
 import static java.util.stream.Collectors.joining;
 
-import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
@@ -67,20 +68,21 @@ public class ApiUtil {
   }
 
   /**
-   * Reads a stream to its end.
+   * Reads a stream to its end and decodes it as UTF-8.
    *
    * @param inputStream the stream to read
    * @return the full contents of the stream
    * @throws java.io.IOException if the stream cannot be read
    */
   public static String readAll(InputStream inputStream) throws IOException {
-    StringBuilder result = new StringBuilder();
-    BufferedInputStream buffered = new BufferedInputStream(inputStream);
-    int i;
-    while ((i = buffered.read()) != -1) {
-      result.append((char) i);
+    // Decode once at the end, so that a multi-byte character is never split between two reads.
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    byte[] buffer = new byte[4096];
+    int n;
+    while ((n = inputStream.read(buffer)) != -1) {
+      bytes.write(buffer, 0, n);
     }
-    return result.toString();
+    return new String(bytes.toByteArray(), StandardCharsets.UTF_8);
   }
 
   /**
