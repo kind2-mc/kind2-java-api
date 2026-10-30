@@ -415,10 +415,7 @@ public class Kind2Api {
         throw new Kind2Exception("Interrupted while running the Kind 2 interpreter", e);
       } finally {
         if (process != null) {
-          if (!exitsOnItsOwn(process, containerName)) {
-            killContainer(containerName);
-          }
-          process.destroy();
+          stopRun(process, containerName, false);
         }
       }
     }
@@ -534,12 +531,7 @@ public class Kind2Api {
           }
         } finally {
           if (process != null) {
-            // Destroying the docker client does not reliably stop the container (for example on
-            // Windows), so kill the container itself if the run did not finish on its own.
-            if (monitor.isCanceled() || !exitsOnItsOwn(process, containerName)) {
-              killContainer(containerName);
-            }
-            process.destroy();
+            stopRun(process, containerName, monitor.isCanceled());
           }
           monitor.done();
         }
@@ -675,6 +667,28 @@ public class Kind2Api {
     public void close() {
       if (runs != null) {
         runs.release();
+      }
+    }
+  }
+
+  /**
+   * Stops a run's process after its output has ended or it was cancelled. Destroying the docker
+   * client does not reliably stop the container (for example on Windows), so in safe mode the
+   * container itself is killed if the run was cancelled or does not finish on its own.
+   * <p>
+   * The thread's interrupt flag is cleared while this waits, so that the waits still apply and the
+   * run slot is not released before the container is stopped, and is restored afterwards.
+   */
+  private void stopRun(Process process, String containerName, boolean cancelled) {
+    boolean interrupted = Thread.interrupted();
+    try {
+      if (cancelled || !exitsOnItsOwn(process, containerName)) {
+        killContainer(containerName);
+      }
+      process.destroy();
+    } finally {
+      if (interrupted) {
+        Thread.currentThread().interrupt();
       }
     }
   }
