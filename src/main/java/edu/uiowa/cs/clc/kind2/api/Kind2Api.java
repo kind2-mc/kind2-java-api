@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonStreamParser;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
@@ -387,7 +388,7 @@ public class Kind2Api {
         final InputStreamReader reader = new InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
         JsonStreamParser jsp = new JsonStreamParser(reader);
         String trace = "";
-        JsonIOException outputError = null;
+        JsonParseException outputError = null;
         try {
           while (jsp.hasNext()) {
               JsonElement jele = jsp.next();
@@ -395,8 +396,9 @@ public class Kind2Api {
                   trace = jele.getAsJsonObject().get("trace").toString();
               }
           }
-        } catch (JsonIOException e) {
-          // Thrown when stdout is empty, for example when docker fails to start the container.
+        } catch (JsonParseException e) {
+          // A JsonIOException when stdout is empty (for example when docker fails to start the
+          // container), or a JsonSyntaxException when it isn't JSON.
           outputError = e;
         }
         if (trace.isEmpty()) {
@@ -408,7 +410,8 @@ public class Kind2Api {
           }
         }
         if (outputError != null) {
-          throw outputError;
+          throw new Kind2Exception("Could not read the Kind 2 interpreter output: "
+              + outputError.getMessage(), outputError);
         }
         return trace;
       } catch (IOException e) {
