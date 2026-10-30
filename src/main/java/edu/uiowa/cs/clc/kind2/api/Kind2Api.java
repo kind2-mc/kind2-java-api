@@ -466,13 +466,12 @@ public class Kind2Api {
     String containerName = newContainerName();
     ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
-    RunSlot slot = acquireSafeModeRun(containerName, monitor, slotWaitSeconds);
-    if (slot == null) {
-      // Cancelled while waiting for a free run.
-      monitor.done();
-      return;
-    }
-    try (RunSlot heldSlot = slot) {
+    try (RunSlot slot = acquireSafeModeRun(containerName, monitor, slotWaitSeconds)) {
+      if (slot.isCancelled()) {
+        // Cancelled while waiting for a free run.
+        monitor.done();
+        return;
+      }
       Process process = null;
       boolean exceptionThrown = false;
       JsonStreamParser jsp;
@@ -620,7 +619,8 @@ public class Kind2Api {
    * @param containerName the run's container name, null outside safe mode
    * @param monitor checked for cancellation while waiting, or null
    * @param timeoutSeconds how long to wait before throwing, or 0 to wait as long as it takes
-   * @return the slot, or null only if {@code monitor} is cancelled before a slot is free
+   * @return the slot, or {@link RunSlot#CANCELLED} if {@code monitor} is cancelled before a slot
+   *     is free
    * @throws Kind2Exception if no slot is free within {@code timeoutSeconds}
    */
   private RunSlot acquireSafeModeRun(String containerName, IProgressMonitor monitor,
@@ -632,7 +632,7 @@ public class Kind2Api {
     try {
       while (!safeModeRuns.tryAcquire(POLL_INTERVAL, TimeUnit.MILLISECONDS)) {
         if (monitor != null && monitor.isCanceled()) {
-          return null;
+          return RunSlot.CANCELLED;
         }
         if (timeoutSeconds > 0 && System.nanoTime() - deadline >= 0) {
           throw new Kind2Exception("No safe mode run was free after " + timeoutSeconds
@@ -645,20 +645,33 @@ public class Kind2Api {
     }
     if (monitor != null && monitor.isCanceled()) {
       safeModeRuns.release();
-      return null;
+      return RunSlot.CANCELLED;
     }
     return new RunSlot(safeModeRuns);
   }
 
   /**
-   * A held safe mode run slot, released by {@link #close()}. Outside safe mode it holds nothing.
+   * A held safe mode run slot, released by {@link #close()}. Outside safe mode, or when the run was
+   * cancelled before a slot was free, it holds nothing.
    */
   private static final class RunSlot implements AutoCloseable {
-    static final RunSlot NONE = new RunSlot(null);
+    static final RunSlot NONE = new RunSlot(null, false);
+    static final RunSlot CANCELLED = new RunSlot(null, true);
     private final Semaphore runs;
+    private final boolean cancelled;
 
     RunSlot(Semaphore runs) {
+      this(runs, false);
+    }
+
+    private RunSlot(Semaphore runs, boolean cancelled) {
       this.runs = runs;
+      this.cancelled = cancelled;
+    }
+
+    /** Returns whether the run was cancelled before a slot was free, so it must not start. */
+    boolean isCancelled() {
+      return cancelled;
     }
 
     @Override
