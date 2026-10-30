@@ -353,7 +353,7 @@ public class Kind2Api {
     ProcessBuilder builder = new ProcessBuilder(options);
 
     debug.println("Kind 2 command(Interpret):\n" + ApiUtil.getQuotedCommand(builder.command()));
-    try (RunSlot slot = acquireSafeModeRun(null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
+    try (RunSlot slot = acquireSafeModeRun(containerName, null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
       Process process = null;
       try {
         process = builder.start();
@@ -466,7 +466,7 @@ public class Kind2Api {
     String containerName = newContainerName();
     ProcessBuilder builder = getKind2ProcessBuilder(containerName);
     debug.println("Kind 2 command: " + ApiUtil.getQuotedCommand(builder.command()));
-    RunSlot slot = acquireSafeModeRun(monitor, slotWaitSeconds);
+    RunSlot slot = acquireSafeModeRun(containerName, monitor, slotWaitSeconds);
     if (slot == null) {
       // Cancelled while waiting for a free run.
       monitor.done();
@@ -601,6 +601,10 @@ public class Kind2Api {
   }
   /**
    * Returns a unique container name in safe mode, or null otherwise.
+   * <p>
+   * This is the only place a run reads {@link #safeMode}. Everything else that depends on safe mode
+   * for that run is decided by whether its container name is null, so that a concurrent call to
+   * {@link #setSafeMode(boolean)} cannot leave a run half in Docker and half outside it.
    */
   private String newContainerName() {
     if (safeMode != null && safeMode) {
@@ -613,13 +617,15 @@ public class Kind2Api {
    * In safe mode, waits for one of the {@link #setSafeModeMaxRuns(int)} run slots. Outside safe
    * mode, returns a slot that holds nothing. Close the slot when the run ends.
    *
+   * @param containerName the run's container name, null outside safe mode
    * @param monitor checked for cancellation while waiting, or null
    * @param timeoutSeconds how long to wait before throwing, or 0 to wait as long as it takes
    * @return the slot, or null only if {@code monitor} is cancelled before a slot is free
    * @throws Kind2Exception if no slot is free within {@code timeoutSeconds}
    */
-  private RunSlot acquireSafeModeRun(IProgressMonitor monitor, long timeoutSeconds) {
-    if (safeMode == null || !safeMode) {
+  private RunSlot acquireSafeModeRun(String containerName, IProgressMonitor monitor,
+      long timeoutSeconds) {
+    if (containerName == null) {
       return RunSlot.NONE;
     }
     long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
@@ -808,7 +814,7 @@ public class Kind2Api {
    */
   private List<String> getKind2Command(String containerName, List<String> dockerArgs) {
     List<String> command = new ArrayList<>();
-    if (safeMode != null && safeMode) {
+    if (containerName != null) {
       command.addAll(getDockerRunCommand(containerName));
       command.addAll(dockerArgs);
       command.add(dockerImage);
@@ -821,7 +827,7 @@ public class Kind2Api {
 
   private ProcessBuilder getKind2ProcessBuilder(String containerName) {
     List<String> options = getKind2Command(containerName, new ArrayList<>());
-    options.addAll(getOptions());
+    options.addAll(getOptions(containerName != null));
 
     ProcessBuilder builder = new ProcessBuilder(options);
     builder.redirectErrorStream(true);
@@ -830,7 +836,7 @@ public class Kind2Api {
 
 
   private List<String> getInterpreterCommand(File interpreterFile, Path lustreFile, String containerName) {
-    boolean inDocker = safeMode != null && safeMode;
+    boolean inDocker = containerName != null;
     List<String> mounts = new ArrayList<>();
     if (inDocker) {
       mounts.add("--mount");
@@ -842,7 +848,7 @@ public class Kind2Api {
     }
 
     List<String> options = getKind2Command(containerName, mounts);
-    options.addAll(getOptions());
+    options.addAll(getOptions(inDocker));
 
     options.add("--interpreter_input_file");
     options.add(inDocker ? DOCKER_INTERPRETER_INPUT : interpreterFile.getAbsolutePath());
@@ -869,6 +875,13 @@ public class Kind2Api {
    * @return the command line options this API will pass to Kind 2
    */
   public List<String> getOptions() {
+    return getOptions(safeMode != null && safeMode);
+  }
+
+  /**
+   * Returns the command line options to pass to Kind 2, for a run in safe mode if {@code inDocker}.
+   */
+  private List<String> getOptions(boolean inDocker) {
     List<String> options = new ArrayList<>();
     options.add("-ijson");
     if (logLevel != null) {
@@ -910,7 +923,7 @@ public class Kind2Api {
       options.add("--smt_short_names");
       options.add(smtShortNames.toString());
     }
-    if(safeMode != null && safeMode){
+    if (inDocker) {
       if (bitwuzlaBin != null) {  
         options.add("--bitwuzla_bin");
         options.add(DOCKER_BITWUZLA_BIN);
@@ -1184,7 +1197,7 @@ public class Kind2Api {
       options.add("--fake_filepath");
       options.add(fakeFilepath);
     }
-    if (safeMode != null && safeMode) {
+    if (inDocker) {
       options.add("--no_include");
       options.add("true");
     }
@@ -2119,7 +2132,7 @@ public class Kind2Api {
 
     ProcessBuilder builder = new ProcessBuilder(command);
     builder.redirectErrorStream(true);
-    try (RunSlot slot = acquireSafeModeRun(null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
+    try (RunSlot slot = acquireSafeModeRun(containerName, null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
       Process process = builder.start();
       boolean finished = false;
       try {
