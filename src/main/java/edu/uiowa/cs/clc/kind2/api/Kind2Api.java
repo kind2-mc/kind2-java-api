@@ -51,6 +51,7 @@ public class Kind2Api {
   // Calls that cannot be cancelled (the interpreter, and execute without a monitor) give up
   // waiting for a safe mode run slot after this.
   private static final long SAFE_MODE_SLOT_WAIT_SECONDS = 60;
+  private static final long CHECK_AVAILABLE_TIMEOUT_SECONDS = 30;
   // Shared by every instance, so the cap holds however many Kind2Api objects a JVM creates.
   private static final RunLimit safeModeRuns = new RunLimit(DEFAULT_SAFE_MODE_MAX_RUNS);
   private Double safeModeCpuUsage;
@@ -358,17 +359,8 @@ public class Kind2Api {
         process = builder.start();
         // Read stderr on its own thread so that it cannot fill its pipe and block Kind 2. It is
         // kept apart from stdout, which must hold only JSON.
-        final InputStream errorStream = process.getErrorStream();
         final StringBuffer errors = new StringBuffer();
-        Thread errorReader = new Thread(() -> {
-          try {
-            errors.append(ApiUtil.readAll(errorStream));
-          } catch (IOException e) {
-            // The stream is closed when the process is destroyed.
-          }
-        });
-        errorReader.setDaemon(true);
-        errorReader.start();
+        Thread errorReader = readInBackground(process.getErrorStream(), errors);
         if (program != null) {
           process.getOutputStream().write(program.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
@@ -669,6 +661,23 @@ public class Kind2Api {
         runs.release();
       }
     }
+  }
+
+  /**
+   * Reads {@code in} to its end on a daemon thread, appending what it reads to {@code into}, and
+   * returns the thread.
+   */
+  private static Thread readInBackground(InputStream in, StringBuffer into) {
+    Thread reader = new Thread(() -> {
+      try {
+        into.append(ApiUtil.readAll(in));
+      } catch (IOException e) {
+        // The stream is closed when the process is destroyed.
+      }
+    });
+    reader.setDaemon(true);
+    reader.start();
+    return reader;
   }
 
   /**
@@ -2096,22 +2105,42 @@ public class Kind2Api {
   /**
    * Check if the KindApi is available for running and throw exception if not
    *
+   * In safe mode this starts a container like any other run: it takes a run slot (waiting at most
+   * 60 seconds for one) and its container is killed if it does not finish.
+   *
    * @return Availability information when Kind is available
-   * @throws java.lang.Exception When Kind is not available
+   * @throws java.lang.Exception When Kind is not available, or does not report its version within
+   *     30 seconds
    */
   public String checkAvailable() throws Exception {
-    List<String> command = getKind2Command(null, new ArrayList<>());
+    String containerName = newContainerName();
+    List<String> command = getKind2Command(containerName, new ArrayList<>());
     command.add("--version");
 
     ProcessBuilder builder = new ProcessBuilder(command);
     builder.redirectErrorStream(true);
-    Process process = builder.start();
-    process.getOutputStream().close();
-
-    String output = ApiUtil.readAll(process.getInputStream());
-    if (process.waitFor() != 0) {
-      throw new Kind2Exception("Error running kind2: " + output);
+    try (RunSlot slot = acquireSafeModeRun(null, SAFE_MODE_SLOT_WAIT_SECONDS)) {
+      Process process = builder.start();
+      boolean finished = false;
+      try {
+        process.getOutputStream().close();
+        // Read on another thread, so that a hung docker (for example a stuck daemon) cannot block
+        // this call past the timeout.
+        StringBuffer output = new StringBuffer();
+        Thread reader = readInBackground(process.getInputStream(), output);
+        finished = process.waitFor(CHECK_AVAILABLE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!finished) {
+          throw new Kind2Exception("Kind 2 did not report its version within "
+              + CHECK_AVAILABLE_TIMEOUT_SECONDS + " seconds");
+        }
+        reader.join(DOCKER_EXIT_GRACE_MILLIS);
+        if (process.exitValue() != 0) {
+          throw new Kind2Exception("Error running kind2: " + output);
+        }
+        return output.toString();
+      } finally {
+        stopRun(process, containerName, !finished);
+      }
     }
-    return output;
   }
 }
