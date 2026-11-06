@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
 import edu.uiowa.cs.clc.kind2.Kind2Exception;
@@ -38,12 +39,28 @@ public class ApiUtil {
 
   /**
    * Writes an interpreter input to a temporary file for Kind 2 to read.
+   * <p>
+   * In safe mode, this file is mounted into a container that runs as another user, so all users
+   * can read the file. Its directory, which only the current user can enter, keeps the file from
+   * other users of the host.
    *
    * @param program the interpreter input text
    * @return the file the input was written to
    */
   public static File writeInterpreterFile(String program) {
-    return writeTempFile("kind2-api-", ".json", program);
+    File file = null;
+    try {
+      File directory = Files.createTempDirectory("kind2-api-").toFile();
+      file = new File(directory, "interpreter-input.json");
+      file.createNewFile();
+      if (program != null) {
+        Util.writeToFile(program, file);
+      }
+      file.setReadable(true, false);
+      return file;
+    } catch (IOException e) {
+      throw new Kind2Exception("Cannot write to file: " + file, e);
+    }
   }
 
   /**
