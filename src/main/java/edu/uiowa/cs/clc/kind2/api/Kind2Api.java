@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +47,11 @@ public class Kind2Api {
   private static final String DEFAULT_SAFE_MODE_MEMORY_USAGE = "2g";
   private static final String DEFAULT_SAFE_MODE_SWAP_USAGE = DEFAULT_SAFE_MODE_MEMORY_USAGE;
   private static final int DEFAULT_SAFE_MODE_MAX_RUNS = 2;
+  // Counts threads as well as processes. SMTInterpol starts a multi-threaded JVM per solver
+  // instance, and reached about 500 on a small program, while the other solvers stay near 40.
+  private static final int SAFE_MODE_PIDS_LIMIT = 1024;
+  // An unprivileged user that exists in the image's base system.
+  private static final String SAFE_MODE_USER = "65534:65534";
   private static final long DOCKER_COMMAND_TIMEOUT_SECONDS = 10;
   private static final long DOCKER_EXIT_GRACE_MILLIS = 2000;
   // Calls that cannot be cancelled (the interpreter, and execute without a monitor) give up
@@ -343,6 +349,15 @@ public class Kind2Api {
    */
   private String runInterpreter(File interpreterFile, Path lustreFile, String program, String main) {
     String containerName = newContainerName();
+    if (containerName != null && lustreFile != null) {
+      // The container's user may not be able to read the file, but this process can.
+      try {
+        program = new String(Files.readAllBytes(lustreFile), java.nio.charset.StandardCharsets.UTF_8);
+        lustreFile = null;
+      } catch (IOException e) {
+        throw new Kind2Exception("Cannot read Lustre file: " + lustreFile, e);
+      }
+    }
     List<String> options = getInterpreterCommand(interpreterFile, lustreFile, containerName);
 
     options.add("--lus_main");
@@ -541,7 +556,6 @@ public class Kind2Api {
   private static final String DOCKER_YICES2_BIN = "/usr/local/bin/yices-smt2";
   private static final String DOCKER_Z3_BIN = "/usr/local/bin/z3";
   private static final String DOCKER_INTERPRETER_INPUT = "/tmp/interpreter-input.json";
-  private static final String DOCKER_LUSTRE_FILE = "/tmp/program.lus";
 
   public void setDockerImage(String dockerImage) {
     this.dockerImage = dockerImage;
@@ -785,9 +799,9 @@ public class Kind2Api {
 
   /**
    * Returns the docker run command, up to but not including the image name, with the resource
-   * limits and the Kind 2 and solver mounts that every safe mode execution uses.
+   * limits, the restrictions and the Kind 2 and solver mounts that every safe mode execution uses.
    */
-  private List<String> getDockerRunCommand(String containerName) {
+  List<String> getDockerRunCommand(String containerName) {
     List<String> options = new ArrayList<>();
     options.add("docker");
     options.add("run");
@@ -814,6 +828,23 @@ public class Kind2Api {
 
     options.add("--network");
     options.add("none");
+
+    options.add("--pids-limit");
+    options.add(String.valueOf(SAFE_MODE_PIDS_LIMIT));
+
+    options.add("--cap-drop");
+    options.add("ALL");
+
+    options.add("--security-opt");
+    options.add("no-new-privileges");
+
+    options.add("--user");
+    options.add(SAFE_MODE_USER);
+
+    // Kind 2 and the solvers can only write to /tmp, which is in memory and counts toward --memory.
+    options.add("--read-only");
+    options.add("--tmpfs");
+    options.add("/tmp");
 
     mountIfPresent(options, "KIND2", KIND2, DOCKER_KIND2);
     mountSolversToDocker(options);
@@ -854,10 +885,6 @@ public class Kind2Api {
     if (inDocker) {
       mounts.add("--mount");
       mounts.add(bindMountSpec(interpreterFile.toPath(), DOCKER_INTERPRETER_INPUT));
-      if (lustreFile != null) {
-        mounts.add("--mount");
-        mounts.add(bindMountSpec(lustreFile.toAbsolutePath(), DOCKER_LUSTRE_FILE));
-      }
     }
 
     List<String> options = getKind2Command(containerName, mounts);
@@ -867,7 +894,7 @@ public class Kind2Api {
     options.add(inDocker ? DOCKER_INTERPRETER_INPUT : interpreterFile.getAbsolutePath());
 
     if (lustreFile != null) {
-      options.add(inDocker ? DOCKER_LUSTRE_FILE : lustreFile.toString());
+      options.add(lustreFile.toString());
     }
 
     return options;
@@ -1350,6 +1377,10 @@ public class Kind2Api {
    * automatic use of docker containers for executions of Kind 2.
    * In safe mode, the location of the Kind 2 executable and solvers will not be searched 
    * for on the PATH variable: they must be set via the API
+   * <p>
+   * Containers run as an unprivileged user with no capabilities and a read-only file system, so
+   * the Kind 2 executable and the solvers must be readable by all users, and executables must be
+   * executable by all users.
    * <p>
    * Default: false
    * @param safeMode whether or not to enable safe mode.
